@@ -240,15 +240,82 @@
 
   /* ====== 2 · 首页 ====== */
   #s2 .scroll { padding-top: 10px; padding-bottom: 12px; }
-  .home-head { padding: 14px 2px 28px; }
+  .home-head { padding: 14px 2px 18px; }
   .home-head .greet {
     font-size: 26px;
     font-weight: 700;
     letter-spacing: -0.02em;
-    margin-bottom: 6px;
   }
-  .home-head .sub { font-size: 13px; color: var(--text-dim); }
-  .home-head .sub b { color: var(--text-2); font-weight: 500; }
+
+  /* 今日速览 */
+  .digest {
+    background: var(--panel);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px 14px;
+    margin-bottom: 20px;
+  }
+  .digest .lbl {
+    font-size: 10px;
+    color: var(--text-dimmer);
+    letter-spacing: 0.14em;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .digest .body {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+  }
+  .digest .body p { margin: 0; }
+  .digest .body p + p { margin-top: 2px; }
+  .digest .body .gap { margin-top: 8px; }
+  .digest .body b { color: var(--text); font-weight: 600; }
+
+  .filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-top: 14px;
+    border-top: 0.5px solid var(--border);
+  }
+  .filter-chip {
+    background: transparent;
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 11px;
+    font-size: 11px;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    letter-spacing: 0.02em;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .filter-chip .count {
+    color: var(--text-dimmer);
+    font-feature-settings: 'tnum';
+    font-size: 10px;
+  }
+  .filter-chip[data-type="rec"]  { color: var(--t-rec); }
+  .filter-chip[data-type="cmd"]  { color: var(--t-cmd); }
+  .filter-chip[data-type="idea"] { color: var(--t-idea); }
+  .filter-chip[data-type="todo"] { color: var(--t-todo); }
+
+  .filter-chip.active {
+    background: rgba(255,255,255,0.06);
+    border-color: var(--border-strong);
+    color: var(--text);
+  }
+  .filter-chip.active .count { color: var(--text-dim); }
+  .filter-chip[data-type="rec"].active  { background: rgba(111,195,208,0.1);  border-color: rgba(111,195,208,0.35); color: var(--t-rec); }
+  .filter-chip[data-type="cmd"].active  { background: rgba(162,149,208,0.1);  border-color: rgba(162,149,208,0.35); color: var(--t-cmd); }
+  .filter-chip[data-type="idea"].active { background: rgba(212,168,104,0.1);  border-color: rgba(212,168,104,0.35); color: var(--t-idea); }
+  .filter-chip[data-type="todo"].active { background: rgba(127,192,144,0.1);  border-color: rgba(127,192,144,0.35); color: var(--t-todo); }
 
   .time-sep {
     font-size: 11px;
@@ -781,116 +848,59 @@
     border-radius: 4px;
   }
 
-  /* ====== 8 · 记忆图谱 ====== */
-  #s8 .scroll { padding-top: 14px; }
-  #s8 h2 {
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    margin-bottom: 4px;
-  }
-  #s8 .sub { font-size: 13px; color: var(--text-dim); margin-bottom: 22px; }
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-    margin-bottom: 22px;
-  }
-  .stat {
-    background: var(--panel);
-    border: 0.5px solid var(--border);
-    border-radius: 12px;
-    padding: 13px 4px;
-    text-align: center;
-  }
-  .stat .v {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: -0.02em;
-  }
-  .stat .l {
-    font-size: 10px;
-    color: var(--text-dim);
-    margin-top: 4px;
-  }
-  .graph-svg {
-    width: 100%;
-    height: 220px;
-    margin-bottom: 22px;
-    background: var(--panel);
-    border: 0.5px solid var(--border);
-    border-radius: 16px;
-  }
-  .top-ctx .row {
+  /* ====== 卡片内对话 · 指令/灵感 可继续和 Agent 沟通 ====== */
+  .card-chat { margin-top: 4px; }
+  .card-chat .turns {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 2px;
-    border-bottom: 0.5px solid var(--border);
-    font-size: 14px;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 14px;
   }
-  .top-ctx .row:last-child { border-bottom: none; }
-  .top-ctx .p { color: var(--text); font-weight: 500; }
-  .top-ctx .r { color: var(--text-dim); font-size: 11px; margin-top: 2px; }
-  .top-ctx .s {
-    color: var(--text);
-    font-weight: 600;
-    font-size: 14px;
-    font-feature-settings: 'tnum';
-  }
-
-  /* ====== 9 · Agent ====== */
-  #s9 .scroll { padding-top: 14px; display: flex; flex-direction: column; }
-  .agent-header { padding: 10px 2px 22px; }
-  .agent-header h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
-  .agent-header .sub { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
-  .msg {
-    max-width: 80%;
-    padding: 11px 15px;
-    border-radius: 18px;
-    font-size: 14px;
+  .chat-msg {
+    max-width: 82%;
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-size: 13px;
     line-height: 1.5;
-    margin-bottom: 8px;
   }
-  .msg.user {
+  .chat-msg.user {
     background: var(--text);
     color: #000;
     align-self: flex-end;
     border-bottom-right-radius: 5px;
     margin-left: auto;
   }
-  .msg.bot {
+  .chat-msg.bot {
     background: var(--panel);
     color: var(--text-2);
-    align-self: flex-start;
     border: 0.5px solid var(--border);
+    align-self: flex-start;
     border-bottom-left-radius: 5px;
   }
-  .msg.bot b { color: var(--text); font-weight: 500; }
-  .agent-input {
-    margin-top: auto;
-    padding: 14px 0 22px;
+  .chat-msg.bot b { color: var(--text); font-weight: 500; }
+  .chat-input {
     display: flex;
     gap: 10px;
-  }
-  .agent-input .field {
-    flex: 1;
+    align-items: center;
+    padding: 9px 9px 9px 18px;
     background: var(--panel);
     border: 0.5px solid var(--border);
     border-radius: 100px;
-    padding: 12px 18px;
+  }
+  .chat-input .field {
+    flex: 1;
     font-size: 13px;
     color: var(--text-dim);
   }
-  .agent-input .send {
-    width: 42px; height: 42px;
+  .chat-input .send {
+    width: 30px; height: 30px;
     border-radius: 50%;
     background: var(--text);
     border: none;
     color: #000;
-    font-size: 16px;
+    font-size: 14px;
     cursor: pointer;
+    flex-shrink: 0;
   }
 
   /* ====== 10 · 我 ====== */
@@ -994,7 +1004,22 @@
     <div class="scroll">
       <div class="home-head">
         <div class="greet">早上好，明明</div>
-        <div class="sub">今天 <b>8 次交互</b> · 省下 <b>47 分钟</b></div>
+      </div>
+
+      <div class="digest">
+        <div class="lbl">今日速览</div>
+        <div class="body">
+          <p>你今天和 AI 交互了 <b>8 次</b></p>
+          <p>其中 <b>3 次</b>走路时、<b>2 次</b>会后、<b>3 次</b>电脑前</p>
+          <p class="gap">Monostone 为你省下 <b>47 分钟</b>整理时间</p>
+        </div>
+        <div class="filter-chips">
+          <button class="filter-chip active" data-type="all" onclick="filterType('all')">全部 <span class="count">8</span></button>
+          <button class="filter-chip" data-type="rec" onclick="filterType('rec')">长录音 <span class="count">2</span></button>
+          <button class="filter-chip" data-type="cmd" onclick="filterType('cmd')">指令 <span class="count">2</span></button>
+          <button class="filter-chip" data-type="idea" onclick="filterType('idea')">灵感 <span class="count">2</span></button>
+          <button class="filter-chip" data-type="todo" onclick="filterType('todo')">待办 <span class="count">2</span></button>
+        </div>
       </div>
 
       <div class="time-sep">今天</div>
@@ -1078,8 +1103,6 @@
 
     <div class="tabbar">
       <button class="tab active" onclick="go('s2')">首页</button>
-      <button class="tab" onclick="go('s8')">记忆</button>
-      <button class="tab" onclick="go('s9')">Agent</button>
       <button class="tab" onclick="go('s10')">我</button>
     </div>
   </div>
@@ -1262,11 +1285,26 @@
           </div>
         </div>
       </div>
+
+      <div class="sec">
+        <div class="sec-title">继续和 Agent 沟通</div>
+        <div class="card-chat">
+          <div class="turns">
+            <div class="chat-msg bot">草稿写好了。想改哪里都可以告诉我 —— 语气、长度、结构都行。</div>
+            <div class="chat-msg user">GTM 那段太简略了，展开一下，重点说我们为什么选企业优先</div>
+            <div class="chat-msg bot">好，我把 GTM 段扩展成三句，锚点用"10+ 交互/天的高频用户"。正在改…</div>
+          </div>
+          <div class="chat-input">
+            <div class="field">继续改点什么？</div>
+            <button class="send">↑</button>
+          </div>
+        </div>
+      </div>
+
       <div style="height: 20px"></div>
     </div>
     <div class="detail-actions">
-      <button>编辑</button>
-      <button>重新生成</button>
+      <button>存为草稿</button>
       <button class="primary">发送</button>
     </div>
   </div>
@@ -1334,11 +1372,26 @@
           </div>
         </div>
       </div>
+
+      <div class="sec">
+        <div class="sec-title">和 Agent 一起发散</div>
+        <div class="card-chat">
+          <div class="turns">
+            <div class="chat-msg bot">这个想法我记下来了。想让我帮你展开、还是和已有的想法做关联？</div>
+            <div class="chat-msg user">和 spaced repetition 的遗忘曲线怎么结合</div>
+            <div class="chat-msg bot">可以借 <b>SM-2</b> 的思路：memory 每次被引用就 refresh confidence，没被引用按 Ebbinghaus 曲线衰减。这样 memory 的"重要性"随使用自然分层。要我整理成一个 RFC 草稿吗？</div>
+          </div>
+          <div class="chat-input">
+            <div class="field">继续展开…</div>
+            <button class="send">↑</button>
+          </div>
+        </div>
+      </div>
+
       <div style="height: 20px"></div>
     </div>
     <div class="detail-actions">
-      <button>编辑</button>
-      <button>转为指令</button>
+      <button>归档</button>
       <button class="primary">加入项目</button>
     </div>
   </div>
@@ -1425,92 +1478,6 @@
     </div>
   </div>
 
-  <!-- ============ 8 · 记忆图谱 ============ -->
-  <div class="screen" id="s8">
-    <div class="scroll">
-      <h2>记忆图谱</h2>
-      <div class="sub">你的上下文 · 每一天都在累积</div>
-      <div class="stats">
-        <div class="stat"><div class="v">30</div><div class="l">天</div></div>
-        <div class="stat"><div class="v">312</div><div class="l">次交互</div></div>
-        <div class="stat"><div class="v">47</div><div class="l">人物</div></div>
-        <div class="stat"><div class="v">89</div><div class="l">会议</div></div>
-      </div>
-      <svg class="graph-svg" viewBox="0 0 340 220" xmlns="http://www.w3.org/2000/svg">
-        <g stroke="rgba(255,255,255,0.18)" stroke-width="0.8" fill="none">
-          <line x1="170" y1="110" x2="70" y2="55"/>
-          <line x1="170" y1="110" x2="270" y2="60"/>
-          <line x1="170" y1="110" x2="60" y2="170"/>
-          <line x1="170" y1="110" x2="280" y2="175"/>
-          <line x1="170" y1="110" x2="170" y2="30"/>
-          <line x1="70" y1="55" x2="170" y2="30"/>
-          <line x1="270" y1="60" x2="170" y2="30"/>
-          <line x1="60" y1="170" x2="280" y2="175" stroke-dasharray="3,4"/>
-        </g>
-        <g font-family="-apple-system, PingFang SC" font-size="10" fill="#fff" text-anchor="middle">
-          <circle cx="170" cy="110" r="22" fill="rgba(255,255,255,0.12)" stroke="#fff" stroke-width="1.5"/>
-          <text x="170" y="114" font-weight="700" font-size="11">我</text>
-          <circle cx="70" cy="55" r="17" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
-          <text x="70" y="58">蔡哥</text>
-          <circle cx="270" cy="60" r="17" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
-          <text x="270" y="63">林啸</text>
-          <circle cx="170" cy="30" r="16" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
-          <text x="170" y="33">Series A</text>
-          <circle cx="60" cy="170" r="16" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
-          <text x="60" y="173">GTM</text>
-          <circle cx="280" cy="175" r="17" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
-          <text x="280" y="178">Pitch 稿</text>
-        </g>
-      </svg>
-      <div class="top-ctx">
-        <div class="sec-title" style="margin-bottom: 4px">关系强度</div>
-        <div class="row">
-          <div><div class="p">蔡哥</div><div class="r">Linear Capital · 12 次交互</div></div>
-          <div class="s">98</div>
-        </div>
-        <div class="row">
-          <div><div class="p">林啸</div><div class="r">软件联创 · 近一周 8 次</div></div>
-          <div class="s">92</div>
-        </div>
-        <div class="row">
-          <div><div class="p">Marshall</div><div class="r">硬件联创 · 6 次</div></div>
-          <div class="s">87</div>
-        </div>
-      </div>
-      <div style="height: 120px"></div>
-    </div>
-    <div class="tabbar">
-      <button class="tab" onclick="go('s2')">首页</button>
-      <button class="tab active" onclick="go('s8')">记忆</button>
-      <button class="tab" onclick="go('s9')">Agent</button>
-      <button class="tab" onclick="go('s10')">我</button>
-    </div>
-  </div>
-
-  <!-- ============ 9 · Agent ============ -->
-  <div class="screen" id="s9">
-    <div class="scroll">
-      <div class="agent-header">
-        <h2>Agent</h2>
-        <div class="sub">可以问我任何事 · 我懂你的上下文</div>
-      </div>
-      <div class="msg bot">早上好，明明。想让我做点什么？</div>
-      <div class="msg user">帮我做个 Sandbar 最新融资情况的 research</div>
-      <div class="msg bot">正在调取 <b>Sandbar · Stream Ring</b> 的历史数据，联网搜索最新动态中…</div>
-      <div class="msg bot">报告已准备好，3 分钟后推送到首页 Timeline。</div>
-      <div class="agent-input">
-        <div class="field">告诉 Monostone 你想做什么</div>
-        <button class="send">↑</button>
-      </div>
-    </div>
-    <div class="tabbar">
-      <button class="tab" onclick="go('s2')">首页</button>
-      <button class="tab" onclick="go('s8')">记忆</button>
-      <button class="tab active" onclick="go('s9')">Agent</button>
-      <button class="tab" onclick="go('s10')">我</button>
-    </div>
-  </div>
-
   <!-- ============ 10 · 我 ============ -->
   <div class="screen" id="s10">
     <div class="scroll">
@@ -1546,8 +1513,6 @@
     </div>
     <div class="tabbar">
       <button class="tab" onclick="go('s2')">首页</button>
-      <button class="tab" onclick="go('s8')">记忆</button>
-      <button class="tab" onclick="go('s9')">Agent</button>
       <button class="tab active" onclick="go('s10')">我</button>
     </div>
   </div>
@@ -1562,7 +1527,32 @@
     const sc = el.querySelector('.scroll');
     if (sc) sc.scrollTop = 0;
   }
-  const order = ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10'];
+  function filterType(type) {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    document.querySelector('.filter-chip[data-type="' + type + '"]').classList.add('active');
+    document.querySelectorAll('#s2 .card').forEach(card => {
+      if (type === 'all') {
+        card.style.display = '';
+      } else {
+        card.style.display = card.classList.contains(type) ? '' : 'none';
+      }
+    });
+    document.querySelectorAll('#s2 .time-sep').forEach(sep => {
+      let hasVisible = false;
+      let next = sep.nextElementSibling;
+      while (next && !next.classList.contains('time-sep')) {
+        if (next.classList.contains('card') && next.style.display !== 'none') {
+          hasVisible = true;
+          break;
+        }
+        next = next.nextElementSibling;
+      }
+      sep.style.display = hasVisible ? '' : 'none';
+    });
+    const scroll = document.querySelector('#s2 .scroll');
+    if (scroll) scroll.scrollTop = 0;
+  }
+  const order = ['s1','s2','s3','s4','s5','s6','s7','s10'];
   document.addEventListener('keydown', (e) => {
     const active = document.querySelector('.screen.active').id;
     const idx = order.indexOf(active);
