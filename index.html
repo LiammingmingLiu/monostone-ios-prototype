@@ -631,20 +631,21 @@
   }
   .modal-body::-webkit-scrollbar { display: none; }
 
-  /* 完整会议纪要 modal 内容 */
-  .full-summary h2 {
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    margin-bottom: 16px;
-    line-height: 1.3;
+  /* 完整会议纪要 modal 内容 · 支持 H1/H2/H3 / blockquote / table / ul / ol */
+  .full-summary h1 {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.015em;
+    margin-bottom: 18px;
+    line-height: 1.25;
+    color: var(--text);
   }
   .full-summary .meta-table {
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: 8px 14px;
+    gap: 8px 16px;
     font-size: 12px;
-    margin-bottom: 22px;
+    margin-bottom: 10px;
     padding: 14px 16px;
     background: var(--panel);
     border: 0.5px solid var(--border);
@@ -657,27 +658,98 @@
   .full-summary .meta-table dd {
     color: var(--text);
     font-weight: 500;
-    line-height: 1.5;
+    line-height: 1.55;
   }
-  .full-summary h3 {
-    font-size: 13px;
+  .full-summary h2 {
+    font-size: 17px;
     font-weight: 700;
     color: var(--text);
-    margin: 24px 0 10px;
+    margin: 28px 0 12px;
+    letter-spacing: -0.008em;
+    padding-bottom: 10px;
+    border-bottom: 0.5px solid var(--border-strong);
+  }
+  .full-summary h2:first-of-type { margin-top: 20px; }
+  .full-summary h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 18px 0 8px;
     letter-spacing: -0.005em;
-    padding-bottom: 8px;
-    border-bottom: 0.5px solid var(--border);
   }
   .full-summary p {
     font-size: 14px;
     line-height: 1.8;
     color: var(--text-2);
-    margin-bottom: 14px;
-    text-align: justify;
-    text-justify: inter-ideograph;
+    margin-bottom: 12px;
   }
   .full-summary p:last-child { margin-bottom: 0; }
-  .full-summary p b { color: var(--text); font-weight: 600; }
+  .full-summary strong {
+    color: var(--text);
+    font-weight: 700;
+  }
+  .full-summary blockquote {
+    padding: 12px 16px;
+    background: rgba(111,212,224,0.06);
+    border-left: 2px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    margin: 10px 0 14px;
+    font-size: 13px;
+    font-style: italic;
+    line-height: 1.7;
+    color: var(--text-2);
+  }
+  .full-summary blockquote p { margin: 0; color: inherit; font-size: inherit; line-height: inherit; }
+  .full-summary blockquote .bq-author {
+    display: block;
+    margin-top: 8px;
+    font-style: normal;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .full-summary ul,
+  .full-summary ol {
+    padding-left: 22px;
+    margin-bottom: 14px;
+  }
+  .full-summary li {
+    font-size: 13.5px;
+    line-height: 1.75;
+    color: var(--text-2);
+    margin-bottom: 6px;
+  }
+  .full-summary li:last-child { margin-bottom: 0; }
+  .full-summary ul li::marker { color: var(--text-dimmer); }
+  .full-summary ol li::marker { color: var(--text-dim); font-weight: 600; }
+  .full-summary table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 16px;
+    font-size: 12px;
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .full-summary thead {
+    background: rgba(255,255,255,0.03);
+  }
+  .full-summary th {
+    text-align: left;
+    padding: 9px 12px;
+    color: var(--text-dim);
+    font-weight: 600;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 11px;
+    letter-spacing: 0.02em;
+  }
+  .full-summary td {
+    padding: 10px 12px;
+    color: var(--text-2);
+    border-bottom: 0.5px solid var(--border);
+    vertical-align: top;
+    line-height: 1.55;
+  }
+  .full-summary tr:last-child td { border-bottom: none; }
 
   /* Action Item 交互 · 可左滑 + 可勾选 + 可点开详情 */
   .action-row {
