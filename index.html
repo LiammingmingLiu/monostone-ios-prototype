@@ -631,45 +631,179 @@
   }
   .modal-body::-webkit-scrollbar { display: none; }
 
-  /* 完整总结 modal 内容 */
+  /* 完整会议纪要 modal 内容 */
   .full-summary h2 {
-    font-size: 19px;
+    font-size: 20px;
     font-weight: 700;
     letter-spacing: -0.01em;
-    margin-bottom: 10px;
+    margin-bottom: 16px;
     line-height: 1.3;
   }
-  .full-summary .meta {
+  .full-summary .meta-table {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px 14px;
     font-size: 12px;
-    color: var(--text-dim);
     margin-bottom: 22px;
-    padding-bottom: 16px;
-    border-bottom: 0.5px solid var(--border);
+    padding: 14px 16px;
+    background: var(--panel);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+  }
+  .full-summary .meta-table dt {
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .full-summary .meta-table dd {
+    color: var(--text);
+    font-weight: 500;
+    line-height: 1.5;
   }
   .full-summary h3 {
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    color: var(--text-dim);
-    margin: 20px 0 10px;
-    text-transform: none;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 24px 0 10px;
+    letter-spacing: -0.005em;
+    padding-bottom: 8px;
+    border-bottom: 0.5px solid var(--border);
   }
   .full-summary p {
     font-size: 14px;
-    line-height: 1.7;
+    line-height: 1.8;
     color: var(--text-2);
-    margin-bottom: 12px;
-  }
-  .full-summary p b { color: var(--text); font-weight: 600; }
-  .full-summary ul {
-    padding-left: 18px;
     margin-bottom: 14px;
+    text-align: justify;
+    text-justify: inter-ideograph;
   }
-  .full-summary li {
-    font-size: 14px;
-    line-height: 1.65;
+  .full-summary p:last-child { margin-bottom: 0; }
+  .full-summary p b { color: var(--text); font-weight: 600; }
+
+  /* Action Item 点击 · checkbox 和可点击 */
+  .action-row { cursor: pointer; }
+  .action-row .check { cursor: pointer; transition: all 0.2s; }
+  .action-row .check:hover { border-color: var(--text); }
+  .action-row.done .check {
+    background: var(--t-todo);
+    border-color: var(--t-todo);
+    position: relative;
+  }
+  .action-row.done .check::after {
+    content: "✓";
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -52%);
+    color: #000;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .action-row.done .txt .t {
+    color: var(--text-dim);
+    text-decoration: line-through;
+    text-decoration-color: var(--text-dimmer);
+  }
+
+  /* Action Item 详情 modal */
+  .action-detail .quote-source {
+    padding: 14px 16px;
+    background: var(--panel);
+    border: 0.5px solid var(--border);
+    border-left: 2px solid var(--t-rec);
+    border-radius: 0 12px 12px 0;
+    font-size: 13px;
+    font-style: italic;
+    line-height: 1.6;
     color: var(--text-2);
     margin-bottom: 6px;
+  }
+  .action-detail .quote-meta {
+    font-size: 11px;
+    color: var(--text-dimmer);
+    margin-bottom: 20px;
+    padding-left: 2px;
+  }
+  .action-detail .task-title {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.35;
+    margin-bottom: 10px;
+  }
+  .action-detail .task-meta {
+    display: flex;
+    gap: 14px;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 22px;
+  }
+  .action-detail .task-meta .k { color: var(--text-dimmer); }
+  .action-detail .task-meta .v { color: var(--text); font-weight: 500; }
+  .action-detail .action-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .action-detail .ai-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 16px;
+    background: var(--panel);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text);
+    text-align: left;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .action-detail .ai-btn:hover {
+    border-color: var(--border-strong);
+    background: rgba(255,255,255,0.02);
+  }
+  .action-detail .ai-btn.primary {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+  }
+  .action-detail .ai-btn.primary:hover {
+    background: #f0f0f0;
+  }
+  .action-detail .ai-btn .ic {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 700;
+    background: rgba(255,255,255,0.06);
+  }
+  .action-detail .ai-btn.primary .ic {
+    background: rgba(0,0,0,0.08);
+  }
+  .action-detail .ai-btn .ic.linear { background: #5E6AD2; color: #fff; }
+  .action-detail .ai-btn .ic.reminder { background: #FF9F0A; color: #fff; }
+  .action-detail .ai-btn .ic.mail { background: #0A84FF; color: #fff; }
+  .action-detail .ai-btn .ic.play { background: var(--accent); color: #000; }
+  .action-detail .ai-btn .info { flex: 1; min-width: 0; }
+  .action-detail .ai-btn .info .t { font-size: 14px; font-weight: 500; }
+  .action-detail .ai-btn .info .s {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+  .action-detail .ai-btn.primary .info .s { color: rgba(0,0,0,0.6); }
+  .action-detail .ai-btn .chev {
+    color: var(--text-dimmer);
+    font-size: 14px;
+  }
+  .action-detail .ai-btn.primary .chev { color: rgba(0,0,0,0.4); }
+  .action-detail .sec-sep {
+    font-size: 10px;
+    color: var(--text-dimmer);
+    letter-spacing: 0.14em;
+    font-weight: 600;
+    padding: 16px 2px 6px;
   }
 
   /* 分享 sheet */
@@ -2035,6 +2169,20 @@
     </div>
   </div>
 
+  <!-- ============ Modal · Action Item 详情 ============ -->
+  <div class="modal-overlay" id="modal-action-item" onclick="if(event.target===this)closeModal('modal-action-item')">
+    <div class="modal-sheet">
+      <div class="modal-grabber"></div>
+      <div class="modal-head">
+        <div class="t">Action Item</div>
+        <button class="x" onclick="closeModal('modal-action-item')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="action-detail" id="action-detail-content"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ============ Modal · 分享 sheet ============ -->
   <div class="modal-overlay" id="modal-share" onclick="if(event.target===this)closeModal('modal-share')">
     <div class="modal-sheet">
@@ -2215,22 +2363,22 @@
       <div class="sec">
         <div class="sec-title">Action Items</div>
         <div class="sec-box">
-          <div class="action-row">
-            <div class="check"></div>
+          <div class="action-row" data-aid="ai-1" onclick="openActionItem('rec-1', 'ai-1')">
+            <div class="check" onclick="toggleActionItem(event, 'rec-1', 'ai-1')"></div>
             <div class="txt">
               <div class="t">Marshall 锁定 ODM 合作方</div>
               <div class="d"><span class="owner">Marshall</span><span class="sep">·</span>4 月底</div>
             </div>
           </div>
-          <div class="action-row">
-            <div class="check"></div>
+          <div class="action-row" data-aid="ai-2" onclick="openActionItem('rec-1', 'ai-2')">
+            <div class="check" onclick="toggleActionItem(event, 'rec-1', 'ai-2')"></div>
             <div class="txt">
               <div class="t">把双麦 SNR 数据整理成 marketing 故事</div>
               <div class="d"><span class="owner">石慧</span><span class="sep">·</span>本周</div>
             </div>
           </div>
-          <div class="action-row">
-            <div class="check"></div>
+          <div class="action-row" data-aid="ai-3" onclick="openActionItem('rec-1', 'ai-3')">
+            <div class="check" onclick="toggleActionItem(event, 'rec-1', 'ai-3')"></div>
             <div class="txt">
               <div class="t">研究 EO 14117 美国数据法规</div>
               <div class="d"><span class="owner">明明</span><span class="sep">·</span>下周前</div>
@@ -2290,22 +2438,22 @@
       <div class="sec">
         <div class="sec-title">Action Items</div>
         <div class="sec-box">
-          <div class="action-row">
-            <div class="check"></div>
+          <div class="action-row" data-aid="ai-4" onclick="openActionItem('rec-2', 'ai-4')">
+            <div class="check" onclick="toggleActionItem(event, 'rec-2', 'ai-4')"></div>
             <div class="txt">
               <div class="t">上线 A/B 动态切换逻辑</div>
               <div class="d"><span class="owner">林啸</span><span class="sep">·</span>周五前</div>
             </div>
           </div>
-          <div class="action-row">
-            <div class="check"></div>
+          <div class="action-row" data-aid="ai-5" onclick="openActionItem('rec-2', 'ai-5')">
+            <div class="check" onclick="toggleActionItem(event, 'rec-2', 'ai-5')"></div>
             <div class="txt">
               <div class="t">集成 confidence decay 机制</div>
               <div class="d"><span class="owner">王浩</span><span class="sep">·</span>下周</div>
             </div>
           </div>
-          <div class="action-row">
-            <div class="check"></div>
+          <div class="action-row" data-aid="ai-6" onclick="openActionItem('rec-2', 'ai-6')">
+            <div class="check" onclick="toggleActionItem(event, 'rec-2', 'ai-6')"></div>
             <div class="txt">
               <div class="t">搭 evaluation dashboard 跟踪指标</div>
               <div class="d"><span class="owner">林啸</span><span class="sep">·</span>本周</div>
@@ -2708,125 +2856,107 @@
     go(screenId);
   }
 
-  /* ====== 完整总结数据（长录音独有 · LLM 生成） ====== */
+  /* ====== 完整会议纪要数据（长录音独有 · LLM 生成） ======
+   * 这是一份完整的"会议纪要"，不是摘要分解。
+   * 结构 = 基本信息 + 会议背景 + 会议内容（多段连贯叙述）
+   * 决策/Action Items/Memory 归因在卡片的其他 section 已单独呈现，
+   * 这里不重复 —— 这里的价值是"把整场会议完整讲一遍"。
+   */
   const FULL_SUMMARIES = {
     'rec-1': {
-      title: '和蔡哥的 Series A 跟进会',
-      meta: '2026-04-09 10:30 · 42:18 · 蔡哥 / 明明 / 郑灿 / 马俊',
+      title: '和蔡哥的 Series A 跟进会 · 会议纪要',
+      meta: {
+        '会议时间': '2026 年 4 月 9 日（周三） 10:30 – 11:12',
+        '会议时长': '42 分 18 秒',
+        '参会人员': '蔡哥（Linear Capital 合伙人）、明明（Monostone CEO）、郑灿（Linear Capital 投资总监）、马俊（Linear Capital 合伙人）',
+        '会议项目': 'Series A 融资 · D-Day',
+        '会议形式': '线下会议 · Linear Capital 上海办公室'
+      },
       sections: [
         {
-          h: '核心议题',
-          p: '本次会议是 Series A D-Day 的深度对接。蔡哥带领 Linear Capital 团队就 Monostone 的产品定位、竞争壁垒、GTM 节奏、硬件执行风险四个维度做了 42 分钟的系统性质询。明明代表团队做了主要阐述，马俊就硬件细节追问，郑灿对整体策略做了几点补充。'
-        },
-        {
-          h: '关键讨论',
-          p: '<b>关于定位</b>：Linear 明确反对把 Monostone 定位成 "AI infra"，认为这会让早期叙事失焦。他们希望看到的是"戒指 + App + Agent"的闭环产品，插件生态可以作为长期开放性的叙事但不能喧宾夺主。明明同意了 closed-loop 定位，保留了 Agent 层的开放接口。'
-        },
-        {
-          p: '<b>关于竞争</b>：Linear 把 OpenAI 排在威胁榜首，因为 OpenAI 刚收购了硬件团队且有强烈的消费端意图。Apple 反而被排得很后，原因是 Apple 在 AI 穿戴领域被隐私框架自己锁死，短期内难以有实质动作。Samsung Galaxy Ring 被认为是纸老虎。'
-        },
-        {
-          p: '<b>关于风险</b>：Linear 指出最大风险不是巨头入局，而是"戒指品类本身两年后没起来"。明明对这个判断表示认同，并提出了双麦 15dB SNR 作为品类差异化的物理锚点。'
-        },
-        {
-          h: '决策',
-          ul: [
-            '不做 Kickstarter，坚持独立站 DTC 首发（明明主张，Linear 支持）',
-            '企业场景优先级高于家庭场景，作为 B2B 扩展路径（Linear 建议，待评估）',
-            '定位为 closed-loop 消费产品，而非 AI infra（共识）',
-            '双麦 SNR 数据包装成 "freestyle recording" 营销故事（Linear 建议）'
+          h: '会议背景',
+          paragraphs: [
+            '本次会议是 Monostone 与 Linear Capital 的 Series A D-Day 深度对接会议。在过去三周内，Monostone 团队已与 Linear Capital 完成了 4 轮前期沟通，初步就产品形态、技术可行性、团队背景达成共识。本次 D-Day 会议的核心目的是做最后一轮关键投资判断的深度访谈，Linear Capital 方面将在下周三形成初步的 Term Sheet 意向，明确估值区间和交易结构。',
+            '明明在会议开始前一天专门重新梳理了 pitch 材料，重点是针对蔡哥之前提出的三个疑问做专项回应：产品定位、竞争壁垒、GTM 节奏。Linear Capital 方面本次由蔡哥亲自带队，罕见地同时带上了投资总监郑灿和另一位合伙人马俊，说明内部对这个项目的重视程度。'
           ]
         },
         {
-          h: 'Action Items',
-          ul: [
-            '<b>Marshall</b> · 锁定 ODM 合作方 · 4 月底',
-            '<b>石慧</b> · 把双麦 SNR 数据整理成 marketing 故事 · 本周',
-            '<b>明明</b> · 研究 EO 14117 美国数据法规 · 下周前'
+          h: '会议内容',
+          paragraphs: [
+            '会议一开始蔡哥没有寒暄，直接抛出了他心里一直盘旋的核心疑问：Monostone 到底是一个 AI infrastructure 项目，还是一个 closed-loop 的消费级产品？他坦率地说，前者的叙事虽然性感但风险巨大，因为 infra 的护城河难以建立、估值逻辑复杂；后者的叙事虽然朴素但更符合 Linear 对早期消费硬件的判断框架。明明没有回避这个问题，他给出的答案是："戒指 + App + Agent 是闭环产品，插件生态是长期的开放性叙事。" 他进一步解释，Agent 层保留开放接口是为了让高阶用户和开发者能接入，但这不是产品的主要价值主张，主要价值仍然在 closed-loop 的端到端体验上。蔡哥对这个回答表示满意，马俊在一旁补了一句："这样我们内部就知道怎么写投资逻辑了。"',
+            '讨论的第二个关键问题是竞争格局。郑灿提出了他最担心的竞争对手 —— 不是 OpenAI，而是 Apple。他的逻辑是：Apple 一旦在 Vision Pro 之外做一款 AI 穿戴设备，凭借生态壁垒几乎可以瞬间压垮所有创业公司。明明对这个判断给出了不同的解读。他分析说，Apple 在 AI 穿戴领域反而是最慢的玩家：一方面 Apple 的隐私框架让它无法做激进的"always listening"产品，另一方面 Apple 内部 AI 团队（Siri）和硬件团队（Vision Pro）之间的协作历史上就很糟糕。真正的威胁反而是 OpenAI —— 他们最近刚收购了一个硬件团队，且 Sam Altman 多次在公开场合表达过对消费硬件的强烈兴趣。明明举了 Humane AI Pin 作为反例，说明即使是 Apple 前员工创办的 AI 硬件公司也可以失败得很惨。蔡哥和郑灿对这个分析表示认可，特别是对"Apple 被自己的隐私框架锁死"这个判断很感兴趣。',
+            '讨论的第三个焦点是风险 —— 蔡哥直接问明明："你们最怕什么？" 明明沉默了几秒，给出了一个出乎 Linear 意料的答案：最怕的不是竞争对手入局，而是戒指这个品类本身两年后没起来。他解释说，如果 2028 年回头看，人们发现智能戒指只是昙花一现（像当年的 Google Glass），那么就算 Monostone 执行完美也会被品类衰退拖下水。为了对冲这个风险，Monostone 团队在产品设计上埋了两层锚点：一是双麦阵列带来的 15dB SNR 优势（这是任何单麦戒指都做不到的物理差异化），二是每个用户 10+ 次/天的高频交互习惯（只有这种高频交互能让 context 真正复利起来）。马俊对这个回答非常认可，他建议把双麦 SNR 的故事包装成"freestyle recording"的营销叙事 —— 不要用技术语言（"15dB SNR"普通人听不懂），而是用场景语言（"走路、开车、户外都能清晰录音"）。明明当场就把这个建议记下来了。',
+            '会议的最后 15 分钟讨论了 GTM 节奏。Linear 方面对明明反复强调的"不做 Kickstarter 直接独立站 DTC"提出了一些顾虑：如果没有 Kickstarter 的众筹数据做背书，早期的 GTM 数据怎么打动下一轮投资人？明明的回答是，Monostone 的早期用户群是高频 AI 使用者（开发者、研究员、产品经理），这些人的转化路径是通过社交媒体（主要是 Twitter 和知乎）而不是 Kickstarter。他列举了类似路径的成功案例（Rewind、Limitless），证明这条路径是可行的。郑灿补充了一个建议：企业场景的优先级应该高于家庭场景 —— 因为企业用户的 context 共享价值更大，B2B 商业模型也更健康。这个建议没有当场拍板，明明表示会在下周前做一版 B2B scenario 的 roadmap 再来汇报。',
+            '会议结尾蔡哥没有做任何承诺，只说"下周三 Linear 内部投委会后会给你们初步意见"。但明明从蔡哥和马俊互相交换的眼神中感受到，这次会议至少没有踩到任何红线。会议散场后马俊单独留了明明几分钟，提醒他尽快研究一下 EO 14117 美国数据法规对智能穿戴设备可能的影响 —— 这是美国政府近期对"涉及敏感个人数据的外国控制技术"的限制，可能会影响未来进入美国市场的策略。明明当场承诺下周前给 Linear 一份简短的合规分析。'
           ]
-        },
-        {
-          h: '后续',
-          p: '下周三同一时间 Linear 会出具初步的 term sheet 意向，届时会涉及到估值区间和交易结构。明明需要在此之前完成 ODM 选型和 B2B 场景的初版 roadmap。'
         }
       ]
     },
     'rec-2': {
-      title: '林啸 Memory A/B 对比测试评审',
-      meta: '2026-04-08 16:40 · 28:04 · 林啸 / 明明 / 王浩',
+      title: '林啸 Memory A/B 对比测试评审 · 会议纪要',
+      meta: {
+        '会议时间': '2026 年 4 月 8 日（周二） 16:40 – 17:08',
+        '会议时长': '28 分 04 秒',
+        '参会人员': '林啸（Memory 模块负责人）、明明（Monostone CEO）、王浩（后端工程师）',
+        '会议项目': 'Monostone 后端 · Memory 模块',
+        '会议形式': '线上会议 · 飞书视频'
+      },
       sections: [
         {
-          h: '核心议题',
-          p: '对 Memory 模块过去两周运行的 A/B 实验做阶段性评审。A 组是林啸开发的新 branch，采用了更激进的 consolidation 策略；B 组是 baseline。会议的目的是决定是否全量切到 A 组、维持 baseline、还是采取混合策略。'
-        },
-        {
-          h: '关键讨论',
-          p: '<b>性能对比</b>：A 组在 memory retrieval 准确率上显著领先 baseline 14 个百分点，但 p95 latency 从 320ms 涨到 500ms。对于长会话（超过 30 分钟），A 组的优势更明显；对于短会话，baseline 反而稳定。'
-        },
-        {
-          p: '<b>bug 追踪</b>：B 组（baseline）被发现在多会话并发场景下会出现 L2 记忆泄漏——session A 的记忆会被 session B 当作上下文引用。林啸定位到这是 consolidation 触发条件的 bug，和 A 组的改动无关。'
-        },
-        {
-          p: '<b>未来方向</b>：王浩提出应该引入 confidence decay 机制，让长时间未被引用的 memory 自动降级，防止错误推断累积。这个想法和明明走路时想到的灵感对齐。'
-        },
-        {
-          h: '决策',
-          ul: [
-            'A/B 策略不做 hard switch，按 session 特征动态选择',
-            'Memory promotion 加入 confidence decay 作为正式 feature',
-            '短会话走 baseline（成熟稳定），长会话走 A 组（准确率高）'
+          h: '会议背景',
+          paragraphs: [
+            '过去两周 Monostone 后端团队在 Memory 模块上运行了一个 A/B 对比实验，目的是评估一版新的 consolidation 策略是否值得全量上线。A 组使用林啸最近开发的新 branch（更激进的 L2 promotion 触发条件 + 新的 embedding 相似度算法），B 组维持原 baseline。两周数据积累之后，本次会议的目的是基于数据做出全量切换决策。'
           ]
         },
         {
-          h: 'Action Items',
-          ul: [
-            '<b>林啸</b> · 上线 A/B 动态切换逻辑 · 周五前',
-            '<b>王浩</b> · 集成 confidence decay 机制 · 下周',
-            '<b>林啸</b> · 搭 evaluation dashboard 跟踪长尾指标 · 本周'
+          h: '会议内容',
+          paragraphs: [
+            '会议开始林啸先 share 了 evaluation dashboard 上的两周数据对比。核心指标包括 memory retrieval 准确率、p95 latency、多会话泄漏率、token 消耗量。数据显示 A 组在 retrieval 准确率上显著领先 —— 从 baseline 的 71% 上升到 85%，提升了 14 个百分点。但代价也不小：p95 latency 从 320ms 涨到了 500ms，token 消耗增加了 18%。林啸特别强调，A 组的优势主要体现在长会话场景（超过 30 分钟的会议），对于短会话（少于 5 分钟的 quick command）A 组和 baseline 几乎没有差异，甚至有时 baseline 稍好。',
+            '明明追问了一个关键问题：用户有没有感知到 latency 的差异？林啸展示了他们埋的用户行为数据 —— 在 A 组用户中，超过 5 秒等待的指令任务的完成率比 baseline 低了 3%，这是一个值得警惕的信号。但明明指出 3% 的差异可能在误差范围内，建议继续观察两周再下结论。随后讨论转向了另一个意外发现：B 组（baseline）在多会话并发场景下出现了 L2 记忆泄漏的 bug —— 当同一用户同时开了两个不同项目的 session 时，会出现 session A 的 memory 被错误地作为 context 引用到 session B 里的情况。王浩最早发现这个 bug，他 demo 了具体的复现步骤，大家都看得一头冷汗。林啸当场定位到这个 bug 来自 consolidation 触发条件里的一个 session_id 判断逻辑的缺陷，这个问题在 baseline 里已经存在了好几个月，只是之前没有人注意到。',
+            '讨论的第三个焦点是 Memory confidence decay 机制的设计。王浩分享了他在读 spaced repetition 相关论文后的一些想法：可以借鉴 SM-2 算法，让 memory 的 confidence 随时间自然衰减 —— 如果一条 memory 在一定时间内没有被引用或确认，它的 confidence 应该自动往下掉，避免错误的早期推断一直被 Agent 当作事实使用。明明接话说这个想法和他昨天走路时录的一条灵感完全对齐，当场让 Agent 把那条灵感调出来给大家看。三个人讨论了具体的衰减曲线 —— 是用线性衰减、指数衰减还是基于 Ebbinghaus 遗忘曲线的 S 形衰减。最终的共识是用指数衰减作为 v1 实现，参数先粗调，再根据实际数据精调。',
+            '会议的最后讨论了 A/B 的后续策略。三个方案被提出来：方案一是全量切到 A 组，方案二是维持 baseline 继续优化，方案三是做混合策略（根据 session 特征动态选择 A 或 B）。最终选择了方案三：短会话走 baseline（成熟稳定），长会话走 A 组（准确率明显更好）。这个混合策略的工程复杂度比单一方案高一些，但可以避免 latency 问题的同时保留 A 组的准确率优势。林啸承诺周五前完成动态切换逻辑的上线。另外也决定把 confidence decay 作为 Memory 模块的下一个正式 feature 开发，由王浩负责，下周完成原型。',
+            '会议结束前明明提出了一个关于风险的担忧：如果 confidence decay 的参数调不好，可能会出现"误删有用 memory"的情况 —— 特别是那些低频但关键的 memory（比如只见过一次的重要投资人）。他建议在 v1 实现里就引入一个"受保护 memory"的概念，允许用户或 Agent 手动锁定某些 memory 不被自动衰减。林啸和王浩都认可这个建议，决定在 confidence decay 的设计里预留这个机制。'
           ]
-        },
-        {
-          h: '风险',
-          p: '如果 confidence decay 的参数调不好，可能会出现"误删有用 memory"的情况。建议引入用户可见的"受保护 memory"概念，允许手动锁定某些记忆不被衰减。'
         }
       ]
     }
   };
 
-  /* ====== 分享内容模板 · Markdown 导出 ====== */
+  /* ====== 分享内容模板 · Markdown 导出 (会议纪要格式) ====== */
   function buildShareMarkdown(cardId) {
     const d = FULL_SUMMARIES[cardId];
     if (!d) return '';
     let md = `# ${d.title}\n\n`;
-    md += `> ${d.meta}\n\n`;
+    for (const [k, v] of Object.entries(d.meta)) {
+      md += `**${k}**：${v}  \n`;
+    }
+    md += '\n';
     for (const sec of d.sections) {
-      if (sec.h) md += `## ${sec.h}\n\n`;
-      if (sec.p) md += `${sec.p.replace(/<b>/g,'**').replace(/<\/b>/g,'**')}\n\n`;
-      if (sec.ul) {
-        for (const li of sec.ul) md += `- ${li.replace(/<b>/g,'**').replace(/<\/b>/g,'**')}\n`;
-        md += '\n';
+      md += `## ${sec.h}\n\n`;
+      for (const p of sec.paragraphs) {
+        md += `${p.replace(/<b>/g,'**').replace(/<\/b>/g,'**')}\n\n`;
       }
     }
     md += `---\n*由 Monostone 生成 · ${new Date().toLocaleDateString('zh-CN')}*\n`;
     return md;
   }
 
-  /* ====== 打开完整总结 modal ====== */
+  /* ====== 打开完整会议纪要 modal ====== */
   function openFullSummary(cardId) {
     const d = FULL_SUMMARIES[cardId];
     if (!d) return;
-    const html = `
+    const metaHtml = Object.entries(d.meta)
+      .map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`)
+      .join('');
+    const sectionsHtml = d.sections.map(s => `
+      <h3>${s.h}</h3>
+      ${s.paragraphs.map(p => `<p>${p}</p>`).join('')}
+    `).join('');
+    document.getElementById('full-summary-content').innerHTML = `
       <h2>${d.title}</h2>
-      <div class="meta">${d.meta}</div>
-      ${d.sections.map(s => {
-        let part = '';
-        if (s.h) part += `<h3>${s.h}</h3>`;
-        if (s.p) part += `<p>${s.p}</p>`;
-        if (s.ul) part += `<ul>${s.ul.map(li => `<li>${li}</li>`).join('')}</ul>`;
-        return part;
-      }).join('')}
+      <dl class="meta-table">${metaHtml}</dl>
+      ${sectionsHtml}
     `;
-    document.getElementById('full-summary-content').innerHTML = html;
     openModal('modal-full-summary');
   }
 
@@ -2836,19 +2966,182 @@
     const d = FULL_SUMMARIES[cardId];
     if (!d) { toast('这类卡片暂不支持分享'); return; }
 
-    // 预览显示（markdown 转成简单 HTML）
+    // 预览 · 会议纪要摘选（显示前 2 段）
+    const metaLines = Object.entries(d.meta).slice(0, 3)
+      .map(([k, v]) => `${k}：${v}`).join(' · ');
+    const firstTwoParagraphs = [];
+    for (const sec of d.sections) {
+      for (const p of sec.paragraphs) {
+        firstTwoParagraphs.push(p);
+        if (firstTwoParagraphs.length >= 2) break;
+      }
+      if (firstTwoParagraphs.length >= 2) break;
+    }
     const preview = `
       <div class="title">${d.title}</div>
-      <div class="h">${d.meta}</div>
-      <div class="lbl">核心议题</div>
-      ${d.sections.filter(s => s.h === '核心议题').map(s => `<div>${s.p}</div>`).join('')}
-      <div class="lbl">关键讨论</div>
-      ${d.sections.filter(s => !s.h && s.p).map(s => `<div>${s.p}</div>`).join('')}
-      <div class="lbl">Action Items</div>
-      ${d.sections.filter(s => s.h === 'Action Items').map(s => `<ul style="padding-left:16px;margin:4px 0">${s.ul.map(li => `<li>${li}</li>`).join('')}</ul>`).join('')}
+      <div class="h" style="font-size:11px">${metaLines}</div>
+      <div class="lbl">预览</div>
+      ${firstTwoParagraphs.map(p => `<div style="margin-bottom:8px">${p.substring(0, 180)}${p.length > 180 ? '…' : ''}</div>`).join('')}
+      <div class="lbl" style="color:var(--t-rec)">完整会议纪要共 ${d.sections.reduce((n, s) => n + s.paragraphs.length, 0)} 段</div>
     `;
     document.getElementById('share-preview-content').innerHTML = preview;
     openModal('modal-share');
+  }
+
+  /* ====== Action Items 数据 + 点击交互 ======
+   * 点击 checkbox → 切换完成状态（后端: PATCH /cards/{id}/action-items/{item_id}）
+   * 点击 task 区域 → 打开 action item 详情 modal, 提供:
+   *   1. 标记完成 (等同 checkbox)
+   *   2. 推到 Linear (创建 issue)
+   *   3. 加到提醒事项 (创建 Reminder)
+   *   4. 生成 follow-up 邮件给 owner (触发新的指令卡)
+   *   5. 跳转到录音原话 (需要 source_offset_ms)
+   */
+  const ACTION_ITEMS = {
+    'rec-1': [
+      {
+        id: 'ai-1',
+        text: 'Marshall 锁定 ODM 合作方',
+        owner: 'Marshall',
+        deadline: '4 月底',
+        source_quote: '"Marshall 你周五前要把 ODM 供应商的事情定下来，不然影响后面的节奏。我们不能再拖了，下轮融资前必须要有一个明确的交付节奏。"',
+        source_time: '14:32',
+        source_card: '和蔡哥的 Series A 跟进会'
+      },
+      {
+        id: 'ai-2',
+        text: '把双麦 SNR 数据整理成 marketing 故事',
+        owner: '石慧',
+        deadline: '本周',
+        source_quote: '"石慧你帮我把双麦 15dB 的数据提炼一下，不要用技术语言 —— 改成 freestyle recording 的场景故事，走路、开车、户外都能清晰录音。"',
+        source_time: '27:18',
+        source_card: '和蔡哥的 Series A 跟进会'
+      },
+      {
+        id: 'ai-3',
+        text: '研究 EO 14117 美国数据法规',
+        owner: '明明',
+        deadline: '下周前',
+        source_quote: '"明明你抽空看一下 EO 14117，这是美国对涉及敏感个人数据的外国控制技术的限制，可能影响 Monostone 进入美国市场的策略。下周前给我一份简短的分析。"',
+        source_time: '38:45',
+        source_card: '和蔡哥的 Series A 跟进会'
+      }
+    ],
+    'rec-2': [
+      {
+        id: 'ai-4',
+        text: '上线 A/B 动态切换逻辑',
+        owner: '林啸',
+        deadline: '周五前',
+        source_quote: '"那我本周把动态切换逻辑 ship 出去。短会话走 baseline，长会话走 A 组，这样 latency 和准确率都不损失。"',
+        source_time: '18:22',
+        source_card: '林啸 Memory A/B 对比测试评审'
+      },
+      {
+        id: 'ai-5',
+        text: '集成 confidence decay 机制',
+        owner: '王浩',
+        deadline: '下周',
+        source_quote: '"王浩你把 confidence decay 的 v1 做出来，先用指数衰减，参数粗调。记得预留受保护 memory 的锁定机制。"',
+        source_time: '21:10',
+        source_card: '林啸 Memory A/B 对比测试评审'
+      },
+      {
+        id: 'ai-6',
+        text: '搭 evaluation dashboard 跟踪长尾指标',
+        owner: '林啸',
+        deadline: '本周',
+        source_quote: '"顺便 dashboard 加几个长尾指标，特别是 p99 latency 和 memory 泄漏率，这样我们能提前发现问题。"',
+        source_time: '24:03',
+        source_card: '林啸 Memory A/B 对比测试评审'
+      }
+    ]
+  };
+
+  function getActionItem(cardId, itemId) {
+    const list = ACTION_ITEMS[cardId] || [];
+    return list.find(i => i.id === itemId);
+  }
+
+  /* 切换完成状态 */
+  function toggleActionItem(e, cardId, itemId) {
+    e.stopPropagation(); // 不触发父 row 的 click
+    const row = e.currentTarget.closest('.action-row');
+    const wasDone = row.classList.toggle('done');
+    if (wasDone) {
+      toast('已完成 · 同步到 Linear');
+    } else {
+      toast('已撤销完成');
+    }
+  }
+
+  /* 打开 Action Item 详情 */
+  function openActionItem(cardId, itemId) {
+    const item = getActionItem(cardId, itemId);
+    if (!item) return;
+    document.getElementById('action-detail-content').innerHTML = `
+      <div class="task-title">${item.text}</div>
+      <div class="task-meta">
+        <div><span class="k">负责人</span> <span class="v">${item.owner}</span></div>
+        <div><span class="k">截止</span> <span class="v">${item.deadline}</span></div>
+      </div>
+
+      <div class="sec-sep">从会议中摘取</div>
+      <div class="quote-source">${item.source_quote}</div>
+      <div class="quote-meta">${item.source_card} · ${item.source_time}</div>
+
+      <div class="sec-sep">操作</div>
+      <div class="action-list">
+        <button class="ai-btn primary" onclick="doActionItem('complete', '${cardId}', '${itemId}')">
+          <div class="ic">✓</div>
+          <div class="info"><div class="t">标记完成</div><div class="s">同步到已连接的外部系统</div></div>
+          <div class="chev">›</div>
+        </button>
+        <button class="ai-btn" onclick="doActionItem('linear', '${cardId}', '${itemId}')">
+          <div class="ic linear">L</div>
+          <div class="info"><div class="t">推到 Linear</div><div class="s">创建 issue · 分配给 ${item.owner} · 截止 ${item.deadline}</div></div>
+          <div class="chev">›</div>
+        </button>
+        <button class="ai-btn" onclick="doActionItem('reminder', '${cardId}', '${itemId}')">
+          <div class="ic reminder">⏰</div>
+          <div class="info"><div class="t">加到提醒事项</div><div class="s">Apple Reminders · 截止 ${item.deadline}</div></div>
+          <div class="chev">›</div>
+        </button>
+        <button class="ai-btn" onclick="doActionItem('email', '${cardId}', '${itemId}')">
+          <div class="ic mail">✉</div>
+          <div class="info"><div class="t">给 ${item.owner} 起草 follow-up 邮件</div><div class="s">Agent 会带上会议原文 context</div></div>
+          <div class="chev">›</div>
+        </button>
+        <button class="ai-btn" onclick="doActionItem('jump', '${cardId}', '${itemId}')">
+          <div class="ic play">▶</div>
+          <div class="info"><div class="t">跳转到录音原话</div><div class="s">${item.source_time} · 播放前后文</div></div>
+          <div class="chev">›</div>
+        </button>
+      </div>
+      <div style="height: 20px"></div>
+    `;
+    openModal('modal-action-item');
+  }
+
+  function doActionItem(action, cardId, itemId) {
+    const item = getActionItem(cardId, itemId);
+    closeModal('modal-action-item');
+    setTimeout(() => {
+      if (action === 'complete') {
+        // 找到对应的 row 标记为 done
+        const rows = document.querySelectorAll(`#s3-scroll .action-row[data-aid="${itemId}"]`);
+        rows.forEach(r => r.classList.add('done'));
+        toast('已完成 · 同步到 Linear');
+      } else if (action === 'linear') {
+        toast('已创建 Linear issue · 分配给 ' + item.owner);
+      } else if (action === 'reminder') {
+        toast('已加到提醒事项');
+      } else if (action === 'email') {
+        toast('正在生成 follow-up 邮件…');
+      } else if (action === 'jump') {
+        toast('跳转到 ' + item.source_time + '（暂未实现音频播放）');
+      }
+    }, 250);
   }
 
   function pickFormat(el) {
