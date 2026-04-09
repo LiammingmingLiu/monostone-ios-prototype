@@ -10,25 +10,22 @@
   :root {
     --bg: #0a0a0a;
     --phone-bg: #000;
-    --panel: #1C1C1E;
-    --panel-2: #2C2C2E;
+    --panel: #141416;
     --text: #fff;
     --text-2: #EBEBF5;
-    --text-dim: #98989F;
-    --text-dimmer: #636366;
-    --border: rgba(255,255,255,0.08);
-    --blue: #0A84FF;
-    --red: #FF453A;
+    --text-dim: #8E8E93;
+    --text-dimmer: #48484A;
+    --border: rgba(255,255,255,0.07);
+    --border-strong: rgba(255,255,255,0.12);
 
-    /* 4 种卡片类型的色系 */
-    --t-rec: #7cf7ff;         /* 长录音 · 青蓝 */
-    --t-rec-bg: rgba(124,247,255,0.09);
-    --t-cmd: #A78BFA;          /* 指令 · 紫 */
-    --t-cmd-bg: rgba(167,139,250,0.1);
-    --t-idea: #FFB84D;         /* 灵感 · 橙 */
-    --t-idea-bg: rgba(255,184,77,0.1);
-    --t-todo: #5ED67A;         /* 待办 · 绿 */
-    --t-todo-bg: rgba(94,214,122,0.1);
+    /* 单一主调 */
+    --accent: #6FD4E0;
+
+    /* 4 种类型的弱色 — 仅用于 type 文字标签 */
+    --t-rec: #6FC3D0;    /* 长录音 · 静青 */
+    --t-cmd: #A295D0;    /* 指令 · 淡紫 */
+    --t-idea: #D4A868;   /* 灵感 · 暖橙 */
+    --t-todo: #7FC090;   /* 日程 · 浅绿 */
   }
   html, body {
     background: var(--bg);
@@ -43,37 +40,33 @@
     justify-content: center;
     padding: 20px;
     background:
-      radial-gradient(ellipse 60% 40% at 20% 20%, rgba(124,247,255,0.06), transparent 60%),
-      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(167,139,250,0.05), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 20% 20%, rgba(111,212,224,0.04), transparent 60%),
       var(--bg);
   }
 
-  /* ===== Stage ===== */
   .brand {
     position: fixed;
     top: 32px;
     left: 32px;
-    font-size: 12px;
+    font-size: 11px;
     letter-spacing: 0.35em;
-    color: var(--text-dim);
+    color: var(--text-dimmer);
     font-weight: 600;
     z-index: 100;
   }
-  .brand span { color: var(--t-rec); }
+  .brand span { color: var(--accent); }
   .hint {
     position: fixed;
     bottom: 24px;
     left: 50%;
     transform: translateX(-50%);
     font-size: 11px;
-    letter-spacing: 0.08em;
     color: var(--text-dimmer);
     text-align: center;
     z-index: 100;
+    letter-spacing: 0.04em;
   }
-  .hint b { color: var(--t-rec); font-weight: 500; }
 
-  /* ===== Phone ===== */
   .phone {
     width: 393px;
     height: 852px;
@@ -85,8 +78,7 @@
     box-shadow:
       0 0 0 3px #000,
       0 0 0 4px #1a1a1c,
-      0 50px 120px -20px rgba(0,0,0,0.9),
-      0 0 80px rgba(124,247,255,0.05);
+      0 50px 120px -20px rgba(0,0,0,0.9);
   }
   .phone::before {
     content: "";
@@ -117,7 +109,6 @@
   .status-bar .icons { display: flex; gap: 6px; align-items: center; }
   .status-bar .icons svg { width: 16px; height: 11px; }
 
-  /* ===== Screens ===== */
   .screen {
     position: absolute;
     inset: 0;
@@ -125,8 +116,8 @@
     display: none;
     flex-direction: column;
     opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+    transform: translateY(8px);
+    transition: opacity 0.35s ease-out, transform 0.35s ease-out;
   }
   .screen.active {
     display: flex;
@@ -137,78 +128,62 @@
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 0 20px;
+    padding: 0 22px;
     scrollbar-width: none;
   }
   .scroll::-webkit-scrollbar { display: none; }
 
-  /* Top nav bar for inner screens */
   .navbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     height: 44px;
-    padding: 0 16px;
-    position: relative;
+    padding: 0 18px;
     flex-shrink: 0;
   }
-  .navbar .back {
-    color: var(--blue);
-    font-size: 16px;
-    font-weight: 400;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 8px 8px 8px 0;
-  }
-  .navbar .title {
-    font-size: 17px;
-    font-weight: 600;
-  }
+  .navbar .back,
   .navbar .right {
     font-size: 15px;
-    color: var(--blue);
+    color: var(--text-dim);
     background: none;
     border: none;
     cursor: pointer;
+    padding: 8px 2px;
   }
+  .navbar .title { font-size: 15px; font-weight: 600; color: var(--text); }
 
-  /* Tab bar */
   .tabbar {
     height: 83px;
-    background: rgba(22,22,23,0.94);
+    background: rgba(10,10,10,0.92);
     backdrop-filter: blur(30px);
     -webkit-backdrop-filter: blur(30px);
     border-top: 0.5px solid var(--border);
     display: flex;
-    padding: 8px 0 30px;
+    padding: 12px 0 30px;
     flex-shrink: 0;
   }
   .tab {
     flex: 1;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px;
     color: var(--text-dimmer);
     cursor: pointer;
     background: none;
     border: none;
     font-family: inherit;
-    padding: 6px 0;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 0;
     transition: color 0.2s;
+    letter-spacing: 0.02em;
   }
-  .tab.active { color: var(--t-rec); }
-  .tab .icon { font-size: 22px; line-height: 1; }
-  .tab .lbl { font-size: 10px; font-weight: 500; }
+  .tab.active { color: var(--text); }
 
   button { font-family: inherit; }
-  button:active { transform: scale(0.97); }
+  button:active { transform: scale(0.98); }
 
-  /* ============================================================ */
-  /* Screen 1 · 启动                                                */
-  /* ============================================================ */
+  /* ====== 1 · 启动 ====== */
   #s1 { padding-top: 0; }
   #s1 .wrap {
     flex: 1;
@@ -216,41 +191,39 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 0 40px 120px;
+    padding: 0 40px 140px;
   }
   #s1 .ring {
-    width: 160px;
-    height: 160px;
+    width: 150px;
+    height: 150px;
     border-radius: 50%;
-    border: 2px solid var(--t-rec);
+    border: 1.5px solid var(--accent);
     position: relative;
-    margin-bottom: 56px;
-    background: radial-gradient(circle at 30% 30%, rgba(124,247,255,0.3), transparent 60%);
-    box-shadow: 0 0 60px rgba(124,247,255,0.35), inset 0 0 40px rgba(124,247,255,0.12);
-    animation: pulse 3s ease-in-out infinite;
+    margin-bottom: 60px;
+    box-shadow: 0 0 60px rgba(111,212,224,0.25);
+    animation: pulse 3.5s ease-in-out infinite;
   }
   #s1 .ring::after {
     content: "";
     position: absolute;
-    inset: 18px;
+    inset: 16px;
     border-radius: 50%;
-    border: 1px solid rgba(124,247,255,0.35);
+    border: 1px solid rgba(111,212,224,0.3);
   }
   @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 60px rgba(124,247,255,0.35), inset 0 0 40px rgba(124,247,255,0.12); }
-    50% { box-shadow: 0 0 90px rgba(124,247,255,0.55), inset 0 0 50px rgba(124,247,255,0.22); }
+    0%, 100% { box-shadow: 0 0 60px rgba(111,212,224,0.25); }
+    50% { box-shadow: 0 0 90px rgba(111,212,224,0.45); }
   }
   #s1 h1 {
-    font-size: 34px;
-    font-weight: 800;
+    font-size: 28px;
+    font-weight: 700;
     letter-spacing: 0.32em;
-    margin-bottom: 12px;
-    text-align: center;
+    margin-bottom: 10px;
   }
   #s1 .tag {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-dim);
-    letter-spacing: 0.22em;
+    letter-spacing: 0.18em;
     margin-bottom: 72px;
   }
   .primary-btn {
@@ -258,497 +231,311 @@
     color: #000;
     border: none;
     border-radius: 100px;
-    padding: 17px 56px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    min-width: 260px;
-    justify-content: center;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  /* ============================================================ */
-  /* Screen 2 · 首页 Timeline（核心）                                */
-  /* ============================================================ */
-  #s2 .scroll { padding-top: 8px; padding-bottom: 12px; }
-  .home-head {
-    padding: 8px 4px 18px;
-  }
-  .home-head .greet {
-    font-size: 30px;
-    font-weight: 800;
-    letter-spacing: -0.025em;
-    margin-bottom: 4px;
-  }
-  .home-head .status {
-    font-size: 13px;
-    color: var(--text-dim);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .home-head .status .d {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--t-rec);
-    box-shadow: 0 0 8px var(--t-rec);
-    animation: blink 2s infinite;
-  }
-  @keyframes blink { 50% { opacity: 0.3; } }
-
-  .digest {
-    background: linear-gradient(135deg, rgba(124,247,255,0.1), rgba(167,139,250,0.06));
-    border: 1px solid rgba(124,247,255,0.22);
-    border-radius: 20px;
-    padding: 18px 20px;
-    margin-bottom: 22px;
-    cursor: pointer;
-  }
-  .digest .h {
-    font-size: 11px;
-    color: var(--t-rec);
-    letter-spacing: 0.1em;
-    font-weight: 600;
-    margin-bottom: 10px;
-  }
-  .digest .big {
+    padding: 16px 56px;
     font-size: 15px;
-    line-height: 1.5;
-    font-weight: 500;
-  }
-  .digest .big b { color: var(--t-rec); font-weight: 700; }
-  .digest .foot {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 0.5px solid rgba(255,255,255,0.1);
-    font-size: 12px;
-    color: var(--text-dim);
-    display: flex;
-    gap: 14px;
-  }
-  .digest .foot span b { color: #fff; font-weight: 600; }
-
-  .section-label {
-    font-size: 12px;
-    color: var(--text-dim);
-    letter-spacing: 0.05em;
     font-weight: 600;
-    margin: 0 4px 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    cursor: pointer;
+    min-width: 240px;
   }
-  .section-label .count { color: var(--text-dimmer); font-weight: 500; }
 
-  /* ---------- 卡片基础样式 ---------- */
+  /* ====== 2 · 首页 ====== */
+  #s2 .scroll { padding-top: 10px; padding-bottom: 12px; }
+  .home-head { padding: 14px 2px 28px; }
+  .home-head .greet {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .home-head .sub { font-size: 13px; color: var(--text-dim); }
+  .home-head .sub b { color: var(--text-2); font-weight: 500; }
+
+  .time-sep {
+    font-size: 11px;
+    color: var(--text-dimmer);
+    letter-spacing: 0.06em;
+    font-weight: 500;
+    padding: 18px 2px 10px;
+  }
+  .time-sep:first-child { padding-top: 0; }
+
+  /* 卡片 · 极简 */
   .card {
     position: relative;
     background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 14px 16px 14px 56px;
-    margin-bottom: 10px;
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px 15px;
+    margin-bottom: 8px;
     cursor: pointer;
-    overflow: hidden;
-    animation: rise 0.45s ease-out both;
-    transition: transform 0.2s, border-color 0.2s;
+    transition: border-color 0.2s;
   }
-  .card:active { transform: scale(0.98); }
-  @keyframes rise {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .card .strip {
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 4px;
-  }
-  .card .icon {
-    position: absolute;
-    left: 16px; top: 50%;
-    transform: translateY(-50%);
-    width: 30px; height: 30px;
-    border-radius: 9px;
+  .card:active { transform: scale(0.985); }
+  .card:hover { border-color: var(--border-strong); }
+
+  .card .head {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
   }
-  .card .type-tag {
-    display: inline-block;
+  .card .type {
     font-size: 10px;
     font-weight: 700;
-    letter-spacing: 0.08em;
-    padding: 2px 7px;
-    border-radius: 5px;
-    margin-bottom: 5px;
+    letter-spacing: 0.12em;
   }
-  .card .title {
-    font-size: 14.5px;
-    font-weight: 600;
-    line-height: 1.35;
-    margin-bottom: 4px;
-    color: #fff;
-  }
-  .card .meta {
-    font-size: 12px;
-    color: var(--text-dim);
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  .card .meta span { display: inline-flex; align-items: center; gap: 3px; }
-  .card .time-right {
-    position: absolute;
-    right: 14px; top: 14px;
+  .card .time {
     font-size: 11px;
     color: var(--text-dimmer);
     font-feature-settings: 'tnum';
   }
-
-  /* ---------- 类型 1 · 长录音 ---------- */
-  .card.rec { background: linear-gradient(90deg, var(--t-rec-bg), var(--panel) 40%); border-color: rgba(124,247,255,0.2); }
-  .card.rec .strip { background: var(--t-rec); }
-  .card.rec .icon { background: rgba(124,247,255,0.18); color: var(--t-rec); }
-  .card.rec .type-tag { background: rgba(124,247,255,0.15); color: var(--t-rec); }
-
-  /* ---------- 类型 2 · 指令 ---------- */
-  .card.cmd { background: linear-gradient(90deg, var(--t-cmd-bg), var(--panel) 40%); border-color: rgba(167,139,250,0.22); }
-  .card.cmd .strip { background: var(--t-cmd); }
-  .card.cmd .icon { background: rgba(167,139,250,0.2); color: var(--t-cmd); }
-  .card.cmd .type-tag { background: rgba(167,139,250,0.18); color: var(--t-cmd); }
-  .card.cmd .title { font-style: italic; font-weight: 500; }
-  .card.cmd .title::before { content: "\201C"; color: var(--t-cmd); font-size: 18px; margin-right: 2px; }
-  .card.cmd .title::after { content: "\201D"; color: var(--t-cmd); font-size: 18px; margin-left: 2px; }
-
-  /* ---------- 类型 3 · 灵感 ---------- */
-  .card.idea { background: linear-gradient(90deg, var(--t-idea-bg), var(--panel) 40%); border-color: rgba(255,184,77,0.22); }
-  .card.idea .strip { background: var(--t-idea); }
-  .card.idea .icon { background: rgba(255,184,77,0.18); color: var(--t-idea); }
-  .card.idea .type-tag { background: rgba(255,184,77,0.15); color: var(--t-idea); }
-
-  /* ---------- 类型 4 · 待办/日程 ---------- */
-  .card.todo { background: linear-gradient(90deg, var(--t-todo-bg), var(--panel) 40%); border-color: rgba(94,214,122,0.22); }
-  .card.todo .strip { background: var(--t-todo); }
-  .card.todo .icon { background: rgba(94,214,122,0.18); color: var(--t-todo); }
-  .card.todo .type-tag { background: rgba(94,214,122,0.15); color: var(--t-todo); }
-
-  .status-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 100px;
+  .card .title {
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.42;
+    color: var(--text);
+    margin-bottom: 5px;
+    letter-spacing: -0.005em;
   }
-  .status-pill.running { background: rgba(167,139,250,0.15); color: var(--t-cmd); }
-  .status-pill.done { background: rgba(94,214,122,0.15); color: var(--t-todo); }
-  .status-pill .d {
-    width: 5px; height: 5px;
+  .card .meta {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+  .card .meta .sep { margin: 0 6px; color: var(--text-dimmer); }
+
+  .card.rec  .type { color: var(--t-rec); }
+  .card.cmd  .type { color: var(--t-cmd); }
+  .card.idea .type { color: var(--t-idea); }
+  .card.todo .type { color: var(--t-todo); }
+
+  .card.cmd .title {
+    font-style: italic;
+    color: var(--text-2);
+  }
+
+  .running-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    background: currentColor;
+    background: var(--t-cmd);
+    margin-right: 5px;
+    vertical-align: middle;
     animation: blink 1.5s infinite;
   }
+  @keyframes blink { 50% { opacity: 0.3; } }
 
-  /* FAB · 录音触发 */
-  .fab {
-    position: absolute;
-    bottom: 103px;
-    right: 20px;
-    width: 62px; height: 62px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--t-rec), var(--t-cmd));
-    border: none;
-    color: #000;
-    font-size: 26px;
-    cursor: pointer;
-    box-shadow: 0 8px 24px rgba(124,247,255,0.4);
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .fab::before {
-    content: "";
-    position: absolute;
-    inset: -6px;
-    border-radius: 50%;
-    border: 1.5px solid rgba(124,247,255,0.3);
-    animation: ripple 2s ease-out infinite;
-  }
-  @keyframes ripple {
-    0% { transform: scale(0.9); opacity: 1; }
-    100% { transform: scale(1.4); opacity: 0; }
-  }
-
-  /* ============================================================ */
-  /* 通用 · 详情页                                                   */
-  /* ============================================================ */
-  .detail-head {
-    padding: 4px 0 18px;
-  }
-  .detail-head .type-tag {
-    display: inline-block;
+  /* ====== 通用详情页 ====== */
+  .detail-head { padding: 6px 0 22px; }
+  .detail-head .type {
     font-size: 10px;
     font-weight: 700;
-    letter-spacing: 0.1em;
-    padding: 3px 9px;
-    border-radius: 5px;
+    letter-spacing: 0.14em;
     margin-bottom: 10px;
+    display: block;
   }
+  .detail-head.rec  .type { color: var(--t-rec); }
+  .detail-head.cmd  .type { color: var(--t-cmd); }
+  .detail-head.idea .type { color: var(--t-idea); }
+  .detail-head.todo .type { color: var(--t-todo); }
+
   .detail-head .ti {
     font-size: 22px;
     font-weight: 700;
     line-height: 1.3;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
   }
-  .detail-head .mt {
-    font-size: 13px;
-    color: var(--text-dim);
-    display: flex;
-    gap: 14px;
-    flex-wrap: wrap;
-  }
-  .detail-head .mt b { color: var(--text); font-weight: 500; }
+  .detail-head .mt { font-size: 12px; color: var(--text-dim); }
+  .detail-head .mt .sep { margin: 0 7px; color: var(--text-dimmer); }
 
-  .sec {
-    margin-bottom: 18px;
-  }
+  .sec { margin-bottom: 22px; }
   .sec-title {
-    font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: 0.1em;
+    font-size: 10px;
+    color: var(--text-dimmer);
+    letter-spacing: 0.14em;
     font-weight: 600;
     margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    padding: 0 2px;
   }
   .sec-box {
     background: var(--panel);
-    border: 1px solid var(--border);
+    border: 0.5px solid var(--border);
     border-radius: 14px;
     padding: 14px 16px;
   }
   .bullet {
-    font-size: 14px;
+    font-size: 13px;
     line-height: 1.55;
     padding: 6px 0;
-    padding-left: 16px;
-    position: relative;
     color: var(--text-2);
   }
-  .bullet::before {
-    content: "•";
-    position: absolute;
-    left: 4px;
-    color: var(--t-rec);
-  }
+  .bullet + .bullet { border-top: 0.5px solid var(--border); }
 
-  /* ============================================================ */
-  /* Screen 3 · 长录音详情                                          */
-  /* ============================================================ */
-  #s3 .type-tag { background: rgba(124,247,255,0.15); color: var(--t-rec); }
-  .action-row {
-    display: flex;
-    gap: 12px;
-    padding: 12px 0;
-    border-bottom: 0.5px solid var(--border);
-  }
-  .action-row:last-child { border-bottom: none; }
-  .action-row .check {
-    width: 20px; height: 20px;
-    border-radius: 5px;
-    border: 1.5px solid var(--text-dimmer);
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-  .action-row .txt { flex: 1; }
-  .action-row .txt .t { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
-  .action-row .txt .d { font-size: 12px; color: var(--text-dim); display: flex; gap: 10px; }
-  .action-row .txt .d .owner {
-    background: rgba(124,247,255,0.12);
-    color: var(--t-rec);
-    padding: 1px 7px;
-    border-radius: 4px;
-    font-size: 11px;
-  }
-  .decision-card {
-    padding: 10px 12px;
-    background: rgba(255,255,255,0.03);
-    border-left: 3px solid var(--t-rec);
-    border-radius: 0 8px 8px 0;
-    margin-bottom: 8px;
-    font-size: 13px;
-    line-height: 1.5;
-  }
-  .decision-card:last-child { margin-bottom: 0; }
-  .decision-card .who {
-    font-size: 11px;
-    color: var(--t-rec);
-    margin-top: 4px;
-    font-weight: 500;
-  }
-  .people-row {
-    display: flex;
-    gap: 10px;
-    padding: 4px 0;
-  }
-  .person {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    flex: 1;
-    min-width: 0;
-  }
-  .person .av {
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--t-rec), var(--t-cmd));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
-    font-weight: 700;
-    color: #000;
-  }
-  .person .nm { font-size: 11px; color: var(--text-dim); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-  .memory-attr {
-    background: rgba(167,139,250,0.08);
-    border: 1px solid rgba(167,139,250,0.2);
-    border-radius: 12px;
-    padding: 12px 14px;
-  }
-  .memory-attr .row {
-    display: flex;
-    gap: 10px;
-    padding: 7px 0;
-    font-size: 12px;
-    color: var(--text-2);
-    align-items: flex-start;
-  }
-  .memory-attr .row:not(:last-child) { border-bottom: 0.5px solid rgba(255,255,255,0.06); }
-  .memory-attr .row .ic { color: var(--t-cmd); flex-shrink: 0; }
-  .memory-attr .row b { color: var(--t-cmd); font-weight: 600; }
-
-  .transcript-toggle {
-    padding: 14px 16px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    font-size: 13px;
-  }
-  .transcript-toggle .chev { color: var(--text-dimmer); }
-
-  /* 底部操作 */
   .detail-actions {
-    padding: 12px 20px 30px;
+    padding: 14px 22px 30px;
     display: flex;
     gap: 8px;
     border-top: 0.5px solid var(--border);
-    background: rgba(22,22,23,0.7);
+    background: rgba(10,10,10,0.88);
     backdrop-filter: blur(20px);
   }
   .detail-actions button {
     flex: 1;
     padding: 12px;
     border-radius: 12px;
-    border: 1px solid var(--border);
-    background: var(--panel);
+    border: 0.5px solid var(--border);
+    background: transparent;
     color: var(--text);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
   }
   .detail-actions button.primary {
-    background: var(--t-rec);
+    background: #fff;
     color: #000;
-    border-color: var(--t-rec);
+    border-color: #fff;
     font-weight: 600;
   }
 
-  /* ============================================================ */
-  /* Screen 4 · 指令详情                                            */
-  /* ============================================================ */
-  #s4 .type-tag { background: rgba(167,139,250,0.18); color: var(--t-cmd); }
-  #s4 .bullet::before { color: var(--t-cmd); }
-  .quote-said {
-    background: rgba(167,139,250,0.08);
-    border-left: 3px solid var(--t-cmd);
-    border-radius: 0 10px 10px 0;
-    padding: 12px 16px;
-    font-size: 15px;
-    font-style: italic;
+  /* ====== 3 · 长录音详情 ====== */
+  .action-row {
+    display: flex;
+    gap: 12px;
+    padding: 11px 0;
+    border-bottom: 0.5px solid var(--border);
+    align-items: flex-start;
+  }
+  .action-row:last-child { border-bottom: none; padding-bottom: 2px; }
+  .action-row:first-child { padding-top: 2px; }
+  .action-row .check {
+    width: 17px;
+    height: 17px;
+    border-radius: 4px;
+    border: 1px solid var(--text-dimmer);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .action-row .txt { flex: 1; }
+  .action-row .txt .t { font-size: 13px; font-weight: 500; line-height: 1.4; margin-bottom: 4px; }
+  .action-row .txt .d { font-size: 11px; color: var(--text-dim); }
+  .action-row .txt .d .owner { color: var(--text-2); font-weight: 500; }
+  .action-row .txt .d .sep { margin: 0 6px; color: var(--text-dimmer); }
+
+  .decision {
+    padding: 11px 0;
+    font-size: 13px;
     line-height: 1.5;
     color: var(--text-2);
+    border-bottom: 0.5px solid var(--border);
   }
-  .ctx-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    background: rgba(255,255,255,0.03);
-    border-radius: 10px;
-    margin-bottom: 6px;
-    font-size: 13px;
-    animation: rise 0.4s ease-out both;
-  }
-  .ctx-row .ic {
-    width: 28px; height: 28px;
-    background: rgba(167,139,250,0.15);
-    border-radius: 8px;
+  .decision:last-child { border-bottom: none; padding-bottom: 2px; }
+  .decision:first-child { padding-top: 2px; }
+  .decision .who { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+
+  .people-row { display: flex; gap: 18px; flex-wrap: wrap; }
+  .person { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .person .av {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: 0.5px solid var(--border-strong);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .person .nm { font-size: 11px; color: var(--text-dim); }
+
+  .memory-row {
+    display: flex;
+    padding: 10px 0;
+    font-size: 12px;
+    color: var(--text-2);
+    line-height: 1.5;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .memory-row:last-child { border-bottom: none; padding-bottom: 2px; }
+  .memory-row:first-child { padding-top: 2px; }
+  .memory-row::before {
+    content: "→";
+    color: var(--text-dimmer);
+    margin-right: 10px;
     flex-shrink: 0;
   }
-  .ctx-row .nm { flex: 1; color: var(--text); font-weight: 500; }
-  .ctx-row .src { color: var(--text-dim); font-size: 11px; }
-  .ctx-row .check { color: var(--t-todo); font-size: 14px; }
+  .memory-row b { color: var(--text); font-weight: 500; }
 
-  .timeline {
-    position: relative;
-    padding-left: 24px;
+  .transcript-toggle {
+    padding: 13px 16px;
+    background: var(--panel);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-dim);
   }
+
+  /* ====== 4 · 指令详情 ====== */
+  .quote-said {
+    padding: 14px 16px;
+    background: var(--panel);
+    border: 0.5px solid var(--border);
+    border-left: 2px solid var(--t-cmd);
+    border-radius: 0 12px 12px 0;
+    font-size: 14px;
+    font-style: italic;
+    line-height: 1.55;
+    color: var(--text-2);
+  }
+  .ctx-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 11px 0;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 13px;
+  }
+  .ctx-row:last-child { border-bottom: none; padding-bottom: 2px; }
+  .ctx-row:first-child { padding-top: 2px; }
+  .ctx-row .nm { color: var(--text); flex: 1; font-weight: 500; }
+  .ctx-row .src { color: var(--text-dim); font-size: 11px; margin-right: 10px; }
+  .ctx-row .check { color: var(--t-todo); font-size: 13px; }
+
+  .timeline { position: relative; padding-left: 20px; }
   .timeline::before {
     content: "";
     position: absolute;
-    left: 7px; top: 6px; bottom: 6px;
+    left: 4px; top: 8px; bottom: 8px;
     width: 1px;
     background: var(--border);
   }
   .timeline .step {
     position: relative;
-    padding: 6px 0 16px;
+    padding: 7px 0 14px;
     font-size: 13px;
   }
   .timeline .step::before {
     content: "";
     position: absolute;
-    left: -22px; top: 9px;
-    width: 10px; height: 10px;
+    left: -20px; top: 11px;
+    width: 9px; height: 9px;
     border-radius: 50%;
-    background: var(--t-cmd);
-    border: 2px solid var(--phone-bg);
-    box-shadow: 0 0 0 1px var(--t-cmd);
+    background: var(--panel);
+    border: 1px solid var(--text-dimmer);
   }
-  .timeline .step.done::before { background: var(--t-todo); box-shadow: 0 0 0 1px var(--t-todo); }
-  .timeline .step .t { font-weight: 500; margin-bottom: 2px; }
+  .timeline .step.done::before { background: var(--text-dim); border-color: var(--text-dim); }
+  .timeline .step .t { font-weight: 500; margin-bottom: 2px; color: var(--text); }
   .timeline .step .d { font-size: 11px; color: var(--text-dim); }
 
   .result-email {
     background: var(--panel);
-    border: 1px solid var(--border);
+    border: 0.5px solid var(--border);
     border-radius: 14px;
     padding: 16px;
   }
@@ -757,142 +544,130 @@
     border-bottom: 0.5px solid var(--border);
     font-size: 13px;
     display: flex;
-    gap: 8px;
+    gap: 10px;
   }
-  .result-email .ef .k { color: var(--text-dim); width: 40px; flex-shrink: 0; }
+  .result-email .ef .k { color: var(--text-dim); width: 38px; flex-shrink: 0; }
   .result-email .ef .v { color: var(--text); flex: 1; }
-  .result-email .ef .v.link { color: var(--blue); }
   .result-email .body {
     margin-top: 12px;
     font-size: 13px;
-    line-height: 1.6;
+    line-height: 1.65;
+    color: var(--text-2);
   }
-  .result-email .body b { color: var(--t-cmd); font-weight: 500; }
+  .result-email .body b { color: var(--text); font-weight: 600; }
   .result-email .body p { margin-bottom: 10px; }
-  #s4 .detail-actions button.primary { background: var(--t-cmd); border-color: var(--t-cmd); color: #fff; }
+  .result-email .body p:last-child { margin-bottom: 0; }
 
-  /* ============================================================ */
-  /* Screen 5 · 灵感详情                                            */
-  /* ============================================================ */
-  #s5 .type-tag { background: rgba(255,184,77,0.15); color: var(--t-idea); }
-  #s5 .bullet::before { color: var(--t-idea); }
+  /* ====== 5 · 灵感详情 ====== */
   .wave-mini {
     display: flex;
     align-items: center;
     gap: 3px;
-    height: 44px;
-    padding: 0 4px;
+    height: 40px;
+    flex: 1;
   }
   .wave-mini span {
     display: block;
-    width: 3px;
-    background: var(--t-idea);
-    border-radius: 3px;
-    opacity: 0.7;
+    width: 2.5px;
+    background: var(--text-dim);
+    border-radius: 2px;
   }
   .play-row {
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 14px;
-    background: rgba(255,184,77,0.06);
-    border: 1px solid rgba(255,184,77,0.2);
+    padding: 14px 16px;
+    background: var(--panel);
+    border: 0.5px solid var(--border);
     border-radius: 14px;
   }
   .play-row .play-btn {
-    width: 44px; height: 44px;
+    width: 38px; height: 38px;
     border-radius: 50%;
-    background: var(--t-idea);
+    background: var(--text);
     color: #000;
-    font-size: 16px;
+    font-size: 11px;
     border: none;
     cursor: pointer;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding-left: 2px;
   }
-  .play-row .wf { flex: 1; min-width: 0; }
-  .play-row .dur { font-size: 12px; color: var(--text-dim); font-feature-settings: 'tnum'; }
+  .play-row .dur { font-size: 11px; color: var(--text-dim); font-feature-settings: 'tnum'; }
 
   .transcript-box {
     background: var(--panel);
-    border: 1px solid var(--border);
+    border: 0.5px solid var(--border);
     border-radius: 14px;
     padding: 14px 16px;
     font-size: 14px;
-    line-height: 1.6;
+    line-height: 1.65;
     color: var(--text-2);
   }
 
   .project-badge {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     padding: 8px 14px;
-    background: rgba(255,184,77,0.1);
-    border: 1px solid rgba(255,184,77,0.3);
+    background: var(--panel);
+    border: 0.5px solid var(--border);
     border-radius: 100px;
-    font-size: 13px;
-    color: var(--t-idea);
-    font-weight: 500;
+    font-size: 12px;
+    color: var(--text);
   }
   .project-badge .conf { color: var(--text-dim); font-size: 11px; }
 
   .related-card {
-    padding: 11px 14px;
+    padding: 12px 14px;
     background: var(--panel);
-    border: 1px solid var(--border);
+    border: 0.5px solid var(--border);
     border-radius: 12px;
     margin-bottom: 8px;
     font-size: 13px;
-    line-height: 1.4;
+    line-height: 1.45;
     cursor: pointer;
   }
+  .related-card:last-child { margin-bottom: 0; }
   .related-card .h {
     font-size: 10px;
-    color: var(--t-idea);
-    margin-bottom: 4px;
+    margin-bottom: 5px;
     letter-spacing: 0.05em;
     display: flex;
     justify-content: space-between;
   }
+  .related-card .h .type-tag { color: var(--t-idea); font-weight: 600; }
   .related-card .h .sim {
-    color: var(--text-dim);
+    color: var(--text-dimmer);
     font-feature-settings: 'tnum';
   }
   .related-card .txt { color: var(--text-2); }
 
-  #s5 .detail-actions button.primary { background: var(--t-idea); border-color: var(--t-idea); color: #000; }
-
-  /* ============================================================ */
-  /* Screen 6 · 待办/日程 详情                                      */
-  /* ============================================================ */
-  #s6 .type-tag { background: rgba(94,214,122,0.15); color: var(--t-todo); }
-  #s6 .bullet::before { color: var(--t-todo); }
+  /* ====== 6 · 日程详情 ====== */
   .parse-grid {
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: 12px 18px;
+    gap: 11px 18px;
     font-size: 13px;
   }
   .parse-grid dt { color: var(--text-dim); }
   .parse-grid dd { color: var(--text); font-weight: 500; }
-  .parse-grid dd .hl { color: var(--t-todo); }
 
   .written-to {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 14px;
-    background: rgba(94,214,122,0.06);
-    border: 1px solid rgba(94,214,122,0.25);
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--panel);
+    border: 0.5px solid var(--border);
     border-radius: 14px;
   }
   .written-to .cal-icon {
-    width: 44px; height: 44px;
+    width: 42px; height: 42px;
     background: #fff;
-    border-radius: 10px;
+    border-radius: 9px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -900,37 +675,31 @@
     color: #000;
     flex-shrink: 0;
   }
-  .written-to .cal-icon .m { font-size: 8px; font-weight: 700; color: var(--red); }
+  .written-to .cal-icon .m { font-size: 8px; font-weight: 700; color: #FF453A; }
   .written-to .cal-icon .d { font-size: 20px; font-weight: 700; line-height: 1; }
   .written-to .info { flex: 1; }
-  .written-to .info .t { font-size: 14px; font-weight: 500; }
+  .written-to .info .t { font-size: 14px; font-weight: 500; color: var(--text); }
   .written-to .info .s { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
   .written-to .open {
-    color: var(--t-todo);
+    color: var(--text);
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 500;
     background: none;
     border: none;
     cursor: pointer;
   }
 
   .no-conflict {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px;
-    background: rgba(94,214,122,0.08);
+    padding: 12px 14px;
+    background: var(--panel);
+    border: 0.5px solid var(--border);
     border-radius: 10px;
-    font-size: 13px;
+    font-size: 12px;
+    color: var(--text-dim);
   }
-  .no-conflict .ic { color: var(--t-todo); font-size: 16px; }
+  .no-conflict b { color: var(--text); font-weight: 500; }
 
-  #s6 .detail-actions button.primary { background: var(--t-todo); border-color: var(--t-todo); color: #000; }
-
-  /* ============================================================ */
-  /* Screen 7 · 录音中                                              */
-  /* ============================================================ */
-  #s7 { background: radial-gradient(circle at 50% 40%, rgba(124,247,255,0.08), #000 70%); }
+  /* ====== 7 · 录音中 ====== */
   #s7 .scroll {
     padding-top: 40px;
     display: flex;
@@ -939,41 +708,30 @@
     text-align: center;
   }
   .listening-state {
-    font-size: 13px;
-    color: var(--t-rec);
-    letter-spacing: 0.18em;
-    margin-bottom: 44px;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
     font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .listening-state .d {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--red);
-    animation: blink 1s infinite;
-    box-shadow: 0 0 12px var(--red);
+    margin-bottom: 48px;
   }
   .wave {
     display: flex;
     gap: 6px;
     align-items: center;
     justify-content: center;
-    height: 140px;
-    margin-bottom: 44px;
+    height: 130px;
+    margin-bottom: 48px;
   }
   .wave span {
     display: block;
-    width: 6px;
-    background: var(--t-rec);
-    border-radius: 6px;
+    width: 5px;
+    background: var(--accent);
+    border-radius: 5px;
     animation: wave 1.2s ease-in-out infinite;
-    box-shadow: 0 0 8px rgba(124,247,255,0.5);
   }
   @keyframes wave {
-    0%, 100% { height: 16px; opacity: 0.4; }
-    50% { height: 100px; opacity: 1; }
+    0%, 100% { height: 14px; opacity: 0.4; }
+    50% { height: 90px; opacity: 1; }
   }
   .wave span:nth-child(1) { animation-delay: 0s; }
   .wave span:nth-child(2) { animation-delay: 0.08s; }
@@ -986,349 +744,216 @@
   .wave span:nth-child(9) { animation-delay: 0.16s; }
   .wave span:nth-child(10) { animation-delay: 0.08s; }
   .ctx-loaded {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-dim);
-    margin-bottom: 6px;
+    margin-bottom: 14px;
   }
   .ctx-loaded b { color: var(--text); font-weight: 500; }
   .ctx-chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
     justify-content: center;
-    margin-top: 14px;
-    padding: 0 24px;
+    padding: 0 30px;
   }
   .chip {
-    background: rgba(124,247,255,0.1);
-    border: 1px solid rgba(124,247,255,0.3);
-    color: var(--t-rec);
-    font-size: 12px;
-    padding: 7px 14px;
+    background: var(--panel);
+    border: 0.5px solid var(--border);
+    color: var(--text-dim);
+    font-size: 11px;
+    padding: 6px 12px;
     border-radius: 100px;
-    font-weight: 500;
-  }
-  #s7 .stop-area {
-    padding: 40px 0;
-    display: flex;
-    justify-content: center;
   }
   .stop-btn {
-    width: 80px; height: 80px;
+    width: 72px; height: 72px;
     border-radius: 50%;
-    background: var(--red);
-    border: none;
+    background: transparent;
+    border: 1.5px solid var(--text-dim);
     cursor: pointer;
     position: relative;
-    box-shadow: 0 0 40px rgba(255,69,58,0.5);
+    margin-top: 50px;
   }
   .stop-btn::after {
     content: "";
     position: absolute;
-    inset: 28px;
-    background: #fff;
-    border-radius: 6px;
+    inset: 24px;
+    background: var(--text-dim);
+    border-radius: 4px;
   }
 
-  /* ============================================================ */
-  /* Screen 8 · Memory Tree                                         */
-  /* ============================================================ */
-  #s8 .scroll { padding-top: 12px; }
-  #s8 .head {
-    padding: 4px 0 16px;
-  }
+  /* ====== 8 · 记忆图谱 ====== */
+  #s8 .scroll { padding-top: 14px; }
   #s8 h2 {
     font-size: 24px;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: -0.02em;
     margin-bottom: 4px;
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
   }
-  #s8 h2 .en {
-    font-size: 13px;
-    color: var(--text-dim);
-    font-weight: 500;
-    letter-spacing: 0.05em;
+  #s8 .sub { font-size: 13px; color: var(--text-dim); margin-bottom: 22px; }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 22px;
   }
-  #s8 .sub { font-size: 12px; color: var(--text-dim); }
-
-  /* L-1 用户根画像 */
-  .root-profile {
-    background: linear-gradient(135deg, rgba(46,196,182,0.12), rgba(124,247,255,0.08));
-    border: 1px solid rgba(46,196,182,0.28);
-    border-radius: 18px;
-    padding: 16px 18px;
-    margin-bottom: 16px;
-    position: relative;
-  }
-  .root-profile .lv {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    padding: 2px 8px;
-    border-radius: 4px;
-    background: rgba(46,196,182,0.2);
-    color: #2EC4B6;
-    margin-bottom: 10px;
-  }
-  .root-profile .body {
-    font-size: 13.5px;
-    line-height: 1.55;
-    color: var(--text-2);
-  }
-  .root-profile .ts {
-    margin-top: 10px;
-    font-size: 11px;
-    color: var(--text-dimmer);
-    font-feature-settings: 'tnum';
-  }
-
-  /* 层级健康度 */
-  .layer-stats {
+  .stat {
     background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 14px 16px;
-    margin-bottom: 16px;
-  }
-  .layer-stats .h {
-    font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: 0.08em;
-    font-weight: 600;
-    margin-bottom: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .layer-stats .h .ok {
-    color: var(--t-todo);
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .layer-stats .h .ok::before {
-    content: "●";
-    font-size: 8px;
-  }
-  .layer-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 0;
-    border-bottom: 0.5px solid var(--border);
-    font-size: 12px;
-  }
-  .layer-row:last-child { border-bottom: none; }
-  .layer-row .lv {
-    font-size: 10px;
-    font-weight: 700;
-    font-feature-settings: 'tnum';
-    padding: 2px 6px;
-    border-radius: 4px;
-    min-width: 30px;
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 13px 4px;
     text-align: center;
-    flex-shrink: 0;
   }
-  .layer-row .nm { flex: 1; color: var(--text); font-weight: 500; }
-  .layer-row .desc { color: var(--text-dim); font-size: 11px; }
-  .layer-row .cnt {
-    color: var(--text);
+  .stat .v {
+    font-size: 22px;
     font-weight: 700;
-    font-feature-settings: 'tnum';
-    min-width: 40px;
-    text-align: right;
+    color: var(--text);
+    letter-spacing: -0.02em;
   }
-  .lv-L-1 { background: rgba(46,196,182,0.2); color: #2EC4B6; }
-  .lv-L0  { background: rgba(167,139,250,0.2); color: var(--t-cmd); }
-  .lv-L1  { background: rgba(100,150,255,0.2); color: #6496FF; }
-  .lv-L2  { background: rgba(94,214,122,0.2); color: var(--t-todo); }
-  .lv-L3  { background: rgba(255,184,77,0.18); color: var(--t-idea); }
-  .lv-L4  { background: rgba(255,255,255,0.08); color: var(--text-dim); }
-
-  /* 树可视化 */
-  .tree-svg {
-    width: 100%;
-    height: 280px;
-    margin-bottom: 6px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-  }
-  .tree-legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px 14px;
-    padding: 0 6px 16px;
+  .stat .l {
     font-size: 10px;
     color: var(--text-dim);
+    margin-top: 4px;
   }
-  .tree-legend span {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-  }
-  .tree-legend i {
-    display: inline-block;
-    width: 8px; height: 8px;
-    border-radius: 50%;
-  }
-
-  .top-ctx h3 {
-    font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: 0.08em;
-    margin-bottom: 10px;
-    font-weight: 600;
+  .graph-svg {
+    width: 100%;
+    height: 220px;
+    margin-bottom: 22px;
+    background: var(--panel);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
   }
   .top-ctx .row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 13px 0;
+    padding: 14px 2px;
     border-bottom: 0.5px solid var(--border);
     font-size: 14px;
   }
   .top-ctx .row:last-child { border-bottom: none; }
   .top-ctx .p { color: var(--text); font-weight: 500; }
-  .top-ctx .r { color: var(--text-dim); font-size: 12px; margin-top: 2px; }
-  .top-ctx .s { color: var(--t-rec); font-weight: 700; font-size: 15px; font-feature-settings: 'tnum'; }
+  .top-ctx .r { color: var(--text-dim); font-size: 11px; margin-top: 2px; }
+  .top-ctx .s {
+    color: var(--text);
+    font-weight: 600;
+    font-size: 14px;
+    font-feature-settings: 'tnum';
+  }
 
-  /* ============================================================ */
-  /* Screen 9 · Agent                                               */
-  /* ============================================================ */
-  #s9 .scroll { padding-top: 12px; display: flex; flex-direction: column; }
-  .agent-header { text-align: center; padding: 12px 0 20px; }
-  .agent-header h2 { font-size: 22px; font-weight: 700; }
-  .agent-header .sub { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+  /* ====== 9 · Agent ====== */
+  #s9 .scroll { padding-top: 14px; display: flex; flex-direction: column; }
+  .agent-header { padding: 10px 2px 22px; }
+  .agent-header h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+  .agent-header .sub { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
   .msg {
-    max-width: 78%;
-    padding: 12px 16px;
-    border-radius: 20px;
+    max-width: 80%;
+    padding: 11px 15px;
+    border-radius: 18px;
     font-size: 14px;
     line-height: 1.5;
-    margin-bottom: 10px;
-    animation: rise 0.4s ease-out both;
+    margin-bottom: 8px;
   }
   .msg.user {
-    background: var(--blue);
-    color: #fff;
+    background: var(--text);
+    color: #000;
     align-self: flex-end;
-    border-bottom-right-radius: 6px;
+    border-bottom-right-radius: 5px;
     margin-left: auto;
   }
   .msg.bot {
     background: var(--panel);
-    color: var(--text);
+    color: var(--text-2);
     align-self: flex-start;
-    border-bottom-left-radius: 6px;
+    border: 0.5px solid var(--border);
+    border-bottom-left-radius: 5px;
   }
-  .msg.bot b { color: var(--t-rec); }
+  .msg.bot b { color: var(--text); font-weight: 500; }
   .agent-input {
     margin-top: auto;
-    padding: 14px 0 20px;
+    padding: 14px 0 22px;
     display: flex;
     gap: 10px;
   }
   .agent-input .field {
     flex: 1;
     background: var(--panel);
-    border: 1px solid var(--border);
+    border: 0.5px solid var(--border);
     border-radius: 100px;
     padding: 12px 18px;
-    font-size: 14px;
+    font-size: 13px;
     color: var(--text-dim);
   }
   .agent-input .send {
-    width: 44px; height: 44px;
+    width: 42px; height: 42px;
     border-radius: 50%;
-    background: var(--t-rec);
+    background: var(--text);
     border: none;
     color: #000;
-    font-size: 18px;
+    font-size: 16px;
     cursor: pointer;
   }
 
-  /* ============================================================ */
-  /* Screen 10 · 个人                                               */
-  /* ============================================================ */
-  #s10 .scroll { padding-top: 12px; }
+  /* ====== 10 · 我 ====== */
+  #s10 .scroll { padding-top: 14px; }
   .profile-head {
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 12px 0 22px;
+    padding: 10px 2px 22px;
   }
   .avatar {
-    width: 64px; height: 64px;
+    width: 60px; height: 60px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--t-rec), var(--t-cmd));
+    background: var(--panel);
+    border: 0.5px solid var(--border-strong);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 26px;
-    font-weight: 700;
-    color: #000;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
   }
-  .profile-head .name { font-size: 20px; font-weight: 700; }
-  .profile-head .plan {
-    font-size: 11px;
-    color: var(--t-rec);
-    background: rgba(124,247,255,0.12);
-    padding: 3px 10px;
-    border-radius: 100px;
-    display: inline-block;
-    margin-top: 4px;
-  }
+  .profile-head .name { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
+  .profile-head .plan { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
   .profile-ring {
     background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 16px;
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
     padding: 16px;
     margin-bottom: 18px;
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
   }
-  .profile-ring .ic { font-size: 28px; }
   .profile-ring .info { flex: 1; }
-  .profile-ring .info .t { font-size: 15px; font-weight: 600; }
+  .profile-ring .info .t { font-size: 14px; font-weight: 500; }
   .profile-ring .info .s { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
-  .profile-ring .battery { font-size: 13px; color: var(--t-todo); font-weight: 600; }
+  .profile-ring .battery { font-size: 13px; color: var(--text); font-weight: 500; }
+  .profile-ring .ring-mini {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+    box-shadow: 0 0 12px rgba(111,212,224,0.2);
+  }
   .list-group {
     background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 16px;
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
     overflow: hidden;
     margin-bottom: 14px;
   }
   .list-row {
     display: flex;
     align-items: center;
-    gap: 12px;
     padding: 14px 16px;
     border-bottom: 0.5px solid var(--border);
     cursor: pointer;
-    font-size: 15px;
-  }
-  .list-row:last-child { border-bottom: none; }
-  .list-row .ic {
-    width: 28px; height: 28px;
-    border-radius: 7px;
-    background: rgba(124,247,255,0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
     font-size: 14px;
   }
+  .list-row:last-child { border-bottom: none; }
   .list-row .t { flex: 1; }
   .list-row .chev { color: var(--text-dimmer); font-size: 14px; }
 
-  /* Responsive scale */
   @media (max-width: 460px), (max-height: 900px) {
     .brand { top: 16px; left: 16px; font-size: 10px; }
     .hint { bottom: 12px; font-size: 10px; }
@@ -1340,7 +965,8 @@
 </head>
 <body>
 
-<div class="brand">MONO<span>•</span>STONE</div>
+<div class="brand">MONO<span>·</span>STONE</div>
+<div class="hint">iOS 原型 · 首页 4 种卡片可点</div>
 
 <div class="phone">
 
@@ -1358,263 +984,198 @@
     <div class="wrap">
       <div class="ring"></div>
       <h1>MONOSTONE</h1>
-      <div class="tag">你的专属 AI 戒指</div>
-      <button class="primary-btn" onclick="go('s2')">开始 →</button>
+      <div class="tag">AI 戒指</div>
+      <button class="primary-btn" onclick="go('s2')">开始</button>
     </div>
   </div>
 
-  <!-- ============ 2 · 首页 Timeline ============ -->
+  <!-- ============ 2 · 首页 ============ -->
   <div class="screen" id="s2">
     <div class="scroll">
       <div class="home-head">
         <div class="greet">早上好，明明</div>
-        <div class="status"><span class="d"></span>第 12 天 · 戒指已连接 · 今日第 8 次交互</div>
+        <div class="sub">今天 <b>8 次交互</b> · 省下 <b>47 分钟</b></div>
       </div>
 
-      <div class="digest" onclick="go('s8')">
-        <div class="h">📊 今日速览</div>
-        <div class="big">你今天和 AI 交互了 <b>8 次</b>。其中 <b>3 次走路时</b>、<b>2 次会后</b>、<b>3 次电脑前</b>。<br/>Monostone 为你省下 <b>47 分钟</b>整理时间。</div>
-        <div class="foot">
-          <span>🎙️ <b>2</b> 长录音</span>
-          <span>⚡ <b>3</b> 指令</span>
-          <span>💡 <b>2</b> 灵感</span>
-          <span>✅ <b>1</b> 待办</span>
-        </div>
-      </div>
+      <div class="time-sep">今天</div>
 
-      <div class="section-label">
-        <span>最近活动</span>
-        <span class="count">今天</span>
-      </div>
-
-      <!-- 类型 1 · 长录音 -->
       <div class="card rec" onclick="go('s3')">
-        <div class="strip"></div>
-        <div class="icon">🎙</div>
-        <div class="time-right">2 小时前</div>
-        <span class="type-tag">长录音</span>
+        <div class="head">
+          <span class="type">长录音</span>
+          <span class="time">2 小时前</span>
+        </div>
         <div class="title">和蔡哥的 Series A 跟进会</div>
-        <div class="meta">
-          <span>⏱ 42:18</span>
-          <span>👥 4 人</span>
-          <span>🏷 Series A</span>
-          <span>✓ 3 项待办</span>
-        </div>
+        <div class="meta">42:18<span class="sep">·</span>4 人<span class="sep">·</span>Series A<span class="sep">·</span>3 项待办</div>
       </div>
 
-      <!-- 类型 2 · 指令 -->
       <div class="card cmd" onclick="go('s4')">
-        <div class="strip"></div>
-        <div class="icon">⚡</div>
-        <div class="time-right">1 小时前</div>
-        <span class="type-tag">指令</span>
-        <div class="title">帮我起草给蔡哥的 follow-up 邮件</div>
-        <div class="meta">
-          <span class="status-pill done"><span class="d"></span>已完成</span>
-          <span>🧠 调取 4 项上下文</span>
+        <div class="head">
+          <span class="type">指令</span>
+          <span class="time">1 小时前</span>
         </div>
+        <div class="title">"帮我起草给蔡哥的 follow-up 邮件"</div>
+        <div class="meta">已完成<span class="sep">·</span>调取 4 项上下文</div>
       </div>
 
-      <!-- 类型 3 · 灵感 -->
       <div class="card idea" onclick="go('s5')">
-        <div class="strip"></div>
-        <div class="icon">💡</div>
-        <div class="time-right">45 分钟前</div>
-        <span class="type-tag">灵感</span>
-        <div class="title">Memory 的 L2 到 L3 promotion 可以加一个 confidence decay...</div>
-        <div class="meta">
-          <span>🚶 走路时</span>
-          <span>📂 Monostone 后端</span>
-          <span>🔗 关联 3 条过往</span>
+        <div class="head">
+          <span class="type">灵感</span>
+          <span class="time">45 分钟前</span>
         </div>
+        <div class="title">Memory 的 L2→L3 promotion 可以加 confidence decay</div>
+        <div class="meta">走路时<span class="sep">·</span>Monostone 后端<span class="sep">·</span>关联 3 条过往</div>
       </div>
 
-      <!-- 类型 2 · 指令（执行中） -->
       <div class="card cmd" onclick="go('s4')">
-        <div class="strip"></div>
-        <div class="icon">⚡</div>
-        <div class="time-right">刚刚</div>
-        <span class="type-tag">指令</span>
-        <div class="title">帮我做 Sandbar 最新融资情况的 research</div>
-        <div class="meta">
-          <span class="status-pill running"><span class="d"></span>执行中 · 还剩 ~3 分钟</span>
+        <div class="head">
+          <span class="type">指令</span>
+          <span class="time">刚刚</span>
         </div>
+        <div class="title">"帮我做 Sandbar 最新融资情况的 research"</div>
+        <div class="meta"><span class="running-dot"></span>执行中<span class="sep">·</span>还剩约 3 分钟</div>
       </div>
 
-      <!-- 类型 4 · 待办/日程 -->
       <div class="card todo" onclick="go('s6')">
-        <div class="strip"></div>
-        <div class="icon">📅</div>
-        <div class="time-right">30 分钟前</div>
-        <span class="type-tag">日程</span>
+        <div class="head">
+          <span class="type">日程</span>
+          <span class="time">30 分钟前</span>
+        </div>
         <div class="title">周四下午 3 点去看牙医</div>
-        <div class="meta">
-          <span>📆 4/11 · 15:00</span>
-          <span>✓ 已写入 Apple Calendar</span>
-        </div>
+        <div class="meta">4/11 15:00<span class="sep">·</span>已写入 Apple 日历</div>
       </div>
 
-      <!-- 类型 3 · 灵感 2 -->
+      <div class="time-sep">昨天</div>
+
       <div class="card idea" onclick="go('s5')">
-        <div class="strip"></div>
-        <div class="icon">💡</div>
-        <div class="time-right">昨天</div>
-        <span class="type-tag">灵感</span>
+        <div class="head">
+          <span class="type">灵感</span>
+          <span class="time">22:14</span>
+        </div>
         <div class="title">戒指 onboarding 可以加一步 LinkedIn 导入，让 Day 1 就有 context</div>
-        <div class="meta">
-          <span>🚗 开车时</span>
-          <span>📂 Monostone iOS</span>
-        </div>
+        <div class="meta">开车时<span class="sep">·</span>Monostone iOS</div>
       </div>
 
-      <!-- 类型 1 · 长录音 2 -->
       <div class="card rec" onclick="go('s3')">
-        <div class="strip"></div>
-        <div class="icon">🎙</div>
-        <div class="time-right">昨天</div>
-        <span class="type-tag">长录音</span>
-        <div class="title">林啸 Memory A/B 对比测试评审</div>
-        <div class="meta">
-          <span>⏱ 28:04</span>
-          <span>👥 3 人</span>
-          <span>🏷 Monostone 后端</span>
+        <div class="head">
+          <span class="type">长录音</span>
+          <span class="time">16:40</span>
         </div>
+        <div class="title">林啸 Memory A/B 对比测试评审</div>
+        <div class="meta">28:04<span class="sep">·</span>3 人<span class="sep">·</span>Monostone 后端</div>
       </div>
 
-      <!-- 类型 4 · 待办 2 -->
       <div class="card todo" onclick="go('s6')">
-        <div class="strip"></div>
-        <div class="icon">✅</div>
-        <div class="time-right">昨天</div>
-        <span class="type-tag">待办</span>
-        <div class="title">提醒 Marshal 周五之前锁定 ODM 供应商</div>
-        <div class="meta">
-          <span>📆 4/12 之前</span>
-          <span>✓ 已写入 Linear</span>
+        <div class="head">
+          <span class="type">待办</span>
+          <span class="time">11:20</span>
         </div>
+        <div class="title">提醒 Marshal 周五之前锁定 ODM 供应商</div>
+        <div class="meta">4/12 之前<span class="sep">·</span>已写入 Linear</div>
       </div>
 
       <div style="height: 120px"></div>
     </div>
 
-    <button class="fab" onclick="go('s7')">🎙</button>
-
     <div class="tabbar">
-      <button class="tab active" onclick="go('s2')"><span class="icon">🏠</span><span class="lbl">首页</span></button>
-      <button class="tab" onclick="go('s8')"><span class="icon">🧠</span><span class="lbl">记忆</span></button>
-      <button class="tab" onclick="go('s9')"><span class="icon">🤖</span><span class="lbl">Agent</span></button>
-      <button class="tab" onclick="go('s10')"><span class="icon">👤</span><span class="lbl">我</span></button>
+      <button class="tab active" onclick="go('s2')">首页</button>
+      <button class="tab" onclick="go('s8')">记忆</button>
+      <button class="tab" onclick="go('s9')">Agent</button>
+      <button class="tab" onclick="go('s10')">我</button>
     </div>
   </div>
 
   <!-- ============ 3 · 长录音详情 ============ -->
   <div class="screen" id="s3">
     <div class="navbar">
-      <button class="back" onclick="go('s2')">‹ 返回</button>
-      <div class="title">长录音</div>
-      <button class="right">⋯</button>
+      <button class="back" onclick="go('s2')">返回</button>
+      <div class="title"></div>
+      <button class="right">···</button>
     </div>
     <div class="scroll">
-      <div class="detail-head">
-        <span class="type-tag">🎙 长录音</span>
+      <div class="detail-head rec">
+        <span class="type">长录音</span>
         <div class="ti">和蔡哥的 Series A 跟进会</div>
-        <div class="mt">
-          <span><b>42:18</b></span>
-          <span>4/9 · 10:30</span>
-          <span>🏷 Series A</span>
-        </div>
+        <div class="mt">42:18<span class="sep">·</span>4/9 10:30<span class="sep">·</span>Series A</div>
       </div>
 
       <div class="sec">
-        <div class="sec-title">👥 参与人</div>
+        <div class="sec-title">参与人</div>
         <div class="sec-box">
           <div class="people-row">
             <div class="person"><div class="av">蔡</div><div class="nm">蔡哥</div></div>
             <div class="person"><div class="av">明</div><div class="nm">明明</div></div>
-            <div class="person"><div class="av" style="background:linear-gradient(135deg,var(--t-cmd),var(--t-idea))">郑</div><div class="nm">郑灿</div></div>
-            <div class="person"><div class="av" style="background:linear-gradient(135deg,var(--t-idea),var(--t-todo))">马</div><div class="nm">马俊</div></div>
+            <div class="person"><div class="av">郑</div><div class="nm">郑灿</div></div>
+            <div class="person"><div class="av">马</div><div class="nm">马俊</div></div>
           </div>
         </div>
       </div>
 
       <div class="sec">
-        <div class="sec-title">📋 结构化摘要</div>
+        <div class="sec-title">结构化摘要</div>
         <div class="sec-box">
           <div class="bullet">Linear 对产品定义提出关键质疑：是 infra 还是 closed-loop？明明确认 Agent 层是闭环，仅插件生态开放。</div>
           <div class="bullet">最大风险不是巨头入局，而是戒指品类本身两年后没起来。巨头入局反而是品类验证。</div>
-          <div class="bullet">Linear 认为 OpenAI 是头号威胁（有硬件团队 + "hammer looking for nail"），Apple 反而排很后。</div>
-          <div class="bullet">双麦 15dB SNR 的优势要包装成 "freestyle recording" 营销故事。</div>
+          <div class="bullet">Linear 认为 OpenAI 是头号威胁，Apple 反而排很后。</div>
+          <div class="bullet">双麦 15dB SNR 的优势要包装成"freestyle recording"营销故事。</div>
         </div>
       </div>
 
       <div class="sec">
-        <div class="sec-title">✅ Action Items · 3 项</div>
+        <div class="sec-title">Action Items</div>
         <div class="sec-box">
           <div class="action-row">
             <div class="check"></div>
             <div class="txt">
               <div class="t">Marshall 锁定 ODM 合作方</div>
-              <div class="d"><span class="owner">Marshall</span><span>📆 4月底</span></div>
+              <div class="d"><span class="owner">Marshall</span><span class="sep">·</span>4 月底</div>
             </div>
           </div>
           <div class="action-row">
             <div class="check"></div>
             <div class="txt">
               <div class="t">把双麦 SNR 数据整理成 marketing 故事</div>
-              <div class="d"><span class="owner">石慧</span><span>📆 本周</span></div>
+              <div class="d"><span class="owner">石慧</span><span class="sep">·</span>本周</div>
             </div>
           </div>
           <div class="action-row">
             <div class="check"></div>
             <div class="txt">
               <div class="t">研究 EO 14117 美国数据法规</div>
-              <div class="d"><span class="owner">明明</span><span>📆 下周前</span></div>
+              <div class="d"><span class="owner">明明</span><span class="sep">·</span>下周前</div>
             </div>
           </div>
         </div>
       </div>
 
       <div class="sec">
-        <div class="sec-title">🎯 关键决策</div>
-        <div>
-          <div class="decision-card">
+        <div class="sec-title">关键决策</div>
+        <div class="sec-box">
+          <div class="decision">
             不做 Kickstarter，坚持独立站 DTC
-            <div class="who">— 明明主张，Linear 支持</div>
+            <div class="who">明明主张，Linear 支持</div>
           </div>
-          <div class="decision-card">
+          <div class="decision">
             企业场景优先级高于家庭场景，作为 B2B 扩展路径
-            <div class="who">— Linear 建议，待评估</div>
+            <div class="who">Linear 建议，待评估</div>
           </div>
         </div>
       </div>
 
       <div class="sec">
-        <div class="sec-title">🧠 记忆归因 · 本次会议让 Monostone 学到</div>
-        <div class="memory-attr">
-          <div class="row">
-            <span class="ic">→</span>
-            <div><b>蔡哥</b> 是 Linear Capital 的合伙人，偏好 closed-loop 而非 infra 定位</div>
-          </div>
-          <div class="row">
-            <span class="ic">→</span>
-            <div>你在谈 vision 时喜欢用 <b>Polanyi tacit knowledge</b> 的框架</div>
-          </div>
-          <div class="row">
-            <span class="ic">→</span>
-            <div><b>Marshall</b> 在 Linear 眼中硬件可信度很高</div>
-          </div>
-          <div class="row">
-            <span class="ic">→</span>
-            <div><b>Series A</b> 项目新增关键风险：品类形成而非巨头入局</div>
-          </div>
+        <div class="sec-title">本次会议学到了什么</div>
+        <div class="sec-box">
+          <div class="memory-row"><div><b>蔡哥</b> 是 Linear Capital 合伙人，偏好 closed-loop 定位</div></div>
+          <div class="memory-row"><div>你谈 vision 时喜欢用 <b>Polanyi tacit knowledge</b> 框架</div></div>
+          <div class="memory-row"><div><b>Marshall</b> 在 Linear 眼中硬件可信度很高</div></div>
+          <div class="memory-row"><div><b>Series A</b> 新增关键风险：品类形成而非巨头入局</div></div>
         </div>
       </div>
 
       <div class="sec">
-        <div class="sec-title">📝 完整转录</div>
+        <div class="sec-title">完整转录</div>
         <div class="transcript-toggle">
-          <span>展开 4,281 字转写文本</span>
-          <span class="chev">›</span>
+          <span>展开 4,281 字</span>
+          <span>›</span>
         </div>
       </div>
 
@@ -1622,7 +1183,7 @@
     </div>
     <div class="detail-actions">
       <button>分享</button>
-      <button>→ Notion</button>
+      <button>投递 Notion</button>
       <button class="primary">发送纪要</button>
     </div>
   </div>
@@ -1630,93 +1191,72 @@
   <!-- ============ 4 · 指令详情 ============ -->
   <div class="screen" id="s4">
     <div class="navbar">
-      <button class="back" onclick="go('s2')">‹ 返回</button>
-      <div class="title">指令</div>
-      <button class="right">⋯</button>
+      <button class="back" onclick="go('s2')">返回</button>
+      <div class="title"></div>
+      <button class="right">···</button>
     </div>
     <div class="scroll">
-      <div class="detail-head">
-        <span class="type-tag">⚡ 指令</span>
+      <div class="detail-head cmd">
+        <span class="type">指令</span>
         <div class="ti">帮我起草给蔡哥的 follow-up 邮件</div>
-        <div class="mt">
-          <span>✓ 已完成 · 用时 1 分 42 秒</span>
-          <span>1 小时前</span>
-        </div>
+        <div class="mt">已完成<span class="sep">·</span>用时 1 分 42 秒<span class="sep">·</span>1 小时前</div>
       </div>
 
       <div class="sec">
-        <div class="sec-title">🎙 你说的原话</div>
+        <div class="sec-title">你说的原话</div>
         <div class="quote-said">
           "帮我写封 follow-up 邮件给蔡哥，基于今天早上的会议，重点回应他对估值和 GTM 的疑问。语气参考我平时给投资人的风格。"
         </div>
       </div>
 
       <div class="sec">
-        <div class="sec-title">🧠 调取的上下文 · 4 项</div>
-        <div>
-          <div class="ctx-row">
-            <div class="ic">🎙</div>
-            <div class="nm">今早 Series A 跟进会</div>
-            <div class="src">42 分钟录音</div>
-            <div class="check">✓</div>
-          </div>
-          <div class="ctx-row">
-            <div class="ic">👤</div>
-            <div class="nm">蔡哥的投资人档案</div>
-            <div class="src">Memory</div>
-            <div class="check">✓</div>
-          </div>
-          <div class="ctx-row">
-            <div class="ic">✉️</div>
-            <div class="nm">你的邮件语气和风格</div>
-            <div class="src">自动学习</div>
-            <div class="check">✓</div>
-          </div>
-          <div class="ctx-row">
-            <div class="ic">🧵</div>
-            <div class="nm">Series A 邮件线程</div>
-            <div class="src">8 封历史</div>
-            <div class="check">✓</div>
+        <div class="sec-title">调取的上下文</div>
+        <div class="sec-box">
+          <div class="ctx-row"><div class="nm">今早 Series A 跟进会</div><div class="src">42 分钟录音</div><div class="check">✓</div></div>
+          <div class="ctx-row"><div class="nm">蔡哥的投资人档案</div><div class="src">Memory</div><div class="check">✓</div></div>
+          <div class="ctx-row"><div class="nm">你的邮件语气和风格</div><div class="src">自动学习</div><div class="check">✓</div></div>
+          <div class="ctx-row"><div class="nm">Series A 邮件线程</div><div class="src">8 封历史</div><div class="check">✓</div></div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">执行步骤</div>
+        <div class="sec-box">
+          <div class="timeline">
+            <div class="step done">
+              <div class="t">解析指令意图</div>
+              <div class="d">识别为邮件起草任务 · 0.3s</div>
+            </div>
+            <div class="step done">
+              <div class="t">从 Memory 检索相关上下文</div>
+              <div class="d">调取 4 项相关记忆 · 2.1s</div>
+            </div>
+            <div class="step done">
+              <div class="t">分析蔡哥的关注点</div>
+              <div class="d">估值、GTM、moat 三个主题 · 4.8s</div>
+            </div>
+            <div class="step done">
+              <div class="t">生成草稿（模仿你的语气）</div>
+              <div class="d">正式但不端着 · 18.2s</div>
+            </div>
+            <div class="step done">
+              <div class="t">自我校验 + 推送</div>
+              <div class="d">通过事实核对 · 76.6s</div>
+            </div>
           </div>
         </div>
       </div>
 
       <div class="sec">
-        <div class="sec-title">⚙️ 执行步骤</div>
-        <div class="timeline">
-          <div class="step done">
-            <div class="t">解析指令意图</div>
-            <div class="d">识别为邮件起草任务 · 0.3s</div>
-          </div>
-          <div class="step done">
-            <div class="t">从 Memory 检索相关上下文</div>
-            <div class="d">调取 4 项相关记忆 · 2.1s</div>
-          </div>
-          <div class="step done">
-            <div class="t">分析蔡哥的关注点</div>
-            <div class="d">估值、GTM、moat 三个主题 · 4.8s</div>
-          </div>
-          <div class="step done">
-            <div class="t">生成草稿（模仿你的语气）</div>
-            <div class="d">正式但不端着 · 直接说数字 · 18.2s</div>
-          </div>
-          <div class="step done">
-            <div class="t">自我校验 + 推送</div>
-            <div class="d">通过事实核对 · 76.6s</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="sec">
-        <div class="sec-title">✉️ 产出</div>
+        <div class="sec-title">产出</div>
         <div class="result-email">
-          <div class="ef"><span class="k">收件人</span><span class="v link">cai@linearcap.com</span></div>
+          <div class="ef"><span class="k">收件人</span><span class="v">cai@linearcap.com</span></div>
           <div class="ef"><span class="k">主题</span><span class="v">Re: Series A 讨论跟进</span></div>
           <div class="body">
             <p>蔡哥，</p>
             <p>谢谢今早的深度交流。针对估值和 GTM，我这边补充几点：</p>
-            <p><b>估值</b> — 我们的逻辑基于 Context 复利带来的切换成本，Day 30 的用户迁移成本是 Day 1 的 10 倍以上，这是数据独立性之外的第二条护城河。</p>
-            <p><b>GTM</b> — 企业场景我们认同优先级更高，下周会拉出初版 B2B roadmap 给你看，重点是团队 Context 共享。</p>
+            <p><b>估值</b> — 我们的逻辑基于 Context 复利带来的切换成本。Day 30 的用户迁移成本是 Day 1 的 10 倍以上，这是数据独立性之外的第二条护城河。</p>
+            <p><b>GTM</b> — 企业场景我们认同优先级更高，下周拉出初版 B2B roadmap 给你看，重点是团队 Context 共享。</p>
             <p>另外 EO 14117 的角度我这边会查一下，有结论同步。</p>
             <p>再聊，<br/>明明</p>
           </div>
@@ -1727,79 +1267,69 @@
     <div class="detail-actions">
       <button>编辑</button>
       <button>重新生成</button>
-      <button class="primary">发送 →</button>
+      <button class="primary">发送</button>
     </div>
   </div>
 
   <!-- ============ 5 · 灵感详情 ============ -->
   <div class="screen" id="s5">
     <div class="navbar">
-      <button class="back" onclick="go('s2')">‹ 返回</button>
-      <div class="title">灵感</div>
-      <button class="right">⋯</button>
+      <button class="back" onclick="go('s2')">返回</button>
+      <div class="title"></div>
+      <button class="right">···</button>
     </div>
     <div class="scroll">
-      <div class="detail-head">
-        <span class="type-tag">💡 灵感</span>
+      <div class="detail-head idea">
+        <span class="type">灵感</span>
         <div class="ti">Memory 的 L2 到 L3 promotion 机制</div>
-        <div class="mt">
-          <span>🚶 走路时捕捉</span>
-          <span>45 分钟前</span>
-          <span>⏱ 0:08</span>
-        </div>
+        <div class="mt">走路时捕捉<span class="sep">·</span>45 分钟前<span class="sep">·</span>0:08</div>
       </div>
 
       <div class="sec">
-        <div class="sec-title">🎙 原声</div>
+        <div class="sec-title">原声</div>
         <div class="play-row">
           <button class="play-btn">▶</button>
-          <div class="wf">
-            <div class="wave-mini">
-              <span style="height:12px"></span><span style="height:22px"></span><span style="height:32px"></span>
-              <span style="height:18px"></span><span style="height:28px"></span><span style="height:36px"></span>
-              <span style="height:24px"></span><span style="height:14px"></span><span style="height:30px"></span>
-              <span style="height:20px"></span><span style="height:34px"></span><span style="height:16px"></span>
-              <span style="height:26px"></span><span style="height:32px"></span><span style="height:22px"></span>
-              <span style="height:18px"></span><span style="height:28px"></span><span style="height:14px"></span>
-              <span style="height:24px"></span><span style="height:20px"></span><span style="height:16px"></span>
-              <span style="height:22px"></span><span style="height:32px"></span><span style="height:18px"></span>
-              <span style="height:12px"></span><span style="height:26px"></span><span style="height:20px"></span>
-              <span style="height:14px"></span><span style="height:28px"></span><span style="height:24px"></span>
-              <span style="height:18px"></span><span style="height:30px"></span><span style="height:22px"></span>
-              <span style="height:16px"></span><span style="height:12px"></span>
-            </div>
+          <div class="wave-mini">
+            <span style="height:10px"></span><span style="height:20px"></span><span style="height:28px"></span>
+            <span style="height:16px"></span><span style="height:24px"></span><span style="height:32px"></span>
+            <span style="height:20px"></span><span style="height:12px"></span><span style="height:26px"></span>
+            <span style="height:18px"></span><span style="height:30px"></span><span style="height:14px"></span>
+            <span style="height:22px"></span><span style="height:28px"></span><span style="height:18px"></span>
+            <span style="height:16px"></span><span style="height:24px"></span><span style="height:12px"></span>
+            <span style="height:20px"></span><span style="height:18px"></span><span style="height:14px"></span>
+            <span style="height:18px"></span><span style="height:28px"></span><span style="height:16px"></span>
+            <span style="height:10px"></span><span style="height:22px"></span><span style="height:18px"></span>
+            <span style="height:12px"></span><span style="height:24px"></span><span style="height:20px"></span>
           </div>
           <div class="dur">0:08</div>
         </div>
       </div>
 
       <div class="sec">
-        <div class="sec-title">✏️ 转写文本（可编辑）</div>
+        <div class="sec-title">转写文本</div>
         <div class="transcript-box">
           Memory 的 L2 到 L3 的 promotion 机制可以加一个 confidence decay，如果一条 memory 在 7 天内没被引用或确认，confidence 要自动往下掉，这样才不会让错误的早期推断一直被当成事实。
         </div>
       </div>
 
       <div class="sec">
-        <div class="sec-title">📂 自动归属</div>
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <div class="project-badge">📁 Monostone 后端 <span class="conf">· 94%</span></div>
-        </div>
+        <div class="sec-title">自动归属</div>
+        <div class="project-badge">Monostone 后端<span class="conf">94%</span></div>
       </div>
 
       <div class="sec">
-        <div class="sec-title">🔗 相关的过往灵感 · Context 复利</div>
+        <div class="sec-title">相关的过往灵感</div>
         <div>
           <div class="related-card">
-            <div class="h"><span>💡 3 天前 · 灵感</span><span class="sim">相关度 87%</span></div>
-            <div class="txt">L2 consolidation 的触发条件现在太激进了，应该加一个 "稳定窗口" 的概念...</div>
+            <div class="h"><span class="type-tag">灵感 · 3 天前</span><span class="sim">87%</span></div>
+            <div class="txt">L2 consolidation 的触发条件现在太激进了，应该加一个"稳定窗口"的概念...</div>
           </div>
           <div class="related-card">
-            <div class="h"><span>🎙 上周三 · 长录音</span><span class="sim">相关度 72%</span></div>
+            <div class="h"><span class="type-tag">长录音 · 上周三</span><span class="sim">72%</span></div>
             <div class="txt">林啸提到 memory conflict resolution 需要人工 loop，这是 Linear 也指出的问题...</div>
           </div>
           <div class="related-card">
-            <div class="h"><span>💡 上周 · 灵感</span><span class="sim">相关度 68%</span></div>
+            <div class="h"><span class="type-tag">灵感 · 上周</span><span class="sim">68%</span></div>
             <div class="txt">其实可以参考 spaced repetition 的遗忘曲线来设计 memory 的 decay...</div>
           </div>
         </div>
@@ -1808,90 +1338,79 @@
     </div>
     <div class="detail-actions">
       <button>编辑</button>
-      <button>→ 指令</button>
+      <button>转为指令</button>
       <button class="primary">加入项目</button>
     </div>
   </div>
 
-  <!-- ============ 6 · 待办/日程 详情 ============ -->
+  <!-- ============ 6 · 日程详情 ============ -->
   <div class="screen" id="s6">
     <div class="navbar">
-      <button class="back" onclick="go('s2')">‹ 返回</button>
-      <div class="title">日程</div>
-      <button class="right">⋯</button>
+      <button class="back" onclick="go('s2')">返回</button>
+      <div class="title"></div>
+      <button class="right">···</button>
     </div>
     <div class="scroll">
-      <div class="detail-head">
-        <span class="type-tag">📅 日程</span>
+      <div class="detail-head todo">
+        <span class="type">日程</span>
         <div class="ti">周四下午 3 点去看牙医</div>
-        <div class="mt">
-          <span>30 分钟前捕捉</span>
-          <span>⏱ 0:03</span>
-        </div>
+        <div class="mt">30 分钟前捕捉<span class="sep">·</span>0:03</div>
       </div>
 
       <div class="sec">
-        <div class="sec-title">🎙 你说的原话</div>
-        <div class="quote-said" style="border-left-color:var(--t-todo);background:rgba(94,214,122,0.08)">
+        <div class="sec-title">你说的原话</div>
+        <div class="quote-said" style="border-left-color: var(--t-todo)">
           "提醒我周四下午 3 点去看牙医，在人民医院口腔科。"
         </div>
       </div>
 
       <div class="sec">
-        <div class="sec-title">📋 AI 解析结果</div>
+        <div class="sec-title">解析结果</div>
         <div class="sec-box">
           <dl class="parse-grid">
-            <dt>标题</dt>
-            <dd>看牙医</dd>
-            <dt>时间</dt>
-            <dd><span class="hl">4月11日（周四）15:00 - 16:00</span></dd>
-            <dt>地点</dt>
-            <dd>人民医院 · 口腔科</dd>
-            <dt>提前提醒</dt>
-            <dd>提前 1 小时 · 提前 10 分钟</dd>
-            <dt>重复</dt>
-            <dd>不重复</dd>
+            <dt>标题</dt><dd>看牙医</dd>
+            <dt>时间</dt><dd>4 月 11 日（周四）15:00 – 16:00</dd>
+            <dt>地点</dt><dd>人民医院 · 口腔科</dd>
+            <dt>提醒</dt><dd>提前 1 小时 · 提前 10 分钟</dd>
+            <dt>重复</dt><dd>不重复</dd>
           </dl>
         </div>
       </div>
 
       <div class="sec">
-        <div class="sec-title">✓ 已写入</div>
+        <div class="sec-title">已写入</div>
         <div class="written-to">
           <div class="cal-icon"><div class="m">四月</div><div class="d">11</div></div>
           <div class="info">
             <div class="t">Apple 日历</div>
             <div class="s">同步至 iCloud · 已推送到 Mac</div>
           </div>
-          <button class="open">打开 →</button>
+          <button class="open">打开</button>
         </div>
       </div>
 
       <div class="sec">
-        <div class="sec-title">🔍 冲突检测</div>
-        <div class="no-conflict">
-          <span class="ic">✓</span>
-          <span>那天下午没有其他安排 · 无冲突</span>
-        </div>
+        <div class="sec-title">冲突检测</div>
+        <div class="no-conflict">那天下午没有其他安排 · <b>无冲突</b></div>
       </div>
       <div style="height: 20px"></div>
     </div>
     <div class="detail-actions">
       <button>修改时间</button>
       <button>取消</button>
-      <button class="primary">完成 ✓</button>
+      <button class="primary">完成</button>
     </div>
   </div>
 
   <!-- ============ 7 · 录音中 ============ -->
   <div class="screen" id="s7">
     <div class="navbar">
-      <button class="back" onclick="go('s2')">‹ 取消</button>
+      <button class="back" onclick="go('s2')">取消</button>
       <div class="title"></div>
       <button class="right" style="visibility:hidden"></button>
     </div>
     <div class="scroll">
-      <div class="listening-state"><span class="d"></span>正在聆听</div>
+      <div class="listening-state">正在聆听</div>
       <div class="wave">
         <span></span><span></span><span></span><span></span><span></span>
         <span></span><span></span><span></span><span></span><span></span>
@@ -1902,260 +1421,69 @@
         <span class="chip">会议 · 2 小时前</span>
         <span class="chip">3 个未回复邮件</span>
       </div>
-      <div class="stop-area">
-        <button class="stop-btn" onclick="go('s2')"></button>
-      </div>
+      <button class="stop-btn" onclick="go('s2')"></button>
     </div>
   </div>
 
-  <!-- ============ 8 · Memory Tree ============ -->
+  <!-- ============ 8 · 记忆图谱 ============ -->
   <div class="screen" id="s8">
     <div class="scroll">
-      <div class="head">
-        <h2>记忆树 <span class="en">Memory Tree</span></h2>
-        <div class="sub">L-1 → L0 → L1 → L2 → L3 → L4 · 每次交互都在生长</div>
+      <h2>记忆图谱</h2>
+      <div class="sub">你的上下文 · 每一天都在累积</div>
+      <div class="stats">
+        <div class="stat"><div class="v">30</div><div class="l">天</div></div>
+        <div class="stat"><div class="v">312</div><div class="l">次交互</div></div>
+        <div class="stat"><div class="v">47</div><div class="l">人物</div></div>
+        <div class="stat"><div class="v">89</div><div class="l">会议</div></div>
       </div>
-
-      <!-- L-1 用户根画像 -->
-      <div class="root-profile">
-        <span class="lv">L-1 · 用户根画像</span>
-        <div class="body">
-          Technology-oriented founder specializing in human-AI interaction and investor communication. Direct communicator who prefers data over rhetoric. Deep context in hardware supply chain and early-stage fundraising narratives.
-        </div>
-        <div class="ts">node=2991c49d···9eb8 · 更新于 2026-04-09 08:12</div>
-      </div>
-
-      <!-- 树可视化 -->
-      <svg class="tree-svg" viewBox="0 0 360 280" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <radialGradient id="rootGrad" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#2EC4B6" stop-opacity="0.9"/>
-            <stop offset="100%" stop-color="#2EC4B6" stop-opacity="0.3"/>
-          </radialGradient>
-        </defs>
-
-        <!-- Edges: L-1 → L0 -->
-        <g stroke="rgba(46,196,182,0.45)" stroke-width="1.2" fill="none">
-          <line x1="180" y1="140" x2="180" y2="55"/>
-          <line x1="180" y1="140" x2="295" y2="100"/>
-          <line x1="180" y1="140" x2="295" y2="195"/>
-          <line x1="180" y1="140" x2="95" y2="200"/>
-          <line x1="180" y1="140" x2="65" y2="95"/>
+      <svg class="graph-svg" viewBox="0 0 340 220" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="rgba(255,255,255,0.18)" stroke-width="0.8" fill="none">
+          <line x1="170" y1="110" x2="70" y2="55"/>
+          <line x1="170" y1="110" x2="270" y2="60"/>
+          <line x1="170" y1="110" x2="60" y2="170"/>
+          <line x1="170" y1="110" x2="280" y2="175"/>
+          <line x1="170" y1="110" x2="170" y2="30"/>
+          <line x1="70" y1="55" x2="170" y2="30"/>
+          <line x1="270" y1="60" x2="170" y2="30"/>
+          <line x1="60" y1="170" x2="280" y2="175" stroke-dasharray="3,4"/>
         </g>
-
-        <!-- Edges: L0 → L1 -->
-        <g stroke="rgba(167,139,250,0.4)" stroke-width="0.9" fill="none">
-          <line x1="180" y1="55" x2="145" y2="20"/>
-          <line x1="180" y1="55" x2="215" y2="18"/>
-          <line x1="180" y1="55" x2="180" y2="15"/>
-          <line x1="295" y1="100" x2="335" y2="75"/>
-          <line x1="295" y1="100" x2="340" y2="125"/>
-          <line x1="295" y1="195" x2="340" y2="220"/>
-          <line x1="295" y1="195" x2="335" y2="175"/>
-          <line x1="295" y1="195" x2="320" y2="245"/>
-          <line x1="95" y1="200" x2="55" y2="230"/>
-          <line x1="95" y1="200" x2="45" y2="200"/>
-          <line x1="95" y1="200" x2="75" y2="245"/>
-          <line x1="65" y1="95" x2="25" y2="75"/>
-          <line x1="65" y1="95" x2="25" y2="120"/>
-          <line x1="65" y1="95" x2="45" y2="40"/>
-        </g>
-
-        <!-- Edges: L1 → L2 (tiny leaves) -->
-        <g stroke="rgba(94,214,122,0.35)" stroke-width="0.6" fill="none">
-          <line x1="145" y1="20" x2="130" y2="5"/>
-          <line x1="145" y1="20" x2="155" y2="5"/>
-          <line x1="215" y1="18" x2="225" y2="5"/>
-          <line x1="215" y1="18" x2="210" y2="5"/>
-          <line x1="180" y1="15" x2="175" y2="3"/>
-          <line x1="335" y1="75" x2="350" y2="60"/>
-          <line x1="335" y1="75" x2="352" y2="80"/>
-          <line x1="340" y1="125" x2="355" y2="118"/>
-          <line x1="340" y1="125" x2="355" y2="135"/>
-          <line x1="340" y1="220" x2="355" y2="215"/>
-          <line x1="340" y1="220" x2="355" y2="228"/>
-          <line x1="320" y1="245" x2="325" y2="265"/>
-          <line x1="320" y1="245" x2="305" y2="265"/>
-          <line x1="55" y1="230" x2="45" y2="250"/>
-          <line x1="55" y1="230" x2="60" y2="258"/>
-          <line x1="45" y1="200" x2="20" y2="200"/>
-          <line x1="45" y1="200" x2="22" y2="215"/>
-          <line x1="75" y1="245" x2="65" y2="265"/>
-          <line x1="25" y1="75" x2="10" y2="60"/>
-          <line x1="25" y1="120" x2="8" y2="125"/>
-          <line x1="45" y1="40" x2="35" y2="20"/>
-          <line x1="45" y1="40" x2="55" y2="22"/>
-        </g>
-
-        <!-- L2 leaves (green dots) -->
-        <g fill="#5ED67A">
-          <circle cx="130" cy="5" r="2"/>
-          <circle cx="155" cy="5" r="2"/>
-          <circle cx="175" cy="3" r="2"/>
-          <circle cx="210" cy="5" r="2"/>
-          <circle cx="225" cy="5" r="2"/>
-          <circle cx="350" cy="60" r="2"/>
-          <circle cx="352" cy="80" r="2"/>
-          <circle cx="355" cy="118" r="2"/>
-          <circle cx="355" cy="135" r="2"/>
-          <circle cx="355" cy="215" r="2"/>
-          <circle cx="355" cy="228" r="2"/>
-          <circle cx="325" cy="265" r="2"/>
-          <circle cx="305" cy="265" r="2"/>
-          <circle cx="45" cy="250" r="2"/>
-          <circle cx="60" cy="258" r="2"/>
-          <circle cx="20" cy="200" r="2"/>
-          <circle cx="22" cy="215" r="2"/>
-          <circle cx="65" cy="265" r="2"/>
-          <circle cx="10" cy="60" r="2"/>
-          <circle cx="8" cy="125" r="2"/>
-          <circle cx="35" cy="20" r="2"/>
-          <circle cx="55" cy="22" r="2"/>
-        </g>
-
-        <!-- L3/L4 tiny grey dots (raw anchor points) -->
-        <g fill="rgba(255,255,255,0.35)">
-          <circle cx="125" cy="0" r="1"/>
-          <circle cx="160" cy="0" r="1"/>
-          <circle cx="180" cy="0" r="1"/>
-          <circle cx="230" cy="0" r="1"/>
-          <circle cx="358" cy="55" r="1"/>
-          <circle cx="358" cy="85" r="1"/>
-          <circle cx="358" cy="110" r="1"/>
-          <circle cx="358" cy="140" r="1"/>
-          <circle cx="358" cy="210" r="1"/>
-          <circle cx="358" cy="235" r="1"/>
-          <circle cx="328" cy="270" r="1"/>
-          <circle cx="300" cy="270" r="1"/>
-          <circle cx="40" cy="258" r="1"/>
-          <circle cx="65" cy="270" r="1"/>
-          <circle cx="5" cy="200" r="1"/>
-          <circle cx="15" cy="220" r="1"/>
-          <circle cx="55" cy="270" r="1"/>
-          <circle cx="2" cy="55" r="1"/>
-          <circle cx="2" cy="130" r="1"/>
-          <circle cx="30" cy="12" r="1"/>
-          <circle cx="58" cy="12" r="1"/>
-        </g>
-
-        <!-- L1 Project nodes (blue-violet) -->
-        <g fill="rgba(100,150,255,0.9)" stroke="#6496FF" stroke-width="0.8">
-          <circle cx="145" cy="20" r="4.5"/>
-          <circle cx="215" cy="18" r="4.5"/>
-          <circle cx="180" cy="15" r="4"/>
-          <circle cx="335" cy="75" r="4.5"/>
-          <circle cx="340" cy="125" r="4.5"/>
-          <circle cx="340" cy="220" r="4.5"/>
-          <circle cx="335" cy="175" r="4"/>
-          <circle cx="320" cy="245" r="4"/>
-          <circle cx="55" cy="230" r="4.5"/>
-          <circle cx="45" cy="200" r="4"/>
-          <circle cx="75" cy="245" r="4"/>
-          <circle cx="25" cy="75" r="4"/>
-          <circle cx="25" cy="120" r="4.5"/>
-          <circle cx="45" cy="40" r="4"/>
-        </g>
-
-        <!-- L0 Scene nodes (purple, large) -->
-        <g font-family="-apple-system, PingFang SC" font-size="9" fill="#fff" text-anchor="middle" font-weight="600">
-          <circle cx="180" cy="55" r="16" fill="rgba(167,139,250,0.35)" stroke="#A78BFA" stroke-width="1.8"/>
-          <text x="180" y="58">工作</text>
-
-          <circle cx="295" cy="100" r="15" fill="rgba(167,139,250,0.35)" stroke="#A78BFA" stroke-width="1.8"/>
-          <text x="295" y="103">融资</text>
-
-          <circle cx="295" cy="195" r="15" fill="rgba(167,139,250,0.35)" stroke="#A78BFA" stroke-width="1.8"/>
-          <text x="295" y="198">产品</text>
-
-          <circle cx="95" cy="200" r="15" fill="rgba(167,139,250,0.35)" stroke="#A78BFA" stroke-width="1.8"/>
-          <text x="95" y="203">生活</text>
-
-          <circle cx="65" cy="95" r="15" fill="rgba(167,139,250,0.35)" stroke="#A78BFA" stroke-width="1.8"/>
-          <text x="65" y="98">人际</text>
-        </g>
-
-        <!-- L-1 Root node (center, teal, biggest) -->
-        <g font-family="-apple-system, PingFang SC" font-size="11" fill="#fff" text-anchor="middle" font-weight="700">
-          <circle cx="180" cy="140" r="26" fill="url(#rootGrad)" stroke="#2EC4B6" stroke-width="2.5"/>
-          <text x="180" y="138" font-size="9" opacity="0.8">L-1</text>
-          <text x="180" y="152">我</text>
+        <g font-family="-apple-system, PingFang SC" font-size="10" fill="#fff" text-anchor="middle">
+          <circle cx="170" cy="110" r="22" fill="rgba(255,255,255,0.12)" stroke="#fff" stroke-width="1.5"/>
+          <text x="170" y="114" font-weight="700" font-size="11">我</text>
+          <circle cx="70" cy="55" r="17" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+          <text x="70" y="58">蔡哥</text>
+          <circle cx="270" cy="60" r="17" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+          <text x="270" y="63">林啸</text>
+          <circle cx="170" cy="30" r="16" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+          <text x="170" y="33">Series A</text>
+          <circle cx="60" cy="170" r="16" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+          <text x="60" y="173">GTM</text>
+          <circle cx="280" cy="175" r="17" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+          <text x="280" y="178">Pitch 稿</text>
         </g>
       </svg>
-
-      <div class="tree-legend">
-        <span><i style="background:#2EC4B6"></i>L-1 Root</span>
-        <span><i style="background:#A78BFA"></i>L0 Scene</span>
-        <span><i style="background:#6496FF"></i>L1 Project</span>
-        <span><i style="background:#5ED67A"></i>L2 Episode</span>
-        <span><i style="background:rgba(255,255,255,0.35)"></i>L3/L4 Raw</span>
-      </div>
-
-      <!-- 层级健康度 -->
-      <div class="layer-stats">
-        <div class="h">
-          <span>语义树健康度</span>
-          <span class="ok">健康</span>
-        </div>
-        <div class="layer-row">
-          <span class="lv lv-L-1">L-1</span>
-          <span class="nm">Root Profile</span>
-          <span class="desc">用户根画像</span>
-          <span class="cnt">1</span>
-        </div>
-        <div class="layer-row">
-          <span class="lv lv-L0">L0</span>
-          <span class="nm">Scene</span>
-          <span class="desc">场景</span>
-          <span class="cnt">5</span>
-        </div>
-        <div class="layer-row">
-          <span class="lv lv-L1">L1</span>
-          <span class="nm">Project</span>
-          <span class="desc">项目</span>
-          <span class="cnt">23</span>
-        </div>
-        <div class="layer-row">
-          <span class="lv lv-L2">L2</span>
-          <span class="nm">Episode</span>
-          <span class="desc">会话/任务</span>
-          <span class="cnt">123</span>
-        </div>
-        <div class="layer-row">
-          <span class="lv lv-L3">L3</span>
-          <span class="nm">Description</span>
-          <span class="desc">结构化摘要</span>
-          <span class="cnt">155</span>
-        </div>
-        <div class="layer-row">
-          <span class="lv lv-L4">L4</span>
-          <span class="nm">Raw</span>
-          <span class="desc">原始数据（事实源）</span>
-          <span class="cnt">155</span>
-        </div>
-      </div>
-
       <div class="top-ctx">
-        <h3>关系强度 Top</h3>
+        <div class="sec-title" style="margin-bottom: 4px">关系强度</div>
         <div class="row">
-          <div><div class="p">蔡哥</div><div class="r">Linear Capital · 12 次交互 · 融资场景</div></div>
-          <div class="s">98%</div>
+          <div><div class="p">蔡哥</div><div class="r">Linear Capital · 12 次交互</div></div>
+          <div class="s">98</div>
         </div>
         <div class="row">
-          <div><div class="p">林啸</div><div class="r">软件联创 · 近一周 8 次 · 产品场景</div></div>
-          <div class="s">92%</div>
+          <div><div class="p">林啸</div><div class="r">软件联创 · 近一周 8 次</div></div>
+          <div class="s">92</div>
         </div>
         <div class="row">
-          <div><div class="p">Marshall</div><div class="r">硬件联创 · 6 次 · 产品场景</div></div>
-          <div class="s">87%</div>
+          <div><div class="p">Marshall</div><div class="r">硬件联创 · 6 次</div></div>
+          <div class="s">87</div>
         </div>
       </div>
       <div style="height: 120px"></div>
     </div>
     <div class="tabbar">
-      <button class="tab" onclick="go('s2')"><span class="icon">🏠</span><span class="lbl">首页</span></button>
-      <button class="tab active" onclick="go('s8')"><span class="icon">🧠</span><span class="lbl">记忆</span></button>
-      <button class="tab" onclick="go('s9')"><span class="icon">🤖</span><span class="lbl">Agent</span></button>
-      <button class="tab" onclick="go('s10')"><span class="icon">👤</span><span class="lbl">我</span></button>
+      <button class="tab" onclick="go('s2')">首页</button>
+      <button class="tab active" onclick="go('s8')">记忆</button>
+      <button class="tab" onclick="go('s9')">Agent</button>
+      <button class="tab" onclick="go('s10')">我</button>
     </div>
   </div>
 
@@ -2166,24 +1494,24 @@
         <h2>Agent</h2>
         <div class="sub">可以问我任何事 · 我懂你的上下文</div>
       </div>
-      <div class="msg bot">早上好，明明 👋 想让我做点什么？</div>
+      <div class="msg bot">早上好，明明。想让我做点什么？</div>
       <div class="msg user">帮我做个 Sandbar 最新融资情况的 research</div>
       <div class="msg bot">正在调取 <b>Sandbar · Stream Ring</b> 的历史数据，联网搜索最新动态中…</div>
-      <div class="msg bot">✅ 报告已准备好，预计 3 分钟后推送到首页 Timeline。</div>
+      <div class="msg bot">报告已准备好，3 分钟后推送到首页 Timeline。</div>
       <div class="agent-input">
-        <div class="field">告诉 Monostone 你想做什么…</div>
+        <div class="field">告诉 Monostone 你想做什么</div>
         <button class="send">↑</button>
       </div>
     </div>
     <div class="tabbar">
-      <button class="tab" onclick="go('s2')"><span class="icon">🏠</span><span class="lbl">首页</span></button>
-      <button class="tab" onclick="go('s8')"><span class="icon">🧠</span><span class="lbl">记忆</span></button>
-      <button class="tab active" onclick="go('s9')"><span class="icon">🤖</span><span class="lbl">Agent</span></button>
-      <button class="tab" onclick="go('s10')"><span class="icon">👤</span><span class="lbl">我</span></button>
+      <button class="tab" onclick="go('s2')">首页</button>
+      <button class="tab" onclick="go('s8')">记忆</button>
+      <button class="tab active" onclick="go('s9')">Agent</button>
+      <button class="tab" onclick="go('s10')">我</button>
     </div>
   </div>
 
-  <!-- ============ 10 · 个人 ============ -->
+  <!-- ============ 10 · 我 ============ -->
   <div class="screen" id="s10">
     <div class="scroll">
       <div class="profile-head">
@@ -2194,7 +1522,7 @@
         </div>
       </div>
       <div class="profile-ring">
-        <div class="ic">💍</div>
+        <div class="ring-mini"></div>
         <div class="info">
           <div class="t">Monostone 戒指</div>
           <div class="s">已连接 · 第 12 天</div>
@@ -2202,25 +1530,25 @@
         <div class="battery">87%</div>
       </div>
       <div class="list-group">
-        <div class="list-row"><div class="ic">📅</div><div class="t">日历与提醒</div><div class="chev">›</div></div>
-        <div class="list-row"><div class="ic">🔗</div><div class="t">投递目标</div><div class="chev">›</div></div>
-        <div class="list-row"><div class="ic">🔑</div><div class="t">自带 API Key (BYOK)</div><div class="chev">›</div></div>
+        <div class="list-row"><div class="t">日历与提醒</div><div class="chev">›</div></div>
+        <div class="list-row"><div class="t">投递目标</div><div class="chev">›</div></div>
+        <div class="list-row"><div class="t">自带 API Key</div><div class="chev">›</div></div>
       </div>
       <div class="list-group">
-        <div class="list-row"><div class="ic">🔒</div><div class="t">隐私与数据</div><div class="chev">›</div></div>
-        <div class="list-row"><div class="ic">📦</div><div class="t">导出所有数据</div><div class="chev">›</div></div>
-        <div class="list-row"><div class="ic">⚙️</div><div class="t">高级设置</div><div class="chev">›</div></div>
+        <div class="list-row"><div class="t">隐私与数据</div><div class="chev">›</div></div>
+        <div class="list-row"><div class="t">导出所有数据</div><div class="chev">›</div></div>
+        <div class="list-row"><div class="t">高级设置</div><div class="chev">›</div></div>
       </div>
       <div class="list-group">
-        <div class="list-row" onclick="go('s1')"><div class="ic">↩️</div><div class="t">重新开始引导</div><div class="chev">›</div></div>
+        <div class="list-row" onclick="go('s1')"><div class="t">重新开始引导</div><div class="chev">›</div></div>
       </div>
       <div style="height: 120px"></div>
     </div>
     <div class="tabbar">
-      <button class="tab" onclick="go('s2')"><span class="icon">🏠</span><span class="lbl">首页</span></button>
-      <button class="tab" onclick="go('s8')"><span class="icon">🧠</span><span class="lbl">记忆</span></button>
-      <button class="tab" onclick="go('s9')"><span class="icon">🤖</span><span class="lbl">Agent</span></button>
-      <button class="tab active" onclick="go('s10')"><span class="icon">👤</span><span class="lbl">我</span></button>
+      <button class="tab" onclick="go('s2')">首页</button>
+      <button class="tab" onclick="go('s8')">记忆</button>
+      <button class="tab" onclick="go('s9')">Agent</button>
+      <button class="tab active" onclick="go('s10')">我</button>
     </div>
   </div>
 
