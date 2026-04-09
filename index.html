@@ -2360,10 +2360,10 @@
     // Swap actions bar for cmd-2 (processing state — no "send" button)
     if (id === 'cmd-2') {
       document.getElementById('s4-actions').innerHTML =
-        '<button onclick="go(\\'s2\\')">在后台继续</button><button>取消任务</button>';
+        `<button onclick="go('s2')">在后台继续</button><button>取消任务</button>`;
     } else if (type === 'cmd') {
       document.getElementById('s4-actions').innerHTML =
-        '<button>存为草稿</button><button class="primary">发送</button>';
+        `<button>存为草稿</button><button class="primary">发送</button>`;
     }
 
     go(screenId);
