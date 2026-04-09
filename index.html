@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Monostone — AI Smart Ring</title>
+<title>Monostone — AI 戒指</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
@@ -17,19 +17,23 @@
     --text-dim: #98989F;
     --text-dimmer: #636366;
     --border: rgba(255,255,255,0.08);
-    --accent: #6B8CAE;
-    --accent-bright: #7cf7ff;
     --blue: #0A84FF;
-    --green: #34C759;
-    --orange: #FF9500;
-    --purple: #AF52DE;
     --red: #FF453A;
-    --pink: #FF375F;
+
+    /* 4 种卡片类型的色系 */
+    --t-rec: #7cf7ff;         /* 长录音 · 青蓝 */
+    --t-rec-bg: rgba(124,247,255,0.09);
+    --t-cmd: #A78BFA;          /* 指令 · 紫 */
+    --t-cmd-bg: rgba(167,139,250,0.1);
+    --t-idea: #FFB84D;         /* 灵感 · 橙 */
+    --t-idea-bg: rgba(255,184,77,0.1);
+    --t-todo: #5ED67A;         /* 待办 · 绿 */
+    --t-todo-bg: rgba(94,214,122,0.1);
   }
   html, body {
     background: var(--bg);
     color: var(--text);
-    font-family: -apple-system, 'SF Pro Display', 'Inter', system-ui, sans-serif;
+    font-family: -apple-system, 'PingFang SC', 'Hiragino Sans GB', 'SF Pro Display', 'Inter', system-ui, sans-serif;
     min-height: 100vh;
     overflow: hidden;
   }
@@ -45,12 +49,6 @@
   }
 
   /* ===== Stage ===== */
-  .stage {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 40px;
-  }
   .brand {
     position: fixed;
     top: 32px;
@@ -61,7 +59,7 @@
     font-weight: 600;
     z-index: 100;
   }
-  .brand span { color: var(--accent-bright); }
+  .brand span { color: var(--t-rec); }
   .hint {
     position: fixed;
     bottom: 24px;
@@ -73,7 +71,7 @@
     text-align: center;
     z-index: 100;
   }
-  .hint b { color: var(--accent-bright); font-weight: 500; }
+  .hint b { color: var(--t-rec); font-weight: 500; }
 
   /* ===== Phone ===== */
   .phone {
@@ -124,7 +122,6 @@
     position: absolute;
     inset: 0;
     padding-top: 59px;
-    padding-bottom: 0;
     display: none;
     flex-direction: column;
     opacity: 0;
@@ -140,7 +137,7 @@
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 0 24px;
+    padding: 0 20px;
     scrollbar-width: none;
   }
   .scroll::-webkit-scrollbar { display: none; }
@@ -157,27 +154,23 @@
   }
   .navbar .back {
     color: var(--blue);
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 400;
     background: none;
     border: none;
     cursor: pointer;
     padding: 8px 8px 8px 0;
-    display: flex;
-    align-items: center;
-    gap: 4px;
   }
   .navbar .title {
     font-size: 17px;
     font-weight: 600;
   }
   .navbar .right {
-    font-size: 17px;
+    font-size: 15px;
     color: var(--blue);
     background: none;
     border: none;
     cursor: pointer;
-    font-weight: 400;
   }
 
   /* Tab bar */
@@ -206,18 +199,15 @@
     padding: 6px 0;
     transition: color 0.2s;
   }
-  .tab.active { color: var(--accent-bright); }
+  .tab.active { color: var(--t-rec); }
   .tab .icon { font-size: 22px; line-height: 1; }
-  .tab .lbl { font-size: 10px; font-weight: 500; letter-spacing: 0.02em; }
+  .tab .lbl { font-size: 10px; font-weight: 500; }
 
-  button {
-    font-family: inherit;
-    -webkit-tap-highlight-color: transparent;
-  }
+  button { font-family: inherit; }
   button:active { transform: scale(0.97); }
 
   /* ============================================================ */
-  /* Screen 1 · SPLASH                                              */
+  /* Screen 1 · 启动                                                */
   /* ============================================================ */
   #s1 { padding-top: 0; }
   #s1 .wrap {
@@ -232,7 +222,7 @@
     width: 160px;
     height: 160px;
     border-radius: 50%;
-    border: 2px solid var(--accent-bright);
+    border: 2px solid var(--t-rec);
     position: relative;
     margin-bottom: 56px;
     background: radial-gradient(circle at 30% 30%, rgba(124,247,255,0.3), transparent 60%);
@@ -261,7 +251,6 @@
     font-size: 13px;
     color: var(--text-dim);
     letter-spacing: 0.22em;
-    text-transform: uppercase;
     margin-bottom: 72px;
   }
   .primary-btn {
@@ -269,301 +258,212 @@
     color: #000;
     border: none;
     border-radius: 100px;
-    padding: 18px 56px;
-    font-size: 17px;
+    padding: 17px 56px;
+    font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
     min-width: 260px;
     justify-content: center;
-    transition: transform 0.2s;
-  }
-  .ghost-btn {
-    background: transparent;
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    padding: 18px 56px;
-    font-size: 17px;
-    font-weight: 500;
-    cursor: pointer;
-    min-width: 260px;
-  }
-
-  /* ============================================================ */
-  /* Screen 2 · PROBLEM + LOGIN                                    */
-  /* ============================================================ */
-  #s2 .scroll { padding-top: 24px; padding-bottom: 0; }
-  #s2 h2 {
-    font-size: 30px;
-    font-weight: 800;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-    margin-bottom: 28px;
-  }
-  #s2 h2 em { font-style: normal; color: var(--accent-bright); }
-  .problem-card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 18px 18px 18px 62px;
-    position: relative;
-    font-size: 14px;
-    line-height: 1.5;
-    color: var(--text-dim);
-    margin-bottom: 12px;
-    animation: rise 0.5s ease-out both;
-  }
-  .problem-card:nth-child(2) { animation-delay: 0.1s; }
-  .problem-card:nth-child(3) { animation-delay: 0.2s; }
-  .problem-card:nth-child(4) { animation-delay: 0.3s; }
-  @keyframes rise {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .problem-card .emoji {
-    position: absolute;
-    left: 18px;
-    top: 16px;
-    font-size: 28px;
-  }
-  .problem-card b { color: var(--text); font-weight: 600; display: block; margin-bottom: 3px; font-size: 14px; }
-  #s2 .login-actions {
-    padding: 16px 24px 40px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  #s2 .login-actions .primary-btn,
-  #s2 .login-actions .ghost-btn { width: 100%; min-width: 0; }
-
-  /* ============================================================ */
-  /* Screen 3 · HOW IT WORKS                                       */
-  /* ============================================================ */
-  #s3 .scroll { padding-top: 24px; }
-  #s3 .header h2 {
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    margin-bottom: 6px;
-  }
-  #s3 .header .sub { font-size: 15px; color: var(--text-dim); margin-bottom: 40px; }
-  .step {
-    display: flex;
-    gap: 18px;
-    padding: 22px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .step:last-of-type { border-bottom: none; }
-  .step .n {
-    width: 44px; height: 44px;
-    border-radius: 50%;
-    border: 1.5px solid var(--accent-bright);
-    color: var(--accent-bright);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-  .step h3 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
-  .step p { font-size: 14px; color: var(--text-dim); line-height: 1.5; }
-  #s3 .bottom-actions {
-    padding: 0 24px 40px;
-  }
-  #s3 .primary-btn { width: 100%; min-width: 0; }
-
-  /* ============================================================ */
-  /* Screen 4 · CONTEXT CONNECT                                    */
-  /* ============================================================ */
-  #s4 .scroll { padding-top: 24px; }
-  #s4 h2 { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 6px; }
-  #s4 .sub { font-size: 14px; color: var(--text-dim); margin-bottom: 24px; }
-  .integrations {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-bottom: 24px;
-  }
-  .int {
-    aspect-ratio: 1;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    cursor: pointer;
-    transition: background 0.2s, border-color 0.2s;
-  }
-  .int:hover, .int.on {
-    background: rgba(124,247,255,0.1);
-    border-color: rgba(124,247,255,0.4);
-  }
-  #s4 .count {
-    text-align: center;
-    font-size: 13px;
-    color: var(--text-dim);
-    margin-bottom: 28px;
-  }
-  #s4 .count b { color: var(--accent-bright); font-weight: 600; }
-  #s4 .bottom-actions { padding: 0 24px 40px; display: flex; flex-direction: column; gap: 10px; }
-  #s4 .primary-btn, #s4 .ghost-btn { width: 100%; min-width: 0; }
-
-  /* ============================================================ */
-  /* Screen 5 · RING PAIRING                                       */
-  /* ============================================================ */
-  #s5 .scroll { padding-top: 20px; display: flex; flex-direction: column; align-items: center; }
-  .pair-status {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    font-size: 13px;
-    color: var(--green);
-    background: rgba(52,199,89,0.12);
-    border: 1px solid rgba(52,199,89,0.35);
-    padding: 7px 16px;
-    border-radius: 100px;
-    margin-bottom: 30px;
-    font-weight: 500;
   }
-  .pair-status .dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--green);
-    animation: blink 1.5s infinite;
-    box-shadow: 0 0 8px var(--green);
-  }
-  @keyframes blink { 50% { opacity: 0.3; } }
-  .ring-viz {
-    width: 220px;
-    height: 220px;
-    border-radius: 50%;
-    border: 2px solid var(--accent-bright);
-    position: relative;
-    margin-bottom: 44px;
-    background: radial-gradient(circle at 30% 30%, rgba(124,247,255,0.25), transparent 65%);
-    box-shadow: 0 0 60px rgba(124,247,255,0.3);
-  }
-  .ring-viz::before, .ring-viz::after {
-    content: "";
-    position: absolute;
-    inset: -16px;
-    border-radius: 50%;
-    border: 1.5px solid rgba(124,247,255,0.45);
-    animation: ripple 2.5s ease-out infinite;
-  }
-  .ring-viz::after { animation-delay: 1.25s; }
-  @keyframes ripple {
-    0% { transform: scale(0.9); opacity: 1; }
-    100% { transform: scale(1.5); opacity: 0; }
-  }
-  #s5 h2 { font-size: 24px; font-weight: 700; margin-bottom: 10px; text-align: center; }
-  #s5 .body { font-size: 14px; color: var(--text-dim); line-height: 1.5; text-align: center; max-width: 280px; margin-bottom: auto; }
-  #s5 .bottom-actions { padding: 24px 24px 40px; width: 100%; display: flex; flex-direction: column; gap: 10px; }
-  #s5 .primary-btn, #s5 .ghost-btn { width: 100%; min-width: 0; }
-  #s5 .primary-btn { background: var(--accent-bright); color: #000; }
 
   /* ============================================================ */
-  /* Screen 6 · HOME DASHBOARD (Timeline tab)                      */
+  /* Screen 2 · 首页 Timeline（核心）                                */
   /* ============================================================ */
-  #s6 .scroll { padding-top: 8px; }
-  .home-header {
-    padding: 8px 0 20px;
+  #s2 .scroll { padding-top: 8px; padding-bottom: 12px; }
+  .home-head {
+    padding: 8px 4px 18px;
   }
-  .home-header .greet {
-    font-size: 34px;
+  .home-head .greet {
+    font-size: 30px;
     font-weight: 800;
     letter-spacing: -0.025em;
     margin-bottom: 4px;
   }
-  .home-header .status {
+  .home-head .status {
     font-size: 13px;
     color: var(--text-dim);
     display: flex;
     align-items: center;
     gap: 6px;
   }
-  .home-header .status .d {
+  .home-head .status .d {
     width: 7px; height: 7px;
     border-radius: 50%;
-    background: var(--accent-bright);
-    box-shadow: 0 0 8px var(--accent-bright);
+    background: var(--t-rec);
+    box-shadow: 0 0 8px var(--t-rec);
     animation: blink 2s infinite;
   }
-  .metric-card {
-    background: linear-gradient(135deg, rgba(124,247,255,0.12), rgba(167,139,250,0.08));
-    border: 1px solid rgba(124,247,255,0.2);
-    border-radius: 22px;
-    padding: 22px;
-    margin-bottom: 24px;
+  @keyframes blink { 50% { opacity: 0.3; } }
+
+  .digest {
+    background: linear-gradient(135deg, rgba(124,247,255,0.1), rgba(167,139,250,0.06));
+    border: 1px solid rgba(124,247,255,0.22);
+    border-radius: 20px;
+    padding: 18px 20px;
+    margin-bottom: 22px;
     cursor: pointer;
   }
-  .metric-card .big {
-    font-size: 52px;
-    font-weight: 800;
-    letter-spacing: -0.035em;
-    color: var(--accent-bright);
-    line-height: 1;
+  .digest .h {
+    font-size: 11px;
+    color: var(--t-rec);
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    margin-bottom: 10px;
   }
-  .metric-card .lbl {
-    font-size: 13px;
-    color: var(--text-dim);
-    margin-top: 6px;
-  }
-  .metric-card .hl {
+  .digest .big {
     font-size: 15px;
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid rgba(255,255,255,0.08);
+    line-height: 1.5;
     font-weight: 500;
   }
-  .section-title {
-    font-size: 13px;
+  .digest .big b { color: var(--t-rec); font-weight: 700; }
+  .digest .foot {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 0.5px solid rgba(255,255,255,0.1);
+    font-size: 12px;
     color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 10px;
-    font-weight: 600;
+    display: flex;
+    gap: 14px;
   }
-  .task-item {
+  .digest .foot span b { color: #fff; font-weight: 600; }
+
+  .section-label {
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    margin: 0 4px 10px;
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 14px 0;
-    border-bottom: 0.5px solid var(--border);
-    cursor: pointer;
-    transition: opacity 0.2s;
+    align-items: center;
   }
-  .task-item:active { opacity: 0.6; }
-  .task-item:last-child { border-bottom: none; }
-  .task-item .name { color: var(--text); font-weight: 500; font-size: 15px; line-height: 1.35; margin-bottom: 3px; }
-  .task-item .meta { color: var(--text-dim); font-size: 13px; }
-  .task-item .time {
-    color: var(--text-dimmer);
-    font-size: 12px;
-    flex-shrink: 0;
-    font-feature-settings: 'tnum';
-    white-space: nowrap;
-  }
-  .task-item .time.live { color: var(--accent-bright); }
+  .section-label .count { color: var(--text-dimmer); font-weight: 500; }
 
-  /* FAB — record */
+  /* ---------- 卡片基础样式 ---------- */
+  .card {
+    position: relative;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 14px 16px 14px 56px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    overflow: hidden;
+    animation: rise 0.45s ease-out both;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .card:active { transform: scale(0.98); }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .card .strip {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+  }
+  .card .icon {
+    position: absolute;
+    left: 16px; top: 50%;
+    transform: translateY(-50%);
+    width: 30px; height: 30px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+  }
+  .card .type-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 2px 7px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+  }
+  .card .title {
+    font-size: 14.5px;
+    font-weight: 600;
+    line-height: 1.35;
+    margin-bottom: 4px;
+    color: #fff;
+  }
+  .card .meta {
+    font-size: 12px;
+    color: var(--text-dim);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .card .meta span { display: inline-flex; align-items: center; gap: 3px; }
+  .card .time-right {
+    position: absolute;
+    right: 14px; top: 14px;
+    font-size: 11px;
+    color: var(--text-dimmer);
+    font-feature-settings: 'tnum';
+  }
+
+  /* ---------- 类型 1 · 长录音 ---------- */
+  .card.rec { background: linear-gradient(90deg, var(--t-rec-bg), var(--panel) 40%); border-color: rgba(124,247,255,0.2); }
+  .card.rec .strip { background: var(--t-rec); }
+  .card.rec .icon { background: rgba(124,247,255,0.18); color: var(--t-rec); }
+  .card.rec .type-tag { background: rgba(124,247,255,0.15); color: var(--t-rec); }
+
+  /* ---------- 类型 2 · 指令 ---------- */
+  .card.cmd { background: linear-gradient(90deg, var(--t-cmd-bg), var(--panel) 40%); border-color: rgba(167,139,250,0.22); }
+  .card.cmd .strip { background: var(--t-cmd); }
+  .card.cmd .icon { background: rgba(167,139,250,0.2); color: var(--t-cmd); }
+  .card.cmd .type-tag { background: rgba(167,139,250,0.18); color: var(--t-cmd); }
+  .card.cmd .title { font-style: italic; font-weight: 500; }
+  .card.cmd .title::before { content: "\201C"; color: var(--t-cmd); font-size: 18px; margin-right: 2px; }
+  .card.cmd .title::after { content: "\201D"; color: var(--t-cmd); font-size: 18px; margin-left: 2px; }
+
+  /* ---------- 类型 3 · 灵感 ---------- */
+  .card.idea { background: linear-gradient(90deg, var(--t-idea-bg), var(--panel) 40%); border-color: rgba(255,184,77,0.22); }
+  .card.idea .strip { background: var(--t-idea); }
+  .card.idea .icon { background: rgba(255,184,77,0.18); color: var(--t-idea); }
+  .card.idea .type-tag { background: rgba(255,184,77,0.15); color: var(--t-idea); }
+
+  /* ---------- 类型 4 · 待办/日程 ---------- */
+  .card.todo { background: linear-gradient(90deg, var(--t-todo-bg), var(--panel) 40%); border-color: rgba(94,214,122,0.22); }
+  .card.todo .strip { background: var(--t-todo); }
+  .card.todo .icon { background: rgba(94,214,122,0.18); color: var(--t-todo); }
+  .card.todo .type-tag { background: rgba(94,214,122,0.15); color: var(--t-todo); }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 100px;
+  }
+  .status-pill.running { background: rgba(167,139,250,0.15); color: var(--t-cmd); }
+  .status-pill.done { background: rgba(94,214,122,0.15); color: var(--t-todo); }
+  .status-pill .d {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: blink 1.5s infinite;
+  }
+
+  /* FAB · 录音触发 */
   .fab {
     position: absolute;
     bottom: 103px;
-    right: 24px;
-    width: 64px; height: 64px;
+    right: 20px;
+    width: 62px; height: 62px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent-bright), #a78bfa);
+    background: linear-gradient(135deg, var(--t-rec), var(--t-cmd));
     border: none;
     color: #000;
-    font-size: 28px;
+    font-size: 26px;
     cursor: pointer;
     box-shadow: 0 8px 24px rgba(124,247,255,0.4);
     z-index: 100;
@@ -579,9 +479,456 @@
     border: 1.5px solid rgba(124,247,255,0.3);
     animation: ripple 2s ease-out infinite;
   }
+  @keyframes ripple {
+    0% { transform: scale(0.9); opacity: 1; }
+    100% { transform: scale(1.4); opacity: 0; }
+  }
 
   /* ============================================================ */
-  /* Screen 7 · LISTENING                                           */
+  /* 通用 · 详情页                                                   */
+  /* ============================================================ */
+  .detail-head {
+    padding: 4px 0 18px;
+  }
+  .detail-head .type-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 3px 9px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+  .detail-head .ti {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+  .detail-head .mt {
+    font-size: 13px;
+    color: var(--text-dim);
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .detail-head .mt b { color: var(--text); font-weight: 500; }
+
+  .sec {
+    margin-bottom: 18px;
+  }
+  .sec-title {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sec-box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+  }
+  .bullet {
+    font-size: 14px;
+    line-height: 1.55;
+    padding: 6px 0;
+    padding-left: 16px;
+    position: relative;
+    color: var(--text-2);
+  }
+  .bullet::before {
+    content: "•";
+    position: absolute;
+    left: 4px;
+    color: var(--t-rec);
+  }
+
+  /* ============================================================ */
+  /* Screen 3 · 长录音详情                                          */
+  /* ============================================================ */
+  #s3 .type-tag { background: rgba(124,247,255,0.15); color: var(--t-rec); }
+  .action-row {
+    display: flex;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .action-row:last-child { border-bottom: none; }
+  .action-row .check {
+    width: 20px; height: 20px;
+    border-radius: 5px;
+    border: 1.5px solid var(--text-dimmer);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .action-row .txt { flex: 1; }
+  .action-row .txt .t { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+  .action-row .txt .d { font-size: 12px; color: var(--text-dim); display: flex; gap: 10px; }
+  .action-row .txt .d .owner {
+    background: rgba(124,247,255,0.12);
+    color: var(--t-rec);
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+  }
+  .decision-card {
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.03);
+    border-left: 3px solid var(--t-rec);
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .decision-card:last-child { margin-bottom: 0; }
+  .decision-card .who {
+    font-size: 11px;
+    color: var(--t-rec);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+  .people-row {
+    display: flex;
+    gap: 10px;
+    padding: 4px 0;
+  }
+  .person {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+  }
+  .person .av {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--t-rec), var(--t-cmd));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: #000;
+  }
+  .person .nm { font-size: 11px; color: var(--text-dim); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .memory-attr {
+    background: rgba(167,139,250,0.08);
+    border: 1px solid rgba(167,139,250,0.2);
+    border-radius: 12px;
+    padding: 12px 14px;
+  }
+  .memory-attr .row {
+    display: flex;
+    gap: 10px;
+    padding: 7px 0;
+    font-size: 12px;
+    color: var(--text-2);
+    align-items: flex-start;
+  }
+  .memory-attr .row:not(:last-child) { border-bottom: 0.5px solid rgba(255,255,255,0.06); }
+  .memory-attr .row .ic { color: var(--t-cmd); flex-shrink: 0; }
+  .memory-attr .row b { color: var(--t-cmd); font-weight: 600; }
+
+  .transcript-toggle {
+    padding: 14px 16px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .transcript-toggle .chev { color: var(--text-dimmer); }
+
+  /* 底部操作 */
+  .detail-actions {
+    padding: 12px 20px 30px;
+    display: flex;
+    gap: 8px;
+    border-top: 0.5px solid var(--border);
+    background: rgba(22,22,23,0.7);
+    backdrop-filter: blur(20px);
+  }
+  .detail-actions button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .detail-actions button.primary {
+    background: var(--t-rec);
+    color: #000;
+    border-color: var(--t-rec);
+    font-weight: 600;
+  }
+
+  /* ============================================================ */
+  /* Screen 4 · 指令详情                                            */
+  /* ============================================================ */
+  #s4 .type-tag { background: rgba(167,139,250,0.18); color: var(--t-cmd); }
+  #s4 .bullet::before { color: var(--t-cmd); }
+  .quote-said {
+    background: rgba(167,139,250,0.08);
+    border-left: 3px solid var(--t-cmd);
+    border-radius: 0 10px 10px 0;
+    padding: 12px 16px;
+    font-size: 15px;
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--text-2);
+  }
+  .ctx-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    animation: rise 0.4s ease-out both;
+  }
+  .ctx-row .ic {
+    width: 28px; height: 28px;
+    background: rgba(167,139,250,0.15);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .ctx-row .nm { flex: 1; color: var(--text); font-weight: 500; }
+  .ctx-row .src { color: var(--text-dim); font-size: 11px; }
+  .ctx-row .check { color: var(--t-todo); font-size: 14px; }
+
+  .timeline {
+    position: relative;
+    padding-left: 24px;
+  }
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 7px; top: 6px; bottom: 6px;
+    width: 1px;
+    background: var(--border);
+  }
+  .timeline .step {
+    position: relative;
+    padding: 6px 0 16px;
+    font-size: 13px;
+  }
+  .timeline .step::before {
+    content: "";
+    position: absolute;
+    left: -22px; top: 9px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--t-cmd);
+    border: 2px solid var(--phone-bg);
+    box-shadow: 0 0 0 1px var(--t-cmd);
+  }
+  .timeline .step.done::before { background: var(--t-todo); box-shadow: 0 0 0 1px var(--t-todo); }
+  .timeline .step .t { font-weight: 500; margin-bottom: 2px; }
+  .timeline .step .d { font-size: 11px; color: var(--text-dim); }
+
+  .result-email {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .result-email .ef {
+    padding: 7px 0;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 13px;
+    display: flex;
+    gap: 8px;
+  }
+  .result-email .ef .k { color: var(--text-dim); width: 40px; flex-shrink: 0; }
+  .result-email .ef .v { color: var(--text); flex: 1; }
+  .result-email .ef .v.link { color: var(--blue); }
+  .result-email .body {
+    margin-top: 12px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .result-email .body b { color: var(--t-cmd); font-weight: 500; }
+  .result-email .body p { margin-bottom: 10px; }
+  #s4 .detail-actions button.primary { background: var(--t-cmd); border-color: var(--t-cmd); color: #fff; }
+
+  /* ============================================================ */
+  /* Screen 5 · 灵感详情                                            */
+  /* ============================================================ */
+  #s5 .type-tag { background: rgba(255,184,77,0.15); color: var(--t-idea); }
+  #s5 .bullet::before { color: var(--t-idea); }
+  .wave-mini {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 44px;
+    padding: 0 4px;
+  }
+  .wave-mini span {
+    display: block;
+    width: 3px;
+    background: var(--t-idea);
+    border-radius: 3px;
+    opacity: 0.7;
+  }
+  .play-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    background: rgba(255,184,77,0.06);
+    border: 1px solid rgba(255,184,77,0.2);
+    border-radius: 14px;
+  }
+  .play-row .play-btn {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--t-idea);
+    color: #000;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .play-row .wf { flex: 1; min-width: 0; }
+  .play-row .dur { font-size: 12px; color: var(--text-dim); font-feature-settings: 'tnum'; }
+
+  .transcript-box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-2);
+  }
+
+  .project-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: rgba(255,184,77,0.1);
+    border: 1px solid rgba(255,184,77,0.3);
+    border-radius: 100px;
+    font-size: 13px;
+    color: var(--t-idea);
+    font-weight: 500;
+  }
+  .project-badge .conf { color: var(--text-dim); font-size: 11px; }
+
+  .related-card {
+    padding: 11px 14px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    line-height: 1.4;
+    cursor: pointer;
+  }
+  .related-card .h {
+    font-size: 10px;
+    color: var(--t-idea);
+    margin-bottom: 4px;
+    letter-spacing: 0.05em;
+    display: flex;
+    justify-content: space-between;
+  }
+  .related-card .h .sim {
+    color: var(--text-dim);
+    font-feature-settings: 'tnum';
+  }
+  .related-card .txt { color: var(--text-2); }
+
+  #s5 .detail-actions button.primary { background: var(--t-idea); border-color: var(--t-idea); color: #000; }
+
+  /* ============================================================ */
+  /* Screen 6 · 待办/日程 详情                                      */
+  /* ============================================================ */
+  #s6 .type-tag { background: rgba(94,214,122,0.15); color: var(--t-todo); }
+  #s6 .bullet::before { color: var(--t-todo); }
+  .parse-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px 18px;
+    font-size: 13px;
+  }
+  .parse-grid dt { color: var(--text-dim); }
+  .parse-grid dd { color: var(--text); font-weight: 500; }
+  .parse-grid dd .hl { color: var(--t-todo); }
+
+  .written-to {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: rgba(94,214,122,0.06);
+    border: 1px solid rgba(94,214,122,0.25);
+    border-radius: 14px;
+  }
+  .written-to .cal-icon {
+    width: 44px; height: 44px;
+    background: #fff;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    flex-shrink: 0;
+  }
+  .written-to .cal-icon .m { font-size: 8px; font-weight: 700; color: var(--red); }
+  .written-to .cal-icon .d { font-size: 20px; font-weight: 700; line-height: 1; }
+  .written-to .info { flex: 1; }
+  .written-to .info .t { font-size: 14px; font-weight: 500; }
+  .written-to .info .s { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+  .written-to .open {
+    color: var(--t-todo);
+    font-size: 13px;
+    font-weight: 600;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .no-conflict {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: rgba(94,214,122,0.08);
+    border-radius: 10px;
+    font-size: 13px;
+  }
+  .no-conflict .ic { color: var(--t-todo); font-size: 16px; }
+
+  #s6 .detail-actions button.primary { background: var(--t-todo); border-color: var(--t-todo); color: #000; }
+
+  /* ============================================================ */
+  /* Screen 7 · 录音中                                              */
   /* ============================================================ */
   #s7 { background: radial-gradient(circle at 50% 40%, rgba(124,247,255,0.08), #000 70%); }
   #s7 .scroll {
@@ -590,13 +937,11 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    justify-content: center;
   }
   .listening-state {
     font-size: 13px;
-    color: var(--accent-bright);
+    color: var(--t-rec);
     letter-spacing: 0.18em;
-    text-transform: uppercase;
     margin-bottom: 44px;
     font-weight: 600;
     display: flex;
@@ -621,7 +966,7 @@
   .wave span {
     display: block;
     width: 6px;
-    background: var(--accent-bright);
+    background: var(--t-rec);
     border-radius: 6px;
     animation: wave 1.2s ease-in-out infinite;
     box-shadow: 0 0 8px rgba(124,247,255,0.5);
@@ -657,7 +1002,7 @@
   .chip {
     background: rgba(124,247,255,0.1);
     border: 1px solid rgba(124,247,255,0.3);
-    color: var(--accent-bright);
+    color: var(--t-rec);
     font-size: 12px;
     padding: 7px 14px;
     border-radius: 100px;
@@ -686,182 +1031,157 @@
   }
 
   /* ============================================================ */
-  /* Screen 8 · PROCESSING                                         */
+  /* Screen 8 · Memory Tree                                         */
   /* ============================================================ */
-  #s8 .scroll {
-    padding-top: 24px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+  #s8 .scroll { padding-top: 12px; }
+  #s8 .head {
+    padding: 4px 0 16px;
   }
-  #s8 h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
-  #s8 .sub { font-size: 13px; color: var(--text-dim); margin-bottom: 40px; }
-  .orbit {
-    position: relative;
-    width: 220px;
-    height: 220px;
-    margin-bottom: 36px;
-  }
-  .orbit .core {
-    position: absolute;
-    inset: 42%;
-    border-radius: 50%;
-    background: radial-gradient(circle, var(--accent-bright), transparent 70%);
-    box-shadow: 0 0 40px var(--accent-bright);
-    animation: pulse 2s ease-in-out infinite;
-  }
-  .orbit .o {
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    border: 1.5px dashed rgba(124,247,255,0.35);
-    animation: spin 20s linear infinite;
-  }
-  .orbit .o2 { inset: 18px; border-color: rgba(167,139,250,0.3); animation: spin 15s linear infinite reverse; }
-  .orbit .o3 { inset: 36px; border-color: rgba(124,247,255,0.2); animation: spin 10s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-label {
-    font-size: 12px;
-    color: var(--text-dim);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-bottom: 32px;
-  }
-  .ctx-list {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .ctx-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    font-size: 14px;
-    text-align: left;
-    animation: rise 0.5s ease-out both;
-  }
-  .ctx-row:nth-child(1) { animation-delay: 0.1s; }
-  .ctx-row:nth-child(2) { animation-delay: 0.25s; }
-  .ctx-row:nth-child(3) { animation-delay: 0.4s; }
-  .ctx-row:nth-child(4) { animation-delay: 0.55s; }
-  .ctx-row .ic {
-    width: 32px; height: 32px;
-    background: rgba(124,247,255,0.12);
-    border-radius: 9px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-  }
-  .ctx-row .nm { flex: 1; color: var(--text); font-weight: 500; }
-  .ctx-row .mt { color: var(--text-dim); font-size: 12px; }
-
-  /* ============================================================ */
-  /* Screen 9 · RESULT (email task)                                */
-  /* ============================================================ */
-  #s9 .scroll { padding-top: 10px; }
-  .email-field {
-    padding: 13px 0;
-    border-bottom: 0.5px solid var(--border);
-    font-size: 15px;
-    display: flex;
-    gap: 8px;
-  }
-  .email-field .k { color: var(--text-dim); width: 40px; flex-shrink: 0; }
-  .email-field .v { color: var(--text); flex: 1; }
-  .email-field .v.link { color: var(--blue); }
-  .email-body {
-    margin-top: 18px;
-    font-size: 15px;
-    line-height: 1.55;
-    color: var(--text);
-    padding-bottom: 24px;
-  }
-  .email-body b { color: var(--accent-bright); font-weight: 500; }
-  .email-body p { margin-bottom: 14px; }
-  #s9 .bottom-actions {
-    padding: 14px 24px 30px;
-    display: flex;
-    gap: 10px;
-    border-top: 0.5px solid var(--border);
-    background: rgba(22,22,23,0.7);
-    backdrop-filter: blur(20px);
-  }
-  #s9 .bottom-actions button {
-    flex: 1;
-    padding: 13px;
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    background: var(--panel);
-    color: var(--text);
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-  }
-  #s9 .bottom-actions button.primary {
-    background: var(--accent-bright);
-    color: #000;
-    border-color: var(--accent-bright);
-    font-weight: 600;
-  }
-
-  /* ============================================================ */
-  /* Screen 10 · MEMORY GRAPH                                      */
-  /* ============================================================ */
-  #s10 .scroll { padding-top: 12px; }
-  #s10 h2 {
-    font-size: 26px;
+  #s8 h2 {
+    font-size: 24px;
     font-weight: 800;
     letter-spacing: -0.02em;
     margin-bottom: 4px;
-  }
-  #s10 .sub { font-size: 13px; color: var(--text-dim); margin-bottom: 20px; }
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    display: flex;
+    align-items: baseline;
     gap: 8px;
-    margin-bottom: 20px;
   }
-  .stat {
+  #s8 h2 .en {
+    font-size: 13px;
+    color: var(--text-dim);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+  #s8 .sub { font-size: 12px; color: var(--text-dim); }
+
+  /* L-1 用户根画像 */
+  .root-profile {
+    background: linear-gradient(135deg, rgba(46,196,182,0.12), rgba(124,247,255,0.08));
+    border: 1px solid rgba(46,196,182,0.28);
+    border-radius: 18px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .root-profile .lv {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(46,196,182,0.2);
+    color: #2EC4B6;
+    margin-bottom: 10px;
+  }
+  .root-profile .body {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--text-2);
+  }
+  .root-profile .ts {
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--text-dimmer);
+    font-feature-settings: 'tnum';
+  }
+
+  /* 层级健康度 */
+  .layer-stats {
     background: var(--panel);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 12px 8px;
-    text-align: center;
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
   }
-  .stat .v {
-    font-size: 22px;
-    font-weight: 800;
-    color: var(--accent-bright);
-    letter-spacing: -0.02em;
-  }
-  .stat .l {
-    font-size: 9px;
+  .layer-stats .h {
+    font-size: 11px;
     color: var(--text-dim);
-    margin-top: 4px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
-  .graph-svg {
+  .layer-stats .h .ok {
+    color: var(--t-todo);
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .layer-stats .h .ok::before {
+    content: "●";
+    font-size: 8px;
+  }
+  .layer-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 12px;
+  }
+  .layer-row:last-child { border-bottom: none; }
+  .layer-row .lv {
+    font-size: 10px;
+    font-weight: 700;
+    font-feature-settings: 'tnum';
+    padding: 2px 6px;
+    border-radius: 4px;
+    min-width: 30px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .layer-row .nm { flex: 1; color: var(--text); font-weight: 500; }
+  .layer-row .desc { color: var(--text-dim); font-size: 11px; }
+  .layer-row .cnt {
+    color: var(--text);
+    font-weight: 700;
+    font-feature-settings: 'tnum';
+    min-width: 40px;
+    text-align: right;
+  }
+  .lv-L-1 { background: rgba(46,196,182,0.2); color: #2EC4B6; }
+  .lv-L0  { background: rgba(167,139,250,0.2); color: var(--t-cmd); }
+  .lv-L1  { background: rgba(100,150,255,0.2); color: #6496FF; }
+  .lv-L2  { background: rgba(94,214,122,0.2); color: var(--t-todo); }
+  .lv-L3  { background: rgba(255,184,77,0.18); color: var(--t-idea); }
+  .lv-L4  { background: rgba(255,255,255,0.08); color: var(--text-dim); }
+
+  /* 树可视化 */
+  .tree-svg {
     width: 100%;
-    height: 240px;
-    margin-bottom: 20px;
+    height: 280px;
+    margin-bottom: 6px;
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 18px;
   }
+  .tree-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    padding: 0 6px 16px;
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+  .tree-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .tree-legend i {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
   .top-ctx h3 {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-dim);
     letter-spacing: 0.08em;
-    text-transform: uppercase;
     margin-bottom: 10px;
     font-weight: 600;
   }
@@ -876,12 +1196,12 @@
   .top-ctx .row:last-child { border-bottom: none; }
   .top-ctx .p { color: var(--text); font-weight: 500; }
   .top-ctx .r { color: var(--text-dim); font-size: 12px; margin-top: 2px; }
-  .top-ctx .s { color: var(--accent-bright); font-weight: 700; font-size: 15px; font-feature-settings: 'tnum'; }
+  .top-ctx .s { color: var(--t-rec); font-weight: 700; font-size: 15px; font-feature-settings: 'tnum'; }
 
   /* ============================================================ */
-  /* Screen 11 · AGENT (simple)                                    */
+  /* Screen 9 · Agent                                               */
   /* ============================================================ */
-  #s11 .scroll { padding-top: 12px; display: flex; flex-direction: column; }
+  #s9 .scroll { padding-top: 12px; display: flex; flex-direction: column; }
   .agent-header { text-align: center; padding: 12px 0 20px; }
   .agent-header h2 { font-size: 22px; font-weight: 700; }
   .agent-header .sub { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
@@ -889,8 +1209,8 @@
     max-width: 78%;
     padding: 12px 16px;
     border-radius: 20px;
-    font-size: 15px;
-    line-height: 1.4;
+    font-size: 14px;
+    line-height: 1.5;
     margin-bottom: 10px;
     animation: rise 0.4s ease-out both;
   }
@@ -907,7 +1227,7 @@
     align-self: flex-start;
     border-bottom-left-radius: 6px;
   }
-  .msg.bot b { color: var(--accent-bright); }
+  .msg.bot b { color: var(--t-rec); }
   .agent-input {
     margin-top: auto;
     padding: 14px 0 20px;
@@ -926,7 +1246,7 @@
   .agent-input .send {
     width: 44px; height: 44px;
     border-radius: 50%;
-    background: var(--accent-bright);
+    background: var(--t-rec);
     border: none;
     color: #000;
     font-size: 18px;
@@ -934,9 +1254,9 @@
   }
 
   /* ============================================================ */
-  /* Screen 12 · PROFILE                                           */
+  /* Screen 10 · 个人                                               */
   /* ============================================================ */
-  #s12 .scroll { padding-top: 12px; }
+  #s10 .scroll { padding-top: 12px; }
   .profile-head {
     display: flex;
     align-items: center;
@@ -946,7 +1266,7 @@
   .avatar {
     width: 64px; height: 64px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent-bright), var(--purple));
+    background: linear-gradient(135deg, var(--t-rec), var(--t-cmd));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -956,8 +1276,8 @@
   }
   .profile-head .name { font-size: 20px; font-weight: 700; }
   .profile-head .plan {
-    font-size: 12px;
-    color: var(--accent-bright);
+    font-size: 11px;
+    color: var(--t-rec);
     background: rgba(124,247,255,0.12);
     padding: 3px 10px;
     border-radius: 100px;
@@ -978,11 +1298,7 @@
   .profile-ring .info { flex: 1; }
   .profile-ring .info .t { font-size: 15px; font-weight: 600; }
   .profile-ring .info .s { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
-  .profile-ring .battery {
-    font-size: 13px;
-    color: var(--green);
-    font-weight: 600;
-  }
+  .profile-ring .battery { font-size: 13px; color: var(--t-todo); font-weight: 600; }
   .list-group {
     background: var(--panel);
     border: 1px solid var(--border);
@@ -1012,425 +1328,902 @@
   .list-row .t { flex: 1; }
   .list-row .chev { color: var(--text-dimmer); font-size: 14px; }
 
-  /* Responsive scale for small screens */
+  /* Responsive scale */
   @media (max-width: 460px), (max-height: 900px) {
-    .stage { gap: 0; }
-    .phone {
-      transform: scale(0.88);
-      transform-origin: center;
-    }
     .brand { top: 16px; left: 16px; font-size: 10px; }
     .hint { bottom: 12px; font-size: 10px; }
+    .phone { transform: scale(0.88); transform-origin: center; }
   }
-  @media (max-height: 780px) {
-    .phone { transform: scale(0.78); }
-  }
-  @media (max-height: 680px) {
-    .phone { transform: scale(0.7); }
-  }
+  @media (max-height: 780px) { .phone { transform: scale(0.78); } }
+  @media (max-height: 680px) { .phone { transform: scale(0.7); } }
 </style>
 </head>
 <body>
 
 <div class="brand">MONO<span>•</span>STONE</div>
-<div class="hint">Interactive iOS Prototype · tap <b>buttons</b> and <b>cards</b> to navigate</div>
 
-<div class="stage">
-  <div class="phone">
+<div class="phone">
 
-    <!-- Status bar (persistent) -->
-    <div class="status-bar">
-      <span class="time">9:41</span>
-      <span class="icons">
-        <svg viewBox="0 0 16 11" fill="currentColor"><path d="M1 9h1v2H1zM4 7h1v4H4zM7 5h1v6H7zM10 3h1v8h-1zM13 1h1v10h-1z"/></svg>
-        <svg viewBox="0 0 16 11" fill="currentColor"><path d="M8 3c2 0 4 1 5 2l1-1C13 3 11 2 8 2S3 3 2 4l1 1c1-1 3-2 5-2zm0 3c1 0 2 0 3 1l1-1c-1-1-2-2-4-2S5 5 4 6l1 1c1-1 2-1 3-1zm0 3a1 1 0 100 2 1 1 0 000-2z"/></svg>
-        <svg viewBox="0 0 22 11" fill="none" stroke="currentColor"><rect x="1" y="2" width="18" height="7" rx="2"/><rect x="3" y="4" width="14" height="3" fill="currentColor"/><rect x="20" y="4" width="1" height="3" fill="currentColor"/></svg>
-      </span>
-    </div>
-
-    <!-- ============ Screen 1: Splash ============ -->
-    <div class="screen active" id="s1">
-      <div class="wrap">
-        <div class="ring"></div>
-        <h1>MONOSTONE</h1>
-        <div class="tag">AI Smart Ring</div>
-        <button class="primary-btn" onclick="go('s2')">Begin →</button>
-      </div>
-    </div>
-
-    <!-- ============ Screen 2: Problem + Login ============ -->
-    <div class="screen" id="s2">
-      <div class="scroll">
-        <h2>The best <em>ideas</em> happen where you can't type.</h2>
-        <div class="problem-card">
-          <span class="emoji">🚶</span>
-          <b>Walking to your next meeting</b>
-          You think of a perfect follow-up email.
-        </div>
-        <div class="problem-card">
-          <span class="emoji">🚗</span>
-          <b>Driving home</b>
-          You want to rethink the pitch deck structure.
-        </div>
-        <div class="problem-card">
-          <span class="emoji">🍽</span>
-          <b>At lunch</b>
-          A quick competitor check would change your strategy.
-        </div>
-      </div>
-      <div class="login-actions">
-        <button class="primary-btn" onclick="go('s3')">Continue with Apple</button>
-        <button class="ghost-btn" onclick="go('s3')">Sign in with Email</button>
-      </div>
-    </div>
-
-    <!-- ============ Screen 3: How It Works ============ -->
-    <div class="screen" id="s3">
-      <div class="navbar">
-        <button class="back" onclick="go('s2')">‹ Back</button>
-        <div class="title">How it works</div>
-        <button class="right" style="visibility:hidden">Skip</button>
-      </div>
-      <div class="scroll">
-        <div class="header">
-          <h2>Three seconds.<br/>No typing. Ever.</h2>
-          <div class="sub">Monostone learns your context — so you don't have to explain yourself again.</div>
-        </div>
-        <div class="step">
-          <div class="n">1</div>
-          <div>
-            <h3>Raise</h3>
-            <p>3-second trigger. Double-tap your ring to start.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="n">2</div>
-          <div>
-            <h3>Speak</h3>
-            <p>Brief & natural. Just talk it out.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="n">3</div>
-          <div>
-            <h3>Done</h3>
-            <p>AI handles the rest. Draft ready in your pocket.</p>
-          </div>
-        </div>
-      </div>
-      <div class="bottom-actions">
-        <button class="primary-btn" onclick="go('s4')">Continue →</button>
-      </div>
-    </div>
-
-    <!-- ============ Screen 4: Context Connect ============ -->
-    <div class="screen" id="s4">
-      <div class="navbar">
-        <button class="back" onclick="go('s3')">‹ Back</button>
-        <div class="title">Connect</div>
-        <button class="right" onclick="go('s5')">Skip</button>
-      </div>
-      <div class="scroll">
-        <h2>Connect your context</h2>
-        <div class="sub">Plug in where your work already lives.</div>
-        <div class="integrations">
-          <div class="int" onclick="this.classList.toggle('on')">📝</div>
-          <div class="int on" onclick="this.classList.toggle('on')">📅</div>
-          <div class="int on" onclick="this.classList.toggle('on')">📧</div>
-          <div class="int" onclick="this.classList.toggle('on')">💬</div>
-          <div class="int" onclick="this.classList.toggle('on')">📊</div>
-          <div class="int on" onclick="this.classList.toggle('on')">🗂</div>
-          <div class="int" onclick="this.classList.toggle('on')">🔗</div>
-          <div class="int" onclick="this.classList.toggle('on')">☁️</div>
-          <div class="int" onclick="this.classList.toggle('on')">🧠</div>
-          <div class="int" onclick="this.classList.toggle('on')">🎥</div>
-          <div class="int" onclick="this.classList.toggle('on')">📂</div>
-          <div class="int" onclick="this.classList.toggle('on')">⚙️</div>
-        </div>
-        <div class="count"><b>+992</b> integrations available</div>
-      </div>
-      <div class="bottom-actions">
-        <button class="primary-btn" onclick="go('s5')">Continue →</button>
-        <button class="ghost-btn" onclick="go('s5')">Skip for now</button>
-      </div>
-    </div>
-
-    <!-- ============ Screen 5: Ring Pairing ============ -->
-    <div class="screen" id="s5">
-      <div class="navbar">
-        <button class="back" onclick="go('s4')">‹ Back</button>
-        <div class="title">Pair Ring</div>
-        <button class="right" style="visibility:hidden">Skip</button>
-      </div>
-      <div class="scroll">
-        <div class="pair-status"><span class="dot"></span>Monostone Ring · detected</div>
-        <div class="ring-viz"></div>
-        <h2>Keep your ring nearby</h2>
-        <div class="body">Keep your ring charged and within 30cm. Pairing takes under 10 seconds.</div>
-      </div>
-      <div class="bottom-actions">
-        <button class="primary-btn" onclick="go('s6')">Pair Ring →</button>
-        <button class="ghost-btn" onclick="go('s6')">Skip for now</button>
-      </div>
-    </div>
-
-    <!-- ============ Screen 6: Home Dashboard (Timeline Tab) ============ -->
-    <div class="screen" id="s6">
-      <div class="scroll">
-        <div class="home-header">
-          <div class="greet">Good morning.</div>
-          <div class="status"><span class="d"></span>Day 12 · Ring connected</div>
-        </div>
-        <div class="metric-card" onclick="go('s10')">
-          <div class="big">87%</div>
-          <div class="lbl">312 interactions logged</div>
-          <div class="hl">Emails now near send-ready ✨</div>
-        </div>
-        <div class="section-title">Recent tasks</div>
-        <div class="task-item" onclick="go('s9')">
-          <div>
-            <div class="name">Drafted follow-up for Chen</div>
-            <div class="meta">Series A · investor meeting</div>
-          </div>
-          <div class="time">2h</div>
-        </div>
-        <div class="task-item">
-          <div>
-            <div class="name">Logged team sync issues</div>
-            <div class="meta">4 items added to Linear</div>
-          </div>
-          <div class="time">4h</div>
-        </div>
-        <div class="task-item">
-          <div>
-            <div class="name">Set dentist reminder</div>
-            <div class="meta">Thu 2:30 pm · Calendar</div>
-          </div>
-          <div class="time">6h</div>
-        </div>
-        <div class="task-item">
-          <div>
-            <div class="name">Sandbar competitor research</div>
-            <div class="meta">Working · ~3 min remaining</div>
-          </div>
-          <div class="time live">now</div>
-        </div>
-        <div style="height: 120px"></div>
-      </div>
-      <button class="fab" onclick="go('s7')">🎙</button>
-      <div class="tabbar">
-        <button class="tab active" onclick="tabGo('s6', this)"><span class="icon">🏠</span><span class="lbl">Home</span></button>
-        <button class="tab" onclick="tabGo('s10', this)"><span class="icon">🧠</span><span class="lbl">Memory</span></button>
-        <button class="tab" onclick="tabGo('s11', this)"><span class="icon">🤖</span><span class="lbl">Agent</span></button>
-        <button class="tab" onclick="tabGo('s12', this)"><span class="icon">👤</span><span class="lbl">Profile</span></button>
-      </div>
-    </div>
-
-    <!-- ============ Screen 7: Listening ============ -->
-    <div class="screen" id="s7">
-      <div class="navbar">
-        <button class="back" onclick="go('s6')">‹ Cancel</button>
-        <div class="title"></div>
-        <button class="right" style="visibility:hidden">Skip</button>
-      </div>
-      <div class="scroll">
-        <div class="listening-state"><span class="d"></span>Listening</div>
-        <div class="wave">
-          <span></span><span></span><span></span><span></span><span></span>
-          <span></span><span></span><span></span><span></span><span></span>
-        </div>
-        <div class="ctx-loaded">Context loaded · <b>Series A</b></div>
-        <div class="ctx-chips">
-          <span class="chip">Chen Wei · Sequoia</span>
-          <span class="chip">Meeting · 2h ago</span>
-          <span class="chip">3 open threads</span>
-        </div>
-        <div class="stop-area">
-          <button class="stop-btn" onclick="go('s8')"></button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ============ Screen 8: Processing ============ -->
-    <div class="screen" id="s8">
-      <div class="navbar">
-        <button class="back" onclick="go('s6')">‹ Back</button>
-        <div class="title">Processing</div>
-        <button class="right" style="visibility:hidden">Skip</button>
-      </div>
-      <div class="scroll">
-        <h2>Connecting the dots</h2>
-        <div class="sub">Pulling in everything relevant to this moment…</div>
-        <div class="orbit">
-          <div class="o"></div><div class="o o2"></div><div class="o o3"></div>
-          <div class="core"></div>
-        </div>
-        <div class="loading-label">Synthesizing…</div>
-        <div class="ctx-list">
-          <div class="ctx-row"><div class="ic">🎙</div><div class="nm">Meeting recording</div><div class="mt">2h ago</div></div>
-          <div class="ctx-row"><div class="ic">👤</div><div class="nm">Chen Wei</div><div class="mt">investor profile</div></div>
-          <div class="ctx-row"><div class="ic">✉️</div><div class="nm">Your email tone & style</div><div class="mt">learned</div></div>
-          <div class="ctx-row"><div class="ic">🧵</div><div class="nm">Series A thread</div><div class="mt">8 messages</div></div>
-        </div>
-        <div style="height: 24px"></div>
-        <button class="primary-btn" onclick="go('s9')" style="width:100%;min-width:0">See result →</button>
-        <div style="height: 24px"></div>
-      </div>
-    </div>
-
-    <!-- ============ Screen 9: Result (email) ============ -->
-    <div class="screen" id="s9">
-      <div class="navbar">
-        <button class="back" onclick="go('s6')">‹ Close</button>
-        <div class="title">New Draft</div>
-        <button class="right">Edit</button>
-      </div>
-      <div class="scroll">
-        <div class="email-field"><span class="k">To:</span><span class="v link">chen.wei@sequoia.com</span></div>
-        <div class="email-field"><span class="k">Re:</span><span class="v">Following up — Series A discussion</span></div>
-        <div class="email-body">
-          <p>Hi Chen,</p>
-          <p>Really enjoyed our conversation. A few things I want to follow up on:</p>
-          <p><b>On the GTM question</b> — we're targeting enterprise knowledge workers first, with a self-serve motion launching Q3. ARR target is <b>$2M EOY</b>.</p>
-          <p><b>On the moat</b> — context compounding is the durable layer. Every recording makes the next output better, which is why Day 30 answers take 3 seconds, not 30.</p>
-          <p>Happy to dig in deeper on any of this. Thanks again —</p>
-          <p>Mingming</p>
-        </div>
-      </div>
-      <div class="bottom-actions">
-        <button>Regenerate</button>
-        <button class="primary" onclick="go('s6')">Send →</button>
-      </div>
-    </div>
-
-    <!-- ============ Screen 10: Memory Graph ============ -->
-    <div class="screen" id="s10">
-      <div class="scroll">
-        <h2>Knowledge graph</h2>
-        <div class="sub">Your context. Compounding every day.</div>
-        <div class="stats">
-          <div class="stat"><div class="v">30</div><div class="l">DAYS</div></div>
-          <div class="stat"><div class="v">312</div><div class="l">LOGS</div></div>
-          <div class="stat"><div class="v">47</div><div class="l">CONTACTS</div></div>
-          <div class="stat"><div class="v">89</div><div class="l">MEETINGS</div></div>
-        </div>
-        <svg class="graph-svg" viewBox="0 0 340 240" xmlns="http://www.w3.org/2000/svg">
-          <g stroke="rgba(124,247,255,0.35)" stroke-width="1" fill="none">
-            <line x1="170" y1="120" x2="70" y2="60"/>
-            <line x1="170" y1="120" x2="270" y2="65"/>
-            <line x1="170" y1="120" x2="60" y2="180"/>
-            <line x1="170" y1="120" x2="280" y2="185"/>
-            <line x1="170" y1="120" x2="170" y2="35"/>
-            <line x1="70" y1="60" x2="170" y2="35"/>
-            <line x1="270" y1="65" x2="170" y2="35"/>
-            <line x1="60" y1="180" x2="280" y2="185" stroke-dasharray="3,4"/>
-          </g>
-          <g font-family="-apple-system, Inter" font-size="10" fill="#fff" text-anchor="middle">
-            <circle cx="170" cy="120" r="22" fill="rgba(124,247,255,0.25)" stroke="#7cf7ff" stroke-width="2"/>
-            <text x="170" y="124" font-weight="700" font-size="11">YOU</text>
-            <circle cx="70" cy="60" r="16" fill="rgba(167,139,250,0.25)" stroke="#a78bfa" stroke-width="1.5"/>
-            <text x="70" y="63">Chen Wei</text>
-            <circle cx="270" cy="65" r="15" fill="rgba(167,139,250,0.25)" stroke="#a78bfa" stroke-width="1.5"/>
-            <text x="270" y="68">Sarah K.</text>
-            <circle cx="170" cy="35" r="14" fill="rgba(255,149,0,0.25)" stroke="#ff9500" stroke-width="1.5"/>
-            <text x="170" y="38">Series A</text>
-            <circle cx="60" cy="180" r="14" fill="rgba(52,199,89,0.25)" stroke="#34c759" stroke-width="1.5"/>
-            <text x="60" y="183">GTM</text>
-            <circle cx="280" cy="185" r="15" fill="rgba(52,199,89,0.25)" stroke="#34c759" stroke-width="1.5"/>
-            <text x="280" y="188">Pitch</text>
-          </g>
-        </svg>
-        <div class="top-ctx">
-          <h3>Top context · by strength</h3>
-          <div class="row">
-            <div><div class="p">Chen Wei</div><div class="r">Sequoia · 12 meetings · Series A</div></div>
-            <div class="s">98%</div>
-          </div>
-          <div class="row">
-            <div><div class="p">Sarah Kim</div><div class="r">Head of Product · 8 meetings</div></div>
-            <div class="s">82%</div>
-          </div>
-          <div class="row">
-            <div><div class="p">Marcus T.</div><div class="r">Engineering lead · 6 meetings</div></div>
-            <div class="s">74%</div>
-          </div>
-        </div>
-        <div style="height: 120px"></div>
-      </div>
-      <div class="tabbar">
-        <button class="tab" onclick="tabGo('s6', this)"><span class="icon">🏠</span><span class="lbl">Home</span></button>
-        <button class="tab active" onclick="tabGo('s10', this)"><span class="icon">🧠</span><span class="lbl">Memory</span></button>
-        <button class="tab" onclick="tabGo('s11', this)"><span class="icon">🤖</span><span class="lbl">Agent</span></button>
-        <button class="tab" onclick="tabGo('s12', this)"><span class="icon">👤</span><span class="lbl">Profile</span></button>
-      </div>
-    </div>
-
-    <!-- ============ Screen 11: Agent ============ -->
-    <div class="screen" id="s11">
-      <div class="scroll">
-        <div class="agent-header">
-          <h2>Agent</h2>
-          <div class="sub">Ask anything · context-aware</div>
-        </div>
-        <div class="msg bot">Hi Mingming 👋 What can I do for you right now?</div>
-        <div class="msg user">Draft a follow-up for Chen based on yesterday's meeting</div>
-        <div class="msg bot">Pulling in <b>Chen Wei · Sequoia</b>, the recording from 2h ago, and your email style. One moment…</div>
-        <div class="msg bot">✅ Draft ready. Want me to open it?</div>
-        <div class="agent-input">
-          <div class="field">Ask or tell Monostone…</div>
-          <button class="send">↑</button>
-        </div>
-      </div>
-      <div class="tabbar">
-        <button class="tab" onclick="tabGo('s6', this)"><span class="icon">🏠</span><span class="lbl">Home</span></button>
-        <button class="tab" onclick="tabGo('s10', this)"><span class="icon">🧠</span><span class="lbl">Memory</span></button>
-        <button class="tab active" onclick="tabGo('s11', this)"><span class="icon">🤖</span><span class="lbl">Agent</span></button>
-        <button class="tab" onclick="tabGo('s12', this)"><span class="icon">👤</span><span class="lbl">Profile</span></button>
-      </div>
-    </div>
-
-    <!-- ============ Screen 12: Profile ============ -->
-    <div class="screen" id="s12">
-      <div class="scroll">
-        <div class="profile-head">
-          <div class="avatar">M</div>
-          <div>
-            <div class="name">Mingming</div>
-            <div class="plan">Max Plan</div>
-          </div>
-        </div>
-        <div class="profile-ring">
-          <div class="ic">💍</div>
-          <div class="info">
-            <div class="t">Monostone Ring</div>
-            <div class="s">Connected · Day 12</div>
-          </div>
-          <div class="battery">87%</div>
-        </div>
-        <div class="list-group">
-          <div class="list-row"><div class="ic">📅</div><div class="t">Integrations</div><div class="chev">›</div></div>
-          <div class="list-row"><div class="ic">🔗</div><div class="t">Destinations</div><div class="chev">›</div></div>
-          <div class="list-row"><div class="ic">🔑</div><div class="t">BYOK · API Keys</div><div class="chev">›</div></div>
-        </div>
-        <div class="list-group">
-          <div class="list-row"><div class="ic">🔒</div><div class="t">Privacy & Data</div><div class="chev">›</div></div>
-          <div class="list-row"><div class="ic">📦</div><div class="t">Export Data</div><div class="chev">›</div></div>
-          <div class="list-row"><div class="ic">⚙️</div><div class="t">Advanced</div><div class="chev">›</div></div>
-        </div>
-        <div class="list-group">
-          <div class="list-row" onclick="go('s1')"><div class="ic">↩️</div><div class="t">Restart Onboarding</div><div class="chev">›</div></div>
-        </div>
-        <div style="height: 120px"></div>
-      </div>
-      <div class="tabbar">
-        <button class="tab" onclick="tabGo('s6', this)"><span class="icon">🏠</span><span class="lbl">Home</span></button>
-        <button class="tab" onclick="tabGo('s10', this)"><span class="icon">🧠</span><span class="lbl">Memory</span></button>
-        <button class="tab" onclick="tabGo('s11', this)"><span class="icon">🤖</span><span class="lbl">Agent</span></button>
-        <button class="tab active" onclick="tabGo('s12', this)"><span class="icon">👤</span><span class="lbl">Profile</span></button>
-      </div>
-    </div>
-
+  <div class="status-bar">
+    <span class="time">9:41</span>
+    <span class="icons">
+      <svg viewBox="0 0 16 11" fill="currentColor"><path d="M1 9h1v2H1zM4 7h1v4H4zM7 5h1v6H7zM10 3h1v8h-1zM13 1h1v10h-1z"/></svg>
+      <svg viewBox="0 0 16 11" fill="currentColor"><path d="M8 3c2 0 4 1 5 2l1-1C13 3 11 2 8 2S3 3 2 4l1 1c1-1 3-2 5-2zm0 3c1 0 2 0 3 1l1-1c-1-1-2-2-4-2S5 5 4 6l1 1c1-1 2-1 3-1zm0 3a1 1 0 100 2 1 1 0 000-2z"/></svg>
+      <svg viewBox="0 0 22 11" fill="none" stroke="currentColor"><rect x="1" y="2" width="18" height="7" rx="2"/><rect x="3" y="4" width="14" height="3" fill="currentColor"/><rect x="20" y="4" width="1" height="3" fill="currentColor"/></svg>
+    </span>
   </div>
+
+  <!-- ============ 1 · 启动 ============ -->
+  <div class="screen active" id="s1">
+    <div class="wrap">
+      <div class="ring"></div>
+      <h1>MONOSTONE</h1>
+      <div class="tag">你的专属 AI 戒指</div>
+      <button class="primary-btn" onclick="go('s2')">开始 →</button>
+    </div>
+  </div>
+
+  <!-- ============ 2 · 首页 Timeline ============ -->
+  <div class="screen" id="s2">
+    <div class="scroll">
+      <div class="home-head">
+        <div class="greet">早上好，明明</div>
+        <div class="status"><span class="d"></span>第 12 天 · 戒指已连接 · 今日第 8 次交互</div>
+      </div>
+
+      <div class="digest" onclick="go('s8')">
+        <div class="h">📊 今日速览</div>
+        <div class="big">你今天和 AI 交互了 <b>8 次</b>。其中 <b>3 次走路时</b>、<b>2 次会后</b>、<b>3 次电脑前</b>。<br/>Monostone 为你省下 <b>47 分钟</b>整理时间。</div>
+        <div class="foot">
+          <span>🎙️ <b>2</b> 长录音</span>
+          <span>⚡ <b>3</b> 指令</span>
+          <span>💡 <b>2</b> 灵感</span>
+          <span>✅ <b>1</b> 待办</span>
+        </div>
+      </div>
+
+      <div class="section-label">
+        <span>最近活动</span>
+        <span class="count">今天</span>
+      </div>
+
+      <!-- 类型 1 · 长录音 -->
+      <div class="card rec" onclick="go('s3')">
+        <div class="strip"></div>
+        <div class="icon">🎙</div>
+        <div class="time-right">2 小时前</div>
+        <span class="type-tag">长录音</span>
+        <div class="title">和蔡哥的 Series A 跟进会</div>
+        <div class="meta">
+          <span>⏱ 42:18</span>
+          <span>👥 4 人</span>
+          <span>🏷 Series A</span>
+          <span>✓ 3 项待办</span>
+        </div>
+      </div>
+
+      <!-- 类型 2 · 指令 -->
+      <div class="card cmd" onclick="go('s4')">
+        <div class="strip"></div>
+        <div class="icon">⚡</div>
+        <div class="time-right">1 小时前</div>
+        <span class="type-tag">指令</span>
+        <div class="title">帮我起草给蔡哥的 follow-up 邮件</div>
+        <div class="meta">
+          <span class="status-pill done"><span class="d"></span>已完成</span>
+          <span>🧠 调取 4 项上下文</span>
+        </div>
+      </div>
+
+      <!-- 类型 3 · 灵感 -->
+      <div class="card idea" onclick="go('s5')">
+        <div class="strip"></div>
+        <div class="icon">💡</div>
+        <div class="time-right">45 分钟前</div>
+        <span class="type-tag">灵感</span>
+        <div class="title">Memory 的 L2 到 L3 promotion 可以加一个 confidence decay...</div>
+        <div class="meta">
+          <span>🚶 走路时</span>
+          <span>📂 Monostone 后端</span>
+          <span>🔗 关联 3 条过往</span>
+        </div>
+      </div>
+
+      <!-- 类型 2 · 指令（执行中） -->
+      <div class="card cmd" onclick="go('s4')">
+        <div class="strip"></div>
+        <div class="icon">⚡</div>
+        <div class="time-right">刚刚</div>
+        <span class="type-tag">指令</span>
+        <div class="title">帮我做 Sandbar 最新融资情况的 research</div>
+        <div class="meta">
+          <span class="status-pill running"><span class="d"></span>执行中 · 还剩 ~3 分钟</span>
+        </div>
+      </div>
+
+      <!-- 类型 4 · 待办/日程 -->
+      <div class="card todo" onclick="go('s6')">
+        <div class="strip"></div>
+        <div class="icon">📅</div>
+        <div class="time-right">30 分钟前</div>
+        <span class="type-tag">日程</span>
+        <div class="title">周四下午 3 点去看牙医</div>
+        <div class="meta">
+          <span>📆 4/11 · 15:00</span>
+          <span>✓ 已写入 Apple Calendar</span>
+        </div>
+      </div>
+
+      <!-- 类型 3 · 灵感 2 -->
+      <div class="card idea" onclick="go('s5')">
+        <div class="strip"></div>
+        <div class="icon">💡</div>
+        <div class="time-right">昨天</div>
+        <span class="type-tag">灵感</span>
+        <div class="title">戒指 onboarding 可以加一步 LinkedIn 导入，让 Day 1 就有 context</div>
+        <div class="meta">
+          <span>🚗 开车时</span>
+          <span>📂 Monostone iOS</span>
+        </div>
+      </div>
+
+      <!-- 类型 1 · 长录音 2 -->
+      <div class="card rec" onclick="go('s3')">
+        <div class="strip"></div>
+        <div class="icon">🎙</div>
+        <div class="time-right">昨天</div>
+        <span class="type-tag">长录音</span>
+        <div class="title">林啸 Memory A/B 对比测试评审</div>
+        <div class="meta">
+          <span>⏱ 28:04</span>
+          <span>👥 3 人</span>
+          <span>🏷 Monostone 后端</span>
+        </div>
+      </div>
+
+      <!-- 类型 4 · 待办 2 -->
+      <div class="card todo" onclick="go('s6')">
+        <div class="strip"></div>
+        <div class="icon">✅</div>
+        <div class="time-right">昨天</div>
+        <span class="type-tag">待办</span>
+        <div class="title">提醒 Marshal 周五之前锁定 ODM 供应商</div>
+        <div class="meta">
+          <span>📆 4/12 之前</span>
+          <span>✓ 已写入 Linear</span>
+        </div>
+      </div>
+
+      <div style="height: 120px"></div>
+    </div>
+
+    <button class="fab" onclick="go('s7')">🎙</button>
+
+    <div class="tabbar">
+      <button class="tab active" onclick="go('s2')"><span class="icon">🏠</span><span class="lbl">首页</span></button>
+      <button class="tab" onclick="go('s8')"><span class="icon">🧠</span><span class="lbl">记忆</span></button>
+      <button class="tab" onclick="go('s9')"><span class="icon">🤖</span><span class="lbl">Agent</span></button>
+      <button class="tab" onclick="go('s10')"><span class="icon">👤</span><span class="lbl">我</span></button>
+    </div>
+  </div>
+
+  <!-- ============ 3 · 长录音详情 ============ -->
+  <div class="screen" id="s3">
+    <div class="navbar">
+      <button class="back" onclick="go('s2')">‹ 返回</button>
+      <div class="title">长录音</div>
+      <button class="right">⋯</button>
+    </div>
+    <div class="scroll">
+      <div class="detail-head">
+        <span class="type-tag">🎙 长录音</span>
+        <div class="ti">和蔡哥的 Series A 跟进会</div>
+        <div class="mt">
+          <span><b>42:18</b></span>
+          <span>4/9 · 10:30</span>
+          <span>🏷 Series A</span>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">👥 参与人</div>
+        <div class="sec-box">
+          <div class="people-row">
+            <div class="person"><div class="av">蔡</div><div class="nm">蔡哥</div></div>
+            <div class="person"><div class="av">明</div><div class="nm">明明</div></div>
+            <div class="person"><div class="av" style="background:linear-gradient(135deg,var(--t-cmd),var(--t-idea))">郑</div><div class="nm">郑灿</div></div>
+            <div class="person"><div class="av" style="background:linear-gradient(135deg,var(--t-idea),var(--t-todo))">马</div><div class="nm">马俊</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">📋 结构化摘要</div>
+        <div class="sec-box">
+          <div class="bullet">Linear 对产品定义提出关键质疑：是 infra 还是 closed-loop？明明确认 Agent 层是闭环，仅插件生态开放。</div>
+          <div class="bullet">最大风险不是巨头入局，而是戒指品类本身两年后没起来。巨头入局反而是品类验证。</div>
+          <div class="bullet">Linear 认为 OpenAI 是头号威胁（有硬件团队 + "hammer looking for nail"），Apple 反而排很后。</div>
+          <div class="bullet">双麦 15dB SNR 的优势要包装成 "freestyle recording" 营销故事。</div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">✅ Action Items · 3 项</div>
+        <div class="sec-box">
+          <div class="action-row">
+            <div class="check"></div>
+            <div class="txt">
+              <div class="t">Marshall 锁定 ODM 合作方</div>
+              <div class="d"><span class="owner">Marshall</span><span>📆 4月底</span></div>
+            </div>
+          </div>
+          <div class="action-row">
+            <div class="check"></div>
+            <div class="txt">
+              <div class="t">把双麦 SNR 数据整理成 marketing 故事</div>
+              <div class="d"><span class="owner">石慧</span><span>📆 本周</span></div>
+            </div>
+          </div>
+          <div class="action-row">
+            <div class="check"></div>
+            <div class="txt">
+              <div class="t">研究 EO 14117 美国数据法规</div>
+              <div class="d"><span class="owner">明明</span><span>📆 下周前</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">🎯 关键决策</div>
+        <div>
+          <div class="decision-card">
+            不做 Kickstarter，坚持独立站 DTC
+            <div class="who">— 明明主张，Linear 支持</div>
+          </div>
+          <div class="decision-card">
+            企业场景优先级高于家庭场景，作为 B2B 扩展路径
+            <div class="who">— Linear 建议，待评估</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">🧠 记忆归因 · 本次会议让 Monostone 学到</div>
+        <div class="memory-attr">
+          <div class="row">
+            <span class="ic">→</span>
+            <div><b>蔡哥</b> 是 Linear Capital 的合伙人，偏好 closed-loop 而非 infra 定位</div>
+          </div>
+          <div class="row">
+            <span class="ic">→</span>
+            <div>你在谈 vision 时喜欢用 <b>Polanyi tacit knowledge</b> 的框架</div>
+          </div>
+          <div class="row">
+            <span class="ic">→</span>
+            <div><b>Marshall</b> 在 Linear 眼中硬件可信度很高</div>
+          </div>
+          <div class="row">
+            <span class="ic">→</span>
+            <div><b>Series A</b> 项目新增关键风险：品类形成而非巨头入局</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">📝 完整转录</div>
+        <div class="transcript-toggle">
+          <span>展开 4,281 字转写文本</span>
+          <span class="chev">›</span>
+        </div>
+      </div>
+
+      <div style="height: 20px"></div>
+    </div>
+    <div class="detail-actions">
+      <button>分享</button>
+      <button>→ Notion</button>
+      <button class="primary">发送纪要</button>
+    </div>
+  </div>
+
+  <!-- ============ 4 · 指令详情 ============ -->
+  <div class="screen" id="s4">
+    <div class="navbar">
+      <button class="back" onclick="go('s2')">‹ 返回</button>
+      <div class="title">指令</div>
+      <button class="right">⋯</button>
+    </div>
+    <div class="scroll">
+      <div class="detail-head">
+        <span class="type-tag">⚡ 指令</span>
+        <div class="ti">帮我起草给蔡哥的 follow-up 邮件</div>
+        <div class="mt">
+          <span>✓ 已完成 · 用时 1 分 42 秒</span>
+          <span>1 小时前</span>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">🎙 你说的原话</div>
+        <div class="quote-said">
+          "帮我写封 follow-up 邮件给蔡哥，基于今天早上的会议，重点回应他对估值和 GTM 的疑问。语气参考我平时给投资人的风格。"
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">🧠 调取的上下文 · 4 项</div>
+        <div>
+          <div class="ctx-row">
+            <div class="ic">🎙</div>
+            <div class="nm">今早 Series A 跟进会</div>
+            <div class="src">42 分钟录音</div>
+            <div class="check">✓</div>
+          </div>
+          <div class="ctx-row">
+            <div class="ic">👤</div>
+            <div class="nm">蔡哥的投资人档案</div>
+            <div class="src">Memory</div>
+            <div class="check">✓</div>
+          </div>
+          <div class="ctx-row">
+            <div class="ic">✉️</div>
+            <div class="nm">你的邮件语气和风格</div>
+            <div class="src">自动学习</div>
+            <div class="check">✓</div>
+          </div>
+          <div class="ctx-row">
+            <div class="ic">🧵</div>
+            <div class="nm">Series A 邮件线程</div>
+            <div class="src">8 封历史</div>
+            <div class="check">✓</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">⚙️ 执行步骤</div>
+        <div class="timeline">
+          <div class="step done">
+            <div class="t">解析指令意图</div>
+            <div class="d">识别为邮件起草任务 · 0.3s</div>
+          </div>
+          <div class="step done">
+            <div class="t">从 Memory 检索相关上下文</div>
+            <div class="d">调取 4 项相关记忆 · 2.1s</div>
+          </div>
+          <div class="step done">
+            <div class="t">分析蔡哥的关注点</div>
+            <div class="d">估值、GTM、moat 三个主题 · 4.8s</div>
+          </div>
+          <div class="step done">
+            <div class="t">生成草稿（模仿你的语气）</div>
+            <div class="d">正式但不端着 · 直接说数字 · 18.2s</div>
+          </div>
+          <div class="step done">
+            <div class="t">自我校验 + 推送</div>
+            <div class="d">通过事实核对 · 76.6s</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">✉️ 产出</div>
+        <div class="result-email">
+          <div class="ef"><span class="k">收件人</span><span class="v link">cai@linearcap.com</span></div>
+          <div class="ef"><span class="k">主题</span><span class="v">Re: Series A 讨论跟进</span></div>
+          <div class="body">
+            <p>蔡哥，</p>
+            <p>谢谢今早的深度交流。针对估值和 GTM，我这边补充几点：</p>
+            <p><b>估值</b> — 我们的逻辑基于 Context 复利带来的切换成本，Day 30 的用户迁移成本是 Day 1 的 10 倍以上，这是数据独立性之外的第二条护城河。</p>
+            <p><b>GTM</b> — 企业场景我们认同优先级更高，下周会拉出初版 B2B roadmap 给你看，重点是团队 Context 共享。</p>
+            <p>另外 EO 14117 的角度我这边会查一下，有结论同步。</p>
+            <p>再聊，<br/>明明</p>
+          </div>
+        </div>
+      </div>
+      <div style="height: 20px"></div>
+    </div>
+    <div class="detail-actions">
+      <button>编辑</button>
+      <button>重新生成</button>
+      <button class="primary">发送 →</button>
+    </div>
+  </div>
+
+  <!-- ============ 5 · 灵感详情 ============ -->
+  <div class="screen" id="s5">
+    <div class="navbar">
+      <button class="back" onclick="go('s2')">‹ 返回</button>
+      <div class="title">灵感</div>
+      <button class="right">⋯</button>
+    </div>
+    <div class="scroll">
+      <div class="detail-head">
+        <span class="type-tag">💡 灵感</span>
+        <div class="ti">Memory 的 L2 到 L3 promotion 机制</div>
+        <div class="mt">
+          <span>🚶 走路时捕捉</span>
+          <span>45 分钟前</span>
+          <span>⏱ 0:08</span>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">🎙 原声</div>
+        <div class="play-row">
+          <button class="play-btn">▶</button>
+          <div class="wf">
+            <div class="wave-mini">
+              <span style="height:12px"></span><span style="height:22px"></span><span style="height:32px"></span>
+              <span style="height:18px"></span><span style="height:28px"></span><span style="height:36px"></span>
+              <span style="height:24px"></span><span style="height:14px"></span><span style="height:30px"></span>
+              <span style="height:20px"></span><span style="height:34px"></span><span style="height:16px"></span>
+              <span style="height:26px"></span><span style="height:32px"></span><span style="height:22px"></span>
+              <span style="height:18px"></span><span style="height:28px"></span><span style="height:14px"></span>
+              <span style="height:24px"></span><span style="height:20px"></span><span style="height:16px"></span>
+              <span style="height:22px"></span><span style="height:32px"></span><span style="height:18px"></span>
+              <span style="height:12px"></span><span style="height:26px"></span><span style="height:20px"></span>
+              <span style="height:14px"></span><span style="height:28px"></span><span style="height:24px"></span>
+              <span style="height:18px"></span><span style="height:30px"></span><span style="height:22px"></span>
+              <span style="height:16px"></span><span style="height:12px"></span>
+            </div>
+          </div>
+          <div class="dur">0:08</div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">✏️ 转写文本（可编辑）</div>
+        <div class="transcript-box">
+          Memory 的 L2 到 L3 的 promotion 机制可以加一个 confidence decay，如果一条 memory 在 7 天内没被引用或确认，confidence 要自动往下掉，这样才不会让错误的早期推断一直被当成事实。
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">📂 自动归属</div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <div class="project-badge">📁 Monostone 后端 <span class="conf">· 94%</span></div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">🔗 相关的过往灵感 · Context 复利</div>
+        <div>
+          <div class="related-card">
+            <div class="h"><span>💡 3 天前 · 灵感</span><span class="sim">相关度 87%</span></div>
+            <div class="txt">L2 consolidation 的触发条件现在太激进了，应该加一个 "稳定窗口" 的概念...</div>
+          </div>
+          <div class="related-card">
+            <div class="h"><span>🎙 上周三 · 长录音</span><span class="sim">相关度 72%</span></div>
+            <div class="txt">林啸提到 memory conflict resolution 需要人工 loop，这是 Linear 也指出的问题...</div>
+          </div>
+          <div class="related-card">
+            <div class="h"><span>💡 上周 · 灵感</span><span class="sim">相关度 68%</span></div>
+            <div class="txt">其实可以参考 spaced repetition 的遗忘曲线来设计 memory 的 decay...</div>
+          </div>
+        </div>
+      </div>
+      <div style="height: 20px"></div>
+    </div>
+    <div class="detail-actions">
+      <button>编辑</button>
+      <button>→ 指令</button>
+      <button class="primary">加入项目</button>
+    </div>
+  </div>
+
+  <!-- ============ 6 · 待办/日程 详情 ============ -->
+  <div class="screen" id="s6">
+    <div class="navbar">
+      <button class="back" onclick="go('s2')">‹ 返回</button>
+      <div class="title">日程</div>
+      <button class="right">⋯</button>
+    </div>
+    <div class="scroll">
+      <div class="detail-head">
+        <span class="type-tag">📅 日程</span>
+        <div class="ti">周四下午 3 点去看牙医</div>
+        <div class="mt">
+          <span>30 分钟前捕捉</span>
+          <span>⏱ 0:03</span>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">🎙 你说的原话</div>
+        <div class="quote-said" style="border-left-color:var(--t-todo);background:rgba(94,214,122,0.08)">
+          "提醒我周四下午 3 点去看牙医，在人民医院口腔科。"
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">📋 AI 解析结果</div>
+        <div class="sec-box">
+          <dl class="parse-grid">
+            <dt>标题</dt>
+            <dd>看牙医</dd>
+            <dt>时间</dt>
+            <dd><span class="hl">4月11日（周四）15:00 - 16:00</span></dd>
+            <dt>地点</dt>
+            <dd>人民医院 · 口腔科</dd>
+            <dt>提前提醒</dt>
+            <dd>提前 1 小时 · 提前 10 分钟</dd>
+            <dt>重复</dt>
+            <dd>不重复</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">✓ 已写入</div>
+        <div class="written-to">
+          <div class="cal-icon"><div class="m">四月</div><div class="d">11</div></div>
+          <div class="info">
+            <div class="t">Apple 日历</div>
+            <div class="s">同步至 iCloud · 已推送到 Mac</div>
+          </div>
+          <button class="open">打开 →</button>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">🔍 冲突检测</div>
+        <div class="no-conflict">
+          <span class="ic">✓</span>
+          <span>那天下午没有其他安排 · 无冲突</span>
+        </div>
+      </div>
+      <div style="height: 20px"></div>
+    </div>
+    <div class="detail-actions">
+      <button>修改时间</button>
+      <button>取消</button>
+      <button class="primary">完成 ✓</button>
+    </div>
+  </div>
+
+  <!-- ============ 7 · 录音中 ============ -->
+  <div class="screen" id="s7">
+    <div class="navbar">
+      <button class="back" onclick="go('s2')">‹ 取消</button>
+      <div class="title"></div>
+      <button class="right" style="visibility:hidden"></button>
+    </div>
+    <div class="scroll">
+      <div class="listening-state"><span class="d"></span>正在聆听</div>
+      <div class="wave">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div class="ctx-loaded">已加载上下文 · <b>Series A</b></div>
+      <div class="ctx-chips">
+        <span class="chip">蔡哥 · Linear Capital</span>
+        <span class="chip">会议 · 2 小时前</span>
+        <span class="chip">3 个未回复邮件</span>
+      </div>
+      <div class="stop-area">
+        <button class="stop-btn" onclick="go('s2')"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 8 · Memory Tree ============ -->
+  <div class="screen" id="s8">
+    <div class="scroll">
+      <div class="head">
+        <h2>记忆树 <span class="en">Memory Tree</span></h2>
+        <div class="sub">L-1 → L0 → L1 → L2 → L3 → L4 · 每次交互都在生长</div>
+      </div>
+
+      <!-- L-1 用户根画像 -->
+      <div class="root-profile">
+        <span class="lv">L-1 · 用户根画像</span>
+        <div class="body">
+          Technology-oriented founder specializing in human-AI interaction and investor communication. Direct communicator who prefers data over rhetoric. Deep context in hardware supply chain and early-stage fundraising narratives.
+        </div>
+        <div class="ts">node=2991c49d···9eb8 · 更新于 2026-04-09 08:12</div>
+      </div>
+
+      <!-- 树可视化 -->
+      <svg class="tree-svg" viewBox="0 0 360 280" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="rootGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#2EC4B6" stop-opacity="0.9"/>
+            <stop offset="100%" stop-color="#2EC4B6" stop-opacity="0.3"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Edges: L-1 → L0 -->
+        <g stroke="rgba(46,196,182,0.45)" stroke-width="1.2" fill="none">
+          <line x1="180" y1="140" x2="180" y2="55"/>
+          <line x1="180" y1="140" x2="295" y2="100"/>
+          <line x1="180" y1="140" x2="295" y2="195"/>
+          <line x1="180" y1="140" x2="95" y2="200"/>
+          <line x1="180" y1="140" x2="65" y2="95"/>
+        </g>
+
+        <!-- Edges: L0 → L1 -->
+        <g stroke="rgba(167,139,250,0.4)" stroke-width="0.9" fill="none">
+          <line x1="180" y1="55" x2="145" y2="20"/>
+          <line x1="180" y1="55" x2="215" y2="18"/>
+          <line x1="180" y1="55" x2="180" y2="15"/>
+          <line x1="295" y1="100" x2="335" y2="75"/>
+          <line x1="295" y1="100" x2="340" y2="125"/>
+          <line x1="295" y1="195" x2="340" y2="220"/>
+          <line x1="295" y1="195" x2="335" y2="175"/>
+          <line x1="295" y1="195" x2="320" y2="245"/>
+          <line x1="95" y1="200" x2="55" y2="230"/>
+          <line x1="95" y1="200" x2="45" y2="200"/>
+          <line x1="95" y1="200" x2="75" y2="245"/>
+          <line x1="65" y1="95" x2="25" y2="75"/>
+          <line x1="65" y1="95" x2="25" y2="120"/>
+          <line x1="65" y1="95" x2="45" y2="40"/>
+        </g>
+
+        <!-- Edges: L1 → L2 (tiny leaves) -->
+        <g stroke="rgba(94,214,122,0.35)" stroke-width="0.6" fill="none">
+          <line x1="145" y1="20" x2="130" y2="5"/>
+          <line x1="145" y1="20" x2="155" y2="5"/>
+          <line x1="215" y1="18" x2="225" y2="5"/>
+          <line x1="215" y1="18" x2="210" y2="5"/>
+          <line x1="180" y1="15" x2="175" y2="3"/>
+          <line x1="335" y1="75" x2="350" y2="60"/>
+          <line x1="335" y1="75" x2="352" y2="80"/>
+          <line x1="340" y1="125" x2="355" y2="118"/>
+          <line x1="340" y1="125" x2="355" y2="135"/>
+          <line x1="340" y1="220" x2="355" y2="215"/>
+          <line x1="340" y1="220" x2="355" y2="228"/>
+          <line x1="320" y1="245" x2="325" y2="265"/>
+          <line x1="320" y1="245" x2="305" y2="265"/>
+          <line x1="55" y1="230" x2="45" y2="250"/>
+          <line x1="55" y1="230" x2="60" y2="258"/>
+          <line x1="45" y1="200" x2="20" y2="200"/>
+          <line x1="45" y1="200" x2="22" y2="215"/>
+          <line x1="75" y1="245" x2="65" y2="265"/>
+          <line x1="25" y1="75" x2="10" y2="60"/>
+          <line x1="25" y1="120" x2="8" y2="125"/>
+          <line x1="45" y1="40" x2="35" y2="20"/>
+          <line x1="45" y1="40" x2="55" y2="22"/>
+        </g>
+
+        <!-- L2 leaves (green dots) -->
+        <g fill="#5ED67A">
+          <circle cx="130" cy="5" r="2"/>
+          <circle cx="155" cy="5" r="2"/>
+          <circle cx="175" cy="3" r="2"/>
+          <circle cx="210" cy="5" r="2"/>
+          <circle cx="225" cy="5" r="2"/>
+          <circle cx="350" cy="60" r="2"/>
+          <circle cx="352" cy="80" r="2"/>
+          <circle cx="355" cy="118" r="2"/>
+          <circle cx="355" cy="135" r="2"/>
+          <circle cx="355" cy="215" r="2"/>
+          <circle cx="355" cy="228" r="2"/>
+          <circle cx="325" cy="265" r="2"/>
+          <circle cx="305" cy="265" r="2"/>
+          <circle cx="45" cy="250" r="2"/>
+          <circle cx="60" cy="258" r="2"/>
+          <circle cx="20" cy="200" r="2"/>
+          <circle cx="22" cy="215" r="2"/>
+          <circle cx="65" cy="265" r="2"/>
+          <circle cx="10" cy="60" r="2"/>
+          <circle cx="8" cy="125" r="2"/>
+          <circle cx="35" cy="20" r="2"/>
+          <circle cx="55" cy="22" r="2"/>
+        </g>
+
+        <!-- L3/L4 tiny grey dots (raw anchor points) -->
+        <g fill="rgba(255,255,255,0.35)">
+          <circle cx="125" cy="0" r="1"/>
+          <circle cx="160" cy="0" r="1"/>
+          <circle cx="180" cy="0" r="1"/>
+          <circle cx="230" cy="0" r="1"/>
+          <circle cx="358" cy="55" r="1"/>
+          <circle cx="358" cy="85" r="1"/>
+          <circle cx="358" cy="110" r="1"/>
+          <circle cx="358" cy="140" r="1"/>
+          <circle cx="358" cy="210" r="1"/>
+          <circle cx="358" cy="235" r="1"/>
+          <circle cx="328" cy="270" r="1"/>
+          <circle cx="300" cy="270" r="1"/>
+          <circle cx="40" cy="258" r="1"/>
+          <circle cx="65" cy="270" r="1"/>
+          <circle cx="5" cy="200" r="1"/>
+          <circle cx="15" cy="220" r="1"/>
+          <circle cx="55" cy="270" r="1"/>
+          <circle cx="2" cy="55" r="1"/>
+          <circle cx="2" cy="130" r="1"/>
+          <circle cx="30" cy="12" r="1"/>
+          <circle cx="58" cy="12" r="1"/>
+        </g>
+
+        <!-- L1 Project nodes (blue-violet) -->
+        <g fill="rgba(100,150,255,0.9)" stroke="#6496FF" stroke-width="0.8">
+          <circle cx="145" cy="20" r="4.5"/>
+          <circle cx="215" cy="18" r="4.5"/>
+          <circle cx="180" cy="15" r="4"/>
+          <circle cx="335" cy="75" r="4.5"/>
+          <circle cx="340" cy="125" r="4.5"/>
+          <circle cx="340" cy="220" r="4.5"/>
+          <circle cx="335" cy="175" r="4"/>
+          <circle cx="320" cy="245" r="4"/>
+          <circle cx="55" cy="230" r="4.5"/>
+          <circle cx="45" cy="200" r="4"/>
+          <circle cx="75" cy="245" r="4"/>
+          <circle cx="25" cy="75" r="4"/>
+          <circle cx="25" cy="120" r="4.5"/>
+          <circle cx="45" cy="40" r="4"/>
+        </g>
+
+        <!-- L0 Scene nodes (purple, large) -->
+        <g font-family="-apple-system, PingFang SC" font-size="9" fill="#fff" text-anchor="middle" font-weight="600">
+          <circle cx="180" cy="55" r="16" fill="rgba(167,139,250,0.35)" stroke="#A78BFA" stroke-width="1.8"/>
+          <text x="180" y="58">工作</text>
+
+          <circle cx="295" cy="100" r="15" fill="rgba(167,139,250,0.35)" stroke="#A78BFA" stroke-width="1.8"/>
+          <text x="295" y="103">融资</text>
+
+          <circle cx="295" cy="195" r="15" fill="rgba(167,139,250,0.35)" stroke="#A78BFA" stroke-width="1.8"/>
+          <text x="295" y="198">产品</text>
+
+          <circle cx="95" cy="200" r="15" fill="rgba(167,139,250,0.35)" stroke="#A78BFA" stroke-width="1.8"/>
+          <text x="95" y="203">生活</text>
+
+          <circle cx="65" cy="95" r="15" fill="rgba(167,139,250,0.35)" stroke="#A78BFA" stroke-width="1.8"/>
+          <text x="65" y="98">人际</text>
+        </g>
+
+        <!-- L-1 Root node (center, teal, biggest) -->
+        <g font-family="-apple-system, PingFang SC" font-size="11" fill="#fff" text-anchor="middle" font-weight="700">
+          <circle cx="180" cy="140" r="26" fill="url(#rootGrad)" stroke="#2EC4B6" stroke-width="2.5"/>
+          <text x="180" y="138" font-size="9" opacity="0.8">L-1</text>
+          <text x="180" y="152">我</text>
+        </g>
+      </svg>
+
+      <div class="tree-legend">
+        <span><i style="background:#2EC4B6"></i>L-1 Root</span>
+        <span><i style="background:#A78BFA"></i>L0 Scene</span>
+        <span><i style="background:#6496FF"></i>L1 Project</span>
+        <span><i style="background:#5ED67A"></i>L2 Episode</span>
+        <span><i style="background:rgba(255,255,255,0.35)"></i>L3/L4 Raw</span>
+      </div>
+
+      <!-- 层级健康度 -->
+      <div class="layer-stats">
+        <div class="h">
+          <span>语义树健康度</span>
+          <span class="ok">健康</span>
+        </div>
+        <div class="layer-row">
+          <span class="lv lv-L-1">L-1</span>
+          <span class="nm">Root Profile</span>
+          <span class="desc">用户根画像</span>
+          <span class="cnt">1</span>
+        </div>
+        <div class="layer-row">
+          <span class="lv lv-L0">L0</span>
+          <span class="nm">Scene</span>
+          <span class="desc">场景</span>
+          <span class="cnt">5</span>
+        </div>
+        <div class="layer-row">
+          <span class="lv lv-L1">L1</span>
+          <span class="nm">Project</span>
+          <span class="desc">项目</span>
+          <span class="cnt">23</span>
+        </div>
+        <div class="layer-row">
+          <span class="lv lv-L2">L2</span>
+          <span class="nm">Episode</span>
+          <span class="desc">会话/任务</span>
+          <span class="cnt">123</span>
+        </div>
+        <div class="layer-row">
+          <span class="lv lv-L3">L3</span>
+          <span class="nm">Description</span>
+          <span class="desc">结构化摘要</span>
+          <span class="cnt">155</span>
+        </div>
+        <div class="layer-row">
+          <span class="lv lv-L4">L4</span>
+          <span class="nm">Raw</span>
+          <span class="desc">原始数据（事实源）</span>
+          <span class="cnt">155</span>
+        </div>
+      </div>
+
+      <div class="top-ctx">
+        <h3>关系强度 Top</h3>
+        <div class="row">
+          <div><div class="p">蔡哥</div><div class="r">Linear Capital · 12 次交互 · 融资场景</div></div>
+          <div class="s">98%</div>
+        </div>
+        <div class="row">
+          <div><div class="p">林啸</div><div class="r">软件联创 · 近一周 8 次 · 产品场景</div></div>
+          <div class="s">92%</div>
+        </div>
+        <div class="row">
+          <div><div class="p">Marshall</div><div class="r">硬件联创 · 6 次 · 产品场景</div></div>
+          <div class="s">87%</div>
+        </div>
+      </div>
+      <div style="height: 120px"></div>
+    </div>
+    <div class="tabbar">
+      <button class="tab" onclick="go('s2')"><span class="icon">🏠</span><span class="lbl">首页</span></button>
+      <button class="tab active" onclick="go('s8')"><span class="icon">🧠</span><span class="lbl">记忆</span></button>
+      <button class="tab" onclick="go('s9')"><span class="icon">🤖</span><span class="lbl">Agent</span></button>
+      <button class="tab" onclick="go('s10')"><span class="icon">👤</span><span class="lbl">我</span></button>
+    </div>
+  </div>
+
+  <!-- ============ 9 · Agent ============ -->
+  <div class="screen" id="s9">
+    <div class="scroll">
+      <div class="agent-header">
+        <h2>Agent</h2>
+        <div class="sub">可以问我任何事 · 我懂你的上下文</div>
+      </div>
+      <div class="msg bot">早上好，明明 👋 想让我做点什么？</div>
+      <div class="msg user">帮我做个 Sandbar 最新融资情况的 research</div>
+      <div class="msg bot">正在调取 <b>Sandbar · Stream Ring</b> 的历史数据，联网搜索最新动态中…</div>
+      <div class="msg bot">✅ 报告已准备好，预计 3 分钟后推送到首页 Timeline。</div>
+      <div class="agent-input">
+        <div class="field">告诉 Monostone 你想做什么…</div>
+        <button class="send">↑</button>
+      </div>
+    </div>
+    <div class="tabbar">
+      <button class="tab" onclick="go('s2')"><span class="icon">🏠</span><span class="lbl">首页</span></button>
+      <button class="tab" onclick="go('s8')"><span class="icon">🧠</span><span class="lbl">记忆</span></button>
+      <button class="tab active" onclick="go('s9')"><span class="icon">🤖</span><span class="lbl">Agent</span></button>
+      <button class="tab" onclick="go('s10')"><span class="icon">👤</span><span class="lbl">我</span></button>
+    </div>
+  </div>
+
+  <!-- ============ 10 · 个人 ============ -->
+  <div class="screen" id="s10">
+    <div class="scroll">
+      <div class="profile-head">
+        <div class="avatar">明</div>
+        <div>
+          <div class="name">明明</div>
+          <div class="plan">Max 订阅</div>
+        </div>
+      </div>
+      <div class="profile-ring">
+        <div class="ic">💍</div>
+        <div class="info">
+          <div class="t">Monostone 戒指</div>
+          <div class="s">已连接 · 第 12 天</div>
+        </div>
+        <div class="battery">87%</div>
+      </div>
+      <div class="list-group">
+        <div class="list-row"><div class="ic">📅</div><div class="t">日历与提醒</div><div class="chev">›</div></div>
+        <div class="list-row"><div class="ic">🔗</div><div class="t">投递目标</div><div class="chev">›</div></div>
+        <div class="list-row"><div class="ic">🔑</div><div class="t">自带 API Key (BYOK)</div><div class="chev">›</div></div>
+      </div>
+      <div class="list-group">
+        <div class="list-row"><div class="ic">🔒</div><div class="t">隐私与数据</div><div class="chev">›</div></div>
+        <div class="list-row"><div class="ic">📦</div><div class="t">导出所有数据</div><div class="chev">›</div></div>
+        <div class="list-row"><div class="ic">⚙️</div><div class="t">高级设置</div><div class="chev">›</div></div>
+      </div>
+      <div class="list-group">
+        <div class="list-row" onclick="go('s1')"><div class="ic">↩️</div><div class="t">重新开始引导</div><div class="chev">›</div></div>
+      </div>
+      <div style="height: 120px"></div>
+    </div>
+    <div class="tabbar">
+      <button class="tab" onclick="go('s2')"><span class="icon">🏠</span><span class="lbl">首页</span></button>
+      <button class="tab" onclick="go('s8')"><span class="icon">🧠</span><span class="lbl">记忆</span></button>
+      <button class="tab" onclick="go('s9')"><span class="icon">🤖</span><span class="lbl">Agent</span></button>
+      <button class="tab active" onclick="go('s10')"><span class="icon">👤</span><span class="lbl">我</span></button>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -1438,15 +2231,10 @@
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     const el = document.getElementById(id);
     el.classList.add('active');
-    // reset scroll
     const sc = el.querySelector('.scroll');
     if (sc) sc.scrollTop = 0;
   }
-  function tabGo(id, btn) {
-    go(id);
-  }
-  // keyboard: left/right to navigate demo order
-  const order = ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12'];
+  const order = ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10'];
   document.addEventListener('keydown', (e) => {
     const active = document.querySelector('.screen.active').id;
     const idx = order.indexOf(active);
