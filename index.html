@@ -139,21 +139,38 @@
     align-items: center; justify-content: center;
     padding: 0 40px 140px;
   }
-  #s1 .ring {
-    width: 150px; height: 150px; border-radius: 50%;
-    border: 1.5px solid var(--accent);
-    position: relative; margin-bottom: 60px;
-    box-shadow: 0 0 60px rgba(111,212,224,0.25);
-    animation: pulse 3.5s ease-in-out infinite;
+  #s1 .ring-wrap {
+    position: relative;
+    width: 220px; height: 220px;
+    margin-bottom: 40px;
+    display: flex; align-items: center; justify-content: center;
+    animation: ring-float 4s ease-in-out infinite;
   }
-  #s1 .ring::after {
-    content: ""; position: absolute; inset: 16px;
+  #s1 .ring-fallback {
+    position: absolute;
+    inset: 35px;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent);
+    box-shadow: 0 0 60px rgba(111,212,224,0.25);
+  }
+  #s1 .ring-fallback::after {
+    content: "";
+    position: absolute;
+    inset: 14px;
     border-radius: 50%;
     border: 1px solid rgba(111,212,224,0.3);
   }
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 60px rgba(111,212,224,0.25); }
-    50% { box-shadow: 0 0 90px rgba(111,212,224,0.45); }
+  #s1 .ring-img {
+    position: relative;
+    z-index: 2;
+    width: 220px; height: 220px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 40px rgba(111,212,224,0.2));
+  }
+  #s1 .ring-img.broken { display: none; }
+  @keyframes ring-float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
   }
   #s1 h1 {
     font-size: 28px; font-weight: 700;
@@ -349,52 +366,80 @@
   }
 
   /* FAB · 手动录音 */
-  .fab-wrap {
+  .fab {
     position: absolute;
     bottom: 100px; right: 22px;
     z-index: 20;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .fab-hint {
-    font-size: 10px;
-    color: var(--text-dimmer);
-    line-height: 1.3;
-    text-align: right;
-    letter-spacing: 0.02em;
-    pointer-events: none;
-  }
-  .fab-hint b { color: var(--text-dim); font-weight: 500; }
-  .fab {
-    width: 56px; height: 56px;
+    width: 60px; height: 60px;
     border-radius: 50%;
     background: var(--panel);
     border: 1.5px solid var(--accent);
-    box-shadow: 0 8px 30px rgba(111,212,224,0.2);
+    box-shadow: 0 8px 30px rgba(111,212,224,0.25);
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     padding: 0;
     user-select: none;
     -webkit-user-select: none;
     touch-action: none;
+    transition: all 0.2s cubic-bezier(0.2,0.8,0.2,1);
   }
   .fab .inner {
-    width: 20px; height: 20px;
+    width: 22px; height: 22px;
     border-radius: 50%;
     background: var(--accent);
-    box-shadow: 0 0 10px rgba(111,212,224,0.6);
-    transition: all 0.15s;
+    box-shadow: 0 0 12px rgba(111,212,224,0.6);
+    transition: all 0.25s cubic-bezier(0.2,0.8,0.2,1);
   }
-  .fab.holding {
-    background: rgba(162,149,208,0.15);
+  /* 长录音中 · 红色圆形脉动 */
+  .fab.recording-long {
+    background: rgba(255,69,58,0.15);
+    border-color: var(--red);
+    box-shadow: 0 8px 30px rgba(255,69,58,0.35), 0 0 0 0 rgba(255,69,58,0.5);
+    animation: fab-pulse-red 1.4s ease-out infinite;
+  }
+  .fab.recording-long .inner {
+    background: var(--red);
+    width: 22px; height: 22px;
+    border-radius: 4px;
+    box-shadow: 0 0 16px rgba(255,69,58,0.8);
+  }
+  @keyframes fab-pulse-red {
+    0%   { box-shadow: 0 8px 30px rgba(255,69,58,0.35), 0 0 0 0 rgba(255,69,58,0.6); }
+    70%  { box-shadow: 0 8px 30px rgba(255,69,58,0.35), 0 0 0 16px rgba(255,69,58,0); }
+    100% { box-shadow: 0 8px 30px rgba(255,69,58,0.35), 0 0 0 0 rgba(255,69,58,0); }
+  }
+  /* 按住短录音 · 紫色方块形态 */
+  .fab.recording-short {
+    background: rgba(162,149,208,0.2);
     border-color: var(--t-cmd);
+    border-radius: 18px;
+    transform: scale(0.9);
+    box-shadow: 0 8px 30px rgba(162,149,208,0.4);
   }
-  .fab.holding .inner {
+  .fab.recording-short .inner {
     background: var(--t-cmd);
-    width: 14px; height: 14px;
-    border-radius: 3px;
+    width: 18px; height: 18px;
+    border-radius: 2px;
+    box-shadow: 0 0 12px rgba(162,149,208,0.8);
   }
+  /* 录音中时下方的提示文字 */
+  .fab-label {
+    position: absolute;
+    bottom: 168px; right: 22px;
+    width: 60px;
+    text-align: center;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.04em;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 20;
+    font-feature-settings: 'tnum';
+  }
+  .fab-label.show { opacity: 1; }
+  .fab-label b { color: var(--red); font-weight: 600; }
+  .fab-label.short b { color: var(--t-cmd); }
 
   /* ====== 通用详情页 ====== */
   .detail-head { padding: 6px 0 22px; }
@@ -507,6 +552,222 @@
   .detail-actions button.primary {
     background: #fff; color: #000;
     border-color: #fff; font-weight: 600;
+  }
+
+  /* Long recording · 查看完整总结 link */
+  .view-full-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0 2px;
+    margin-top: 4px;
+    border-top: 0.5px solid var(--border);
+    font-size: 12px;
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+  .view-full-link:hover { color: var(--text); }
+  .view-full-link .chev { color: var(--text-dimmer); margin-left: 8px; }
+
+  /* 模态层 · 全屏覆盖 */
+  .modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 400;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+  .modal-overlay.show {
+    display: flex;
+    opacity: 1;
+  }
+  .modal-sheet {
+    width: 100%;
+    max-height: 88%;
+    background: #18181a;
+    border-radius: 28px 28px 0 0;
+    border-top: 0.5px solid var(--border-strong);
+    display: flex;
+    flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.2,0.8,0.2,1);
+  }
+  .modal-overlay.show .modal-sheet { transform: translateY(0); }
+  .modal-grabber {
+    width: 40px;
+    height: 4px;
+    background: var(--border-strong);
+    border-radius: 2px;
+    margin: 10px auto 0;
+    flex-shrink: 0;
+  }
+  .modal-head {
+    padding: 16px 22px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 0.5px solid var(--border);
+    flex-shrink: 0;
+  }
+  .modal-head .t { font-size: 16px; font-weight: 600; }
+  .modal-head .x {
+    background: none; border: none;
+    color: var(--text-dim);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 4px;
+  }
+  .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 22px 24px;
+    scrollbar-width: none;
+  }
+  .modal-body::-webkit-scrollbar { display: none; }
+
+  /* 完整总结 modal 内容 */
+  .full-summary h2 {
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+  .full-summary .meta {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 22px;
+    padding-bottom: 16px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .full-summary h3 {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin: 20px 0 10px;
+    text-transform: none;
+  }
+  .full-summary p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-2);
+    margin-bottom: 12px;
+  }
+  .full-summary p b { color: var(--text); font-weight: 600; }
+  .full-summary ul {
+    padding-left: 18px;
+    margin-bottom: 14px;
+  }
+  .full-summary li {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-2);
+    margin-bottom: 6px;
+  }
+
+  /* 分享 sheet */
+  .share-preview {
+    background: var(--panel);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    max-height: 200px;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .share-preview::-webkit-scrollbar { display: none; }
+  .share-preview .title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .share-preview .h { color: var(--text); font-weight: 500; }
+  .share-preview .lbl {
+    display: inline-block;
+    font-size: 9px;
+    color: var(--text-dimmer);
+    letter-spacing: 0.14em;
+    font-weight: 600;
+    margin: 10px 0 4px;
+  }
+
+  .format-picker {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .format-chip {
+    flex: 1;
+    padding: 10px;
+    background: var(--panel);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text-dim);
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .format-chip.active {
+    background: rgba(111,212,224,0.1);
+    border-color: rgba(111,212,224,0.4);
+    color: var(--accent);
+  }
+  .format-chip .fmt {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .share-destinations {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .share-dest {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 4px;
+    background: var(--panel);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text);
+  }
+  .share-dest .d-ic {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .share-dest .d-ic.copy { background: rgba(255,255,255,0.1); color: var(--text); }
+  .share-dest .d-ic.mail { background: #0A84FF; color: #fff; }
+  .share-dest .d-ic.msg { background: #30D158; color: #fff; }
+  .share-dest .d-ic.notion { background: #fff; color: #000; }
+  .share-dest .d-ic.slack { background: #4A154B; color: #fff; }
+  .share-dest .d-ic.wechat { background: #07C160; color: #fff; }
+  .share-dest .d-ic.airdrop { background: #0A84FF; color: #fff; }
+  .share-dest .d-ic.files { background: rgba(255,255,255,0.1); color: var(--accent); }
+  .share-dest .d-lbl {
+    font-size: 10px;
+    color: var(--text-dim);
   }
 
   /* Long recording detail */
@@ -1229,7 +1490,10 @@
   <!-- ============ 1 · 启动 ============ -->
   <div class="screen active" id="s1">
     <div class="wrap">
-      <div class="ring"></div>
+      <div class="ring-wrap">
+        <div class="ring-fallback"></div>
+        <img class="ring-img" src="ring.png" alt="Monostone Ring" onerror="this.classList.add('broken')" />
+      </div>
       <h1>MONOSTONE</h1>
       <div class="tag">AI 戒指</div>
       <button class="primary-btn" onclick="go('s2')">开始</button>
@@ -1340,14 +1604,12 @@
     </div>
 
     <!-- FAB · 手动录音 -->
-    <div class="fab-wrap">
-      <div class="fab-hint"><b>点击</b> 长录音<br/><b>按住</b> 短录音</div>
-      <button class="fab" id="fab"
-              onmousedown="fabDown(event)" onmouseup="fabUp(event)" onmouseleave="fabCancel()"
-              ontouchstart="fabDown(event)" ontouchend="fabUp(event)" ontouchcancel="fabCancel()">
-        <span class="inner"></span>
-      </button>
-    </div>
+    <div class="fab-label" id="fab-label"><b id="fab-label-text">录音中</b><br/><span id="fab-label-time">0:00</span></div>
+    <button class="fab" id="fab"
+            onmousedown="fabDown(event)" onmouseup="fabUp(event)" onmouseleave="fabCancel()"
+            ontouchstart="fabDown(event)" ontouchend="fabUp(event)" ontouchcancel="fabCancel()">
+      <span class="inner"></span>
+    </button>
 
     <div class="tabbar">
       <button class="tab active" onclick="go('s2')">首页</button>
@@ -1364,9 +1626,7 @@
     </div>
     <div class="scroll" id="s3-scroll"></div>
     <div class="detail-actions">
-      <button>分享</button>
-      <button>投递 Notion</button>
-      <button class="primary">发送纪要</button>
+      <button class="primary" onclick="openShareSheet(currentCardId)">分享</button>
     </div>
   </div>
 
@@ -1761,6 +2021,80 @@
     </div>
   </div>
 
+  <!-- ============ Modal · 查看完整总结 ============ -->
+  <div class="modal-overlay" id="modal-full-summary" onclick="if(event.target===this)closeModal('modal-full-summary')">
+    <div class="modal-sheet">
+      <div class="modal-grabber"></div>
+      <div class="modal-head">
+        <div class="t">完整总结</div>
+        <button class="x" onclick="closeModal('modal-full-summary')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="full-summary" id="full-summary-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Modal · 分享 sheet ============ -->
+  <div class="modal-overlay" id="modal-share" onclick="if(event.target===this)closeModal('modal-share')">
+    <div class="modal-sheet">
+      <div class="modal-grabber"></div>
+      <div class="modal-head">
+        <div class="t">分享</div>
+        <button class="x" onclick="closeModal('modal-share')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-sec-title" style="padding-top:0">预览</div>
+        <div class="share-preview" id="share-preview-content"></div>
+
+        <div class="settings-sec-title">格式</div>
+        <div class="format-picker">
+          <button class="format-chip active" data-fmt="md" onclick="pickFormat(this)">
+            <div class="fmt">Markdown</div>
+            <div>.md</div>
+          </button>
+          <button class="format-chip" data-fmt="pdf" onclick="pickFormat(this)">
+            <div class="fmt">PDF</div>
+            <div>.pdf</div>
+          </button>
+          <button class="format-chip" data-fmt="txt" onclick="pickFormat(this)">
+            <div class="fmt">纯文本</div>
+            <div>.txt</div>
+          </button>
+        </div>
+
+        <div class="settings-sec-title">分享到</div>
+        <div class="share-destinations">
+          <button class="share-dest" onclick="toast('已复制到剪贴板');closeModal('modal-share')">
+            <div class="d-ic copy">⎘</div><div class="d-lbl">复制</div>
+          </button>
+          <button class="share-dest" onclick="toast('已打开邮件 App');closeModal('modal-share')">
+            <div class="d-ic mail">M</div><div class="d-lbl">邮件</div>
+          </button>
+          <button class="share-dest" onclick="toast('已打开 iMessage');closeModal('modal-share')">
+            <div class="d-ic msg">i</div><div class="d-lbl">信息</div>
+          </button>
+          <button class="share-dest" onclick="toast('已发送到 Notion');closeModal('modal-share')">
+            <div class="d-ic notion">N</div><div class="d-lbl">Notion</div>
+          </button>
+          <button class="share-dest" onclick="toast('已发送到 Slack');closeModal('modal-share')">
+            <div class="d-ic slack">S</div><div class="d-lbl">Slack</div>
+          </button>
+          <button class="share-dest" onclick="toast('已发送到微信');closeModal('modal-share')">
+            <div class="d-ic wechat">W</div><div class="d-lbl">微信</div>
+          </button>
+          <button class="share-dest" onclick="toast('AirDrop 中…');closeModal('modal-share')">
+            <div class="d-ic airdrop">↓</div><div class="d-lbl">AirDrop</div>
+          </button>
+          <button class="share-dest" onclick="toast('已存到文件 App');closeModal('modal-share')">
+            <div class="d-ic files">□</div><div class="d-lbl">文件</div>
+          </button>
+        </div>
+        <div style="height: 20px"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ============ 16 · 高级设置 ============ -->
   <div class="screen" id="s16">
     <div class="navbar">
@@ -1875,6 +2209,7 @@
           <div class="bullet">最大风险不是巨头入局，而是戒指品类本身两年后没起来。巨头入局反而是品类验证。</div>
           <div class="bullet">Linear 认为 OpenAI 是头号威胁，Apple 反而排很后。</div>
           <div class="bullet">双麦 15dB SNR 的优势要包装成"freestyle recording"营销故事。</div>
+          <div class="view-full-link" onclick="openFullSummary('rec-1')"><span>查看完整总结</span><span class="chev">›</span></div>
         </div>
       </div>
       <div class="sec">
@@ -1949,6 +2284,7 @@
           <div class="bullet">B 组（baseline）在少样本场景更稳定，但多会话场景下会出现 L2 记忆泄漏到其他 session。</div>
           <div class="bullet">最终决定：A/B 同时在线，按 session 长度动态选择策略，短会话走 baseline，长会话走新 branch。</div>
           <div class="bullet">下一步集成 confidence decay 机制，验证长尾 memory 的稳定性。</div>
+          <div class="view-full-link" onclick="openFullSummary('rec-2')"><span>查看完整总结</span><span class="chev">›</span></div>
         </div>
       </div>
       <div class="sec">
@@ -2348,9 +2684,12 @@
   };
 
   /* ====== 打开卡片详情 ====== */
+  let currentCardId = null;
+
   function openCard(id) {
     const template = CARD_TEMPLATES[id];
     if (!template) return;
+    currentCardId = id;
     const type = id.split('-')[0];
     const screenMap = { rec: 's3', cmd: 's4', idea: 's5', todo: 's6' };
     const screenId = screenMap[type];
@@ -2367,6 +2706,161 @@
     }
 
     go(screenId);
+  }
+
+  /* ====== 完整总结数据（长录音独有 · LLM 生成） ====== */
+  const FULL_SUMMARIES = {
+    'rec-1': {
+      title: '和蔡哥的 Series A 跟进会',
+      meta: '2026-04-09 10:30 · 42:18 · 蔡哥 / 明明 / 郑灿 / 马俊',
+      sections: [
+        {
+          h: '核心议题',
+          p: '本次会议是 Series A D-Day 的深度对接。蔡哥带领 Linear Capital 团队就 Monostone 的产品定位、竞争壁垒、GTM 节奏、硬件执行风险四个维度做了 42 分钟的系统性质询。明明代表团队做了主要阐述，马俊就硬件细节追问，郑灿对整体策略做了几点补充。'
+        },
+        {
+          h: '关键讨论',
+          p: '<b>关于定位</b>：Linear 明确反对把 Monostone 定位成 "AI infra"，认为这会让早期叙事失焦。他们希望看到的是"戒指 + App + Agent"的闭环产品，插件生态可以作为长期开放性的叙事但不能喧宾夺主。明明同意了 closed-loop 定位，保留了 Agent 层的开放接口。'
+        },
+        {
+          p: '<b>关于竞争</b>：Linear 把 OpenAI 排在威胁榜首，因为 OpenAI 刚收购了硬件团队且有强烈的消费端意图。Apple 反而被排得很后，原因是 Apple 在 AI 穿戴领域被隐私框架自己锁死，短期内难以有实质动作。Samsung Galaxy Ring 被认为是纸老虎。'
+        },
+        {
+          p: '<b>关于风险</b>：Linear 指出最大风险不是巨头入局，而是"戒指品类本身两年后没起来"。明明对这个判断表示认同，并提出了双麦 15dB SNR 作为品类差异化的物理锚点。'
+        },
+        {
+          h: '决策',
+          ul: [
+            '不做 Kickstarter，坚持独立站 DTC 首发（明明主张，Linear 支持）',
+            '企业场景优先级高于家庭场景，作为 B2B 扩展路径（Linear 建议，待评估）',
+            '定位为 closed-loop 消费产品，而非 AI infra（共识）',
+            '双麦 SNR 数据包装成 "freestyle recording" 营销故事（Linear 建议）'
+          ]
+        },
+        {
+          h: 'Action Items',
+          ul: [
+            '<b>Marshall</b> · 锁定 ODM 合作方 · 4 月底',
+            '<b>石慧</b> · 把双麦 SNR 数据整理成 marketing 故事 · 本周',
+            '<b>明明</b> · 研究 EO 14117 美国数据法规 · 下周前'
+          ]
+        },
+        {
+          h: '后续',
+          p: '下周三同一时间 Linear 会出具初步的 term sheet 意向，届时会涉及到估值区间和交易结构。明明需要在此之前完成 ODM 选型和 B2B 场景的初版 roadmap。'
+        }
+      ]
+    },
+    'rec-2': {
+      title: '林啸 Memory A/B 对比测试评审',
+      meta: '2026-04-08 16:40 · 28:04 · 林啸 / 明明 / 王浩',
+      sections: [
+        {
+          h: '核心议题',
+          p: '对 Memory 模块过去两周运行的 A/B 实验做阶段性评审。A 组是林啸开发的新 branch，采用了更激进的 consolidation 策略；B 组是 baseline。会议的目的是决定是否全量切到 A 组、维持 baseline、还是采取混合策略。'
+        },
+        {
+          h: '关键讨论',
+          p: '<b>性能对比</b>：A 组在 memory retrieval 准确率上显著领先 baseline 14 个百分点，但 p95 latency 从 320ms 涨到 500ms。对于长会话（超过 30 分钟），A 组的优势更明显；对于短会话，baseline 反而稳定。'
+        },
+        {
+          p: '<b>bug 追踪</b>：B 组（baseline）被发现在多会话并发场景下会出现 L2 记忆泄漏——session A 的记忆会被 session B 当作上下文引用。林啸定位到这是 consolidation 触发条件的 bug，和 A 组的改动无关。'
+        },
+        {
+          p: '<b>未来方向</b>：王浩提出应该引入 confidence decay 机制，让长时间未被引用的 memory 自动降级，防止错误推断累积。这个想法和明明走路时想到的灵感对齐。'
+        },
+        {
+          h: '决策',
+          ul: [
+            'A/B 策略不做 hard switch，按 session 特征动态选择',
+            'Memory promotion 加入 confidence decay 作为正式 feature',
+            '短会话走 baseline（成熟稳定），长会话走 A 组（准确率高）'
+          ]
+        },
+        {
+          h: 'Action Items',
+          ul: [
+            '<b>林啸</b> · 上线 A/B 动态切换逻辑 · 周五前',
+            '<b>王浩</b> · 集成 confidence decay 机制 · 下周',
+            '<b>林啸</b> · 搭 evaluation dashboard 跟踪长尾指标 · 本周'
+          ]
+        },
+        {
+          h: '风险',
+          p: '如果 confidence decay 的参数调不好，可能会出现"误删有用 memory"的情况。建议引入用户可见的"受保护 memory"概念，允许手动锁定某些记忆不被衰减。'
+        }
+      ]
+    }
+  };
+
+  /* ====== 分享内容模板 · Markdown 导出 ====== */
+  function buildShareMarkdown(cardId) {
+    const d = FULL_SUMMARIES[cardId];
+    if (!d) return '';
+    let md = `# ${d.title}\n\n`;
+    md += `> ${d.meta}\n\n`;
+    for (const sec of d.sections) {
+      if (sec.h) md += `## ${sec.h}\n\n`;
+      if (sec.p) md += `${sec.p.replace(/<b>/g,'**').replace(/<\/b>/g,'**')}\n\n`;
+      if (sec.ul) {
+        for (const li of sec.ul) md += `- ${li.replace(/<b>/g,'**').replace(/<\/b>/g,'**')}\n`;
+        md += '\n';
+      }
+    }
+    md += `---\n*由 Monostone 生成 · ${new Date().toLocaleDateString('zh-CN')}*\n`;
+    return md;
+  }
+
+  /* ====== 打开完整总结 modal ====== */
+  function openFullSummary(cardId) {
+    const d = FULL_SUMMARIES[cardId];
+    if (!d) return;
+    const html = `
+      <h2>${d.title}</h2>
+      <div class="meta">${d.meta}</div>
+      ${d.sections.map(s => {
+        let part = '';
+        if (s.h) part += `<h3>${s.h}</h3>`;
+        if (s.p) part += `<p>${s.p}</p>`;
+        if (s.ul) part += `<ul>${s.ul.map(li => `<li>${li}</li>`).join('')}</ul>`;
+        return part;
+      }).join('')}
+    `;
+    document.getElementById('full-summary-content').innerHTML = html;
+    openModal('modal-full-summary');
+  }
+
+  /* ====== 打开分享 sheet ====== */
+  function openShareSheet(cardId) {
+    if (!cardId) return;
+    const d = FULL_SUMMARIES[cardId];
+    if (!d) { toast('这类卡片暂不支持分享'); return; }
+
+    // 预览显示（markdown 转成简单 HTML）
+    const preview = `
+      <div class="title">${d.title}</div>
+      <div class="h">${d.meta}</div>
+      <div class="lbl">核心议题</div>
+      ${d.sections.filter(s => s.h === '核心议题').map(s => `<div>${s.p}</div>`).join('')}
+      <div class="lbl">关键讨论</div>
+      ${d.sections.filter(s => !s.h && s.p).map(s => `<div>${s.p}</div>`).join('')}
+      <div class="lbl">Action Items</div>
+      ${d.sections.filter(s => s.h === 'Action Items').map(s => `<ul style="padding-left:16px;margin:4px 0">${s.ul.map(li => `<li>${li}</li>`).join('')}</ul>`).join('')}
+    `;
+    document.getElementById('share-preview-content').innerHTML = preview;
+    openModal('modal-share');
+  }
+
+  function pickFormat(el) {
+    document.querySelectorAll('.format-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function openModal(id) {
+    document.getElementById(id).classList.add('show');
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('show');
   }
 
   /* ====== 重分类 ====== */
@@ -2395,60 +2889,118 @@
   }
 
   /* ====== FAB · 手动录音（tap = 长录音, hold = 短录音） ====== */
+  /*
+   * 交互逻辑:
+   *   [空闲态]
+   *     → 点击 (tap, 松开 <300ms): 进入【长录音中】, FAB 变红圆方块, 再点一下停止
+   *     → 按住 (hold, 按下 >300ms): 进入【短录音中】, FAB 变紫色小方块, 松开停止
+   *   [长录音中]
+   *     → 点击: 停止, 发卡到 Timeline
+   *   [短录音中]
+   *     → 松开: 停止, 发卡到 Timeline
+   */
   let fabTimer = null;
   let fabStart = 0;
-  let fabMode = null;
-  let fabHoldFired = false;
+  let fabState = 'idle'; // idle | recording-long | recording-short
+  let fabHoldTriggered = false;
+  let recStartTime = 0;
+  let recTimerInterval = null;
 
   function fabDown(e) {
     e.preventDefault();
+
+    // 如果已经在长录音状态，点击就是停止
+    if (fabState === 'recording-long') {
+      stopRecording('long');
+      return;
+    }
+    // 如果已经在短录音状态，忽略（不可能发生，因为 short 是按住，松开就停了）
+    if (fabState === 'recording-short') return;
+
+    // 空闲态 · 开始计时
     fabStart = Date.now();
-    fabHoldFired = false;
+    fabHoldTriggered = false;
+
+    // 按住超过 300ms 自动触发短录音
     fabTimer = setTimeout(() => {
-      // 按住超过 300ms → 触发短录音模式
-      fabHoldFired = true;
-      fabMode = 'short';
-      document.getElementById('fab').classList.add('holding');
-      document.getElementById('listening-mode').textContent = '短录音模式 · 松开结束';
-      go('s7');
+      fabHoldTriggered = true;
+      startRecording('short');
     }, 300);
   }
 
   function fabUp(e) {
     e.preventDefault();
     clearTimeout(fabTimer);
-    const dur = Date.now() - fabStart;
-    document.getElementById('fab').classList.remove('holding');
 
-    if (fabHoldFired) {
-      // 之前是短录音模式，现在松开 → 结束录音
-      stopRecording();
-    } else if (dur < 300) {
-      // 快速点击 → 长录音模式
-      fabMode = 'long';
-      document.getElementById('listening-mode').textContent = '长录音模式 · 点停止键结束';
-      go('s7');
+    if (fabState === 'recording-short') {
+      // 按住短录音中，松开 → 停止
+      stopRecording('short');
+      return;
     }
-    fabHoldFired = false;
+
+    if (fabHoldTriggered) {
+      // 已触发 hold 但不在 short 状态（兜底）
+      fabHoldTriggered = false;
+      return;
+    }
+
+    const dur = Date.now() - fabStart;
+    if (dur < 300 && fabState === 'idle') {
+      // 快速点击 → 进入长录音
+      startRecording('long');
+    }
+    fabHoldTriggered = false;
   }
 
   function fabCancel() {
     clearTimeout(fabTimer);
-    document.getElementById('fab').classList.remove('holding');
-    fabHoldFired = false;
+    // 鼠标移出时，如果在短录音中，视为取消/停止
+    if (fabState === 'recording-short') {
+      stopRecording('short');
+    }
+    fabHoldTriggered = false;
   }
 
-  /* ====== 停止录音 → 模拟 WebSocket 推卡片到 Timeline ====== */
-  function stopRecording() {
-    const mode = fabMode || 'long';
-    go('s2');
-    setTimeout(() => simulateIncomingCard(mode), 300);
-    fabMode = null;
+  function startRecording(mode) {
+    fabState = 'recording-' + mode;
+    const fab = document.getElementById('fab');
+    fab.classList.remove('recording-long', 'recording-short');
+    fab.classList.add('recording-' + mode);
+
+    const label = document.getElementById('fab-label');
+    const text = document.getElementById('fab-label-text');
+    label.classList.remove('short');
+    if (mode === 'short') {
+      label.classList.add('short');
+      text.textContent = '捕捉中';
+    } else {
+      text.textContent = '录音中';
+    }
+    label.classList.add('show');
+    recStartTime = Date.now();
+    updateRecTimer();
+    recTimerInterval = setInterval(updateRecTimer, 500);
   }
 
-  function cancelRecording() {
-    go('s2');
-    fabMode = null;
+  function updateRecTimer() {
+    const el = document.getElementById('fab-label-time');
+    if (!el) return;
+    const s = Math.floor((Date.now() - recStartTime) / 1000);
+    const mm = Math.floor(s / 60);
+    const ss = s % 60;
+    el.textContent = mm + ':' + (ss < 10 ? '0' : '') + ss;
+  }
+
+  function stopRecording(mode) {
+    clearInterval(recTimerInterval);
+    const fab = document.getElementById('fab');
+    fab.classList.remove('recording-long', 'recording-short');
+    const label = document.getElementById('fab-label');
+    label.classList.remove('show');
+    fabState = 'idle';
+    fabHoldTriggered = false;
+    // 模拟云端处理 · 推一张新卡到 timeline
+    setTimeout(() => simulateIncomingCard(mode), 200);
   }
 
   /* ====== WebSocket 模拟 · 新卡片的状态机 ====== */
