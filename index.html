@@ -679,8 +679,58 @@
   .full-summary p:last-child { margin-bottom: 0; }
   .full-summary p b { color: var(--text); font-weight: 600; }
 
-  /* Action Item 点击 · checkbox 和可点击 */
-  .action-row { cursor: pointer; }
+  /* Action Item 交互 · 可左滑 + 可勾选 + 可点开详情 */
+  .action-row {
+    position: relative;
+    overflow: hidden;
+    border-bottom: 0.5px solid var(--border);
+    padding: 0;
+  }
+  .action-row:last-child { border-bottom: none; }
+  .action-row .row-inner {
+    display: flex;
+    gap: 12px;
+    padding: 13px 0;
+    align-items: flex-start;
+    background: var(--panel);
+    position: relative;
+    z-index: 2;
+    cursor: pointer;
+    transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transform: translateX(0);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .action-row:first-child .row-inner { padding-top: 4px; }
+  .action-row:last-child .row-inner { padding-bottom: 4px; }
+  .action-row .reject-action {
+    position: absolute;
+    top: 0; bottom: 0;
+    right: -6px;
+    width: 72px;
+    background: var(--red);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 400;
+    cursor: pointer;
+    z-index: 1;
+    border: none;
+    font-family: inherit;
+    box-shadow: -4px 0 6px -4px rgba(0,0,0,0.4);
+  }
+  .action-row.rejected {
+    animation: row-collapse 0.35s ease-out forwards;
+    pointer-events: none;
+  }
+  @keyframes row-collapse {
+    0%   { opacity: 1; max-height: 80px; }
+    50%  { opacity: 0.3; max-height: 80px; }
+    100% { opacity: 0; max-height: 0; padding: 0; margin: 0; border: 0; }
+  }
+
   .action-row .check { cursor: pointer; transition: all 0.2s; }
   .action-row .check:hover { border-color: var(--text); }
   .action-row.done .check {
@@ -705,26 +755,8 @@
   }
 
   /* Action Item 详情 modal */
-  .action-detail .quote-source {
-    padding: 14px 16px;
-    background: var(--panel);
-    border: 0.5px solid var(--border);
-    border-left: 2px solid var(--t-rec);
-    border-radius: 0 12px 12px 0;
-    font-size: 13px;
-    font-style: italic;
-    line-height: 1.6;
-    color: var(--text-2);
-    margin-bottom: 6px;
-  }
-  .action-detail .quote-meta {
-    font-size: 11px;
-    color: var(--text-dimmer);
-    margin-bottom: 20px;
-    padding-left: 2px;
-  }
   .action-detail .task-title {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
     line-height: 1.35;
     margin-bottom: 10px;
@@ -738,72 +770,110 @@
   }
   .action-detail .task-meta .k { color: var(--text-dimmer); }
   .action-detail .task-meta .v { color: var(--text); font-weight: 500; }
-  .action-detail .action-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .action-detail .ai-btn {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 13px 16px;
-    background: var(--panel);
-    border: 0.5px solid var(--border);
-    border-radius: 12px;
-    cursor: pointer;
-    font-family: inherit;
-    color: var(--text);
-    text-align: left;
-    transition: border-color 0.15s, background 0.15s;
-  }
-  .action-detail .ai-btn:hover {
-    border-color: var(--border-strong);
-    background: rgba(255,255,255,0.02);
-  }
-  .action-detail .ai-btn.primary {
-    background: #fff;
-    color: #000;
-    border-color: #fff;
-  }
-  .action-detail .ai-btn.primary:hover {
-    background: #f0f0f0;
-  }
-  .action-detail .ai-btn .ic {
-    width: 32px; height: 32px;
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    font-size: 13px;
-    font-weight: 700;
-    background: rgba(255,255,255,0.06);
-  }
-  .action-detail .ai-btn.primary .ic {
-    background: rgba(0,0,0,0.08);
-  }
-  .action-detail .ai-btn .ic.linear { background: #5E6AD2; color: #fff; }
-  .action-detail .ai-btn .ic.reminder { background: #FF9F0A; color: #fff; }
-  .action-detail .ai-btn .ic.mail { background: #0A84FF; color: #fff; }
-  .action-detail .ai-btn .ic.play { background: var(--accent); color: #000; }
-  .action-detail .ai-btn .info { flex: 1; min-width: 0; }
-  .action-detail .ai-btn .info .t { font-size: 14px; font-weight: 500; }
-  .action-detail .ai-btn .info .s {
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-top: 2px;
-  }
-  .action-detail .ai-btn.primary .info .s { color: rgba(0,0,0,0.6); }
-  .action-detail .ai-btn .chev {
-    color: var(--text-dimmer);
-    font-size: 14px;
-  }
-  .action-detail .ai-btn.primary .chev { color: rgba(0,0,0,0.4); }
+
   .action-detail .sec-sep {
     font-size: 10px;
     color: var(--text-dimmer);
     letter-spacing: 0.14em;
     font-weight: 600;
-    padding: 16px 2px 6px;
+    padding: 16px 2px 8px;
+  }
+  .action-detail .quote-source {
+    padding: 14px 16px;
+    background: var(--panel);
+    border: 0.5px solid var(--border);
+    border-left: 2px solid var(--t-rec);
+    border-radius: 0 12px 12px 0;
+    font-size: 13px;
+    font-style: italic;
+    line-height: 1.65;
+    color: var(--text-2);
+    margin-bottom: 6px;
+  }
+  .action-detail .quote-meta {
+    font-size: 11px;
+    color: var(--text-dimmer);
+    padding-left: 2px;
+  }
+
+  /* 核心 · 告诉 Agent 下一步 */
+  .voice-prompt {
+    background: linear-gradient(135deg, rgba(111,212,224,0.08), rgba(162,149,208,0.06));
+    border: 0.5px solid rgba(111,212,224,0.25);
+    border-radius: 16px;
+    padding: 18px 18px 16px;
+  }
+  .voice-prompt .vp-text {
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+  .voice-prompt .vp-mic {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(111,212,224,0.25);
+  }
+  .voice-prompt .vp-mic .mic-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #000;
+    animation: blink 1.5s infinite;
+  }
+
+  /* 常用的后续动作 · 建议 prompt */
+  .suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .suggestion {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: var(--panel);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text-2);
+    text-align: left;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .suggestion:hover {
+    border-color: var(--border-strong);
+    background: rgba(255,255,255,0.03);
+  }
+  .suggestion .quote-ic {
+    color: var(--text-dimmer);
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: -2px;
+  }
+  .suggestion .q {
+    flex: 1;
+    font-size: 13px;
+    line-height: 1.5;
+    font-style: italic;
+  }
+  .suggestion .chev {
+    color: var(--text-dimmer);
+    font-size: 14px;
+    flex-shrink: 0;
   }
 
   /* 分享 sheet */
@@ -2363,25 +2433,34 @@
       <div class="sec">
         <div class="sec-title">Action Items</div>
         <div class="sec-box">
-          <div class="action-row" data-aid="ai-1" onclick="openActionItem('rec-1', 'ai-1')">
-            <div class="check" onclick="toggleActionItem(event, 'rec-1', 'ai-1')"></div>
-            <div class="txt">
-              <div class="t">Marshall 锁定 ODM 合作方</div>
-              <div class="d"><span class="owner">Marshall</span><span class="sep">·</span>4 月底</div>
+          <div class="action-row" data-aid="ai-1" data-card="rec-1">
+            <button class="reject-action" onclick="rejectActionItem(event, 'rec-1', 'ai-1')">✕</button>
+            <div class="row-inner">
+              <div class="check" onclick="toggleActionItem(event, 'rec-1', 'ai-1')"></div>
+              <div class="txt">
+                <div class="t">Marshall 锁定 ODM 合作方</div>
+                <div class="d"><span class="owner">Marshall</span><span class="sep">·</span>4 月底</div>
+              </div>
             </div>
           </div>
-          <div class="action-row" data-aid="ai-2" onclick="openActionItem('rec-1', 'ai-2')">
-            <div class="check" onclick="toggleActionItem(event, 'rec-1', 'ai-2')"></div>
-            <div class="txt">
-              <div class="t">把双麦 SNR 数据整理成 marketing 故事</div>
-              <div class="d"><span class="owner">石慧</span><span class="sep">·</span>本周</div>
+          <div class="action-row" data-aid="ai-2" data-card="rec-1">
+            <button class="reject-action" onclick="rejectActionItem(event, 'rec-1', 'ai-2')">✕</button>
+            <div class="row-inner">
+              <div class="check" onclick="toggleActionItem(event, 'rec-1', 'ai-2')"></div>
+              <div class="txt">
+                <div class="t">把双麦 SNR 数据整理成 marketing 故事</div>
+                <div class="d"><span class="owner">石慧</span><span class="sep">·</span>本周</div>
+              </div>
             </div>
           </div>
-          <div class="action-row" data-aid="ai-3" onclick="openActionItem('rec-1', 'ai-3')">
-            <div class="check" onclick="toggleActionItem(event, 'rec-1', 'ai-3')"></div>
-            <div class="txt">
-              <div class="t">研究 EO 14117 美国数据法规</div>
-              <div class="d"><span class="owner">明明</span><span class="sep">·</span>下周前</div>
+          <div class="action-row" data-aid="ai-3" data-card="rec-1">
+            <button class="reject-action" onclick="rejectActionItem(event, 'rec-1', 'ai-3')">✕</button>
+            <div class="row-inner">
+              <div class="check" onclick="toggleActionItem(event, 'rec-1', 'ai-3')"></div>
+              <div class="txt">
+                <div class="t">研究 EO 14117 美国数据法规</div>
+                <div class="d"><span class="owner">明明</span><span class="sep">·</span>下周前</div>
+              </div>
             </div>
           </div>
         </div>
@@ -2438,25 +2517,34 @@
       <div class="sec">
         <div class="sec-title">Action Items</div>
         <div class="sec-box">
-          <div class="action-row" data-aid="ai-4" onclick="openActionItem('rec-2', 'ai-4')">
-            <div class="check" onclick="toggleActionItem(event, 'rec-2', 'ai-4')"></div>
-            <div class="txt">
-              <div class="t">上线 A/B 动态切换逻辑</div>
-              <div class="d"><span class="owner">林啸</span><span class="sep">·</span>周五前</div>
+          <div class="action-row" data-aid="ai-4" data-card="rec-2">
+            <button class="reject-action" onclick="rejectActionItem(event, 'rec-2', 'ai-4')">✕</button>
+            <div class="row-inner">
+              <div class="check" onclick="toggleActionItem(event, 'rec-2', 'ai-4')"></div>
+              <div class="txt">
+                <div class="t">上线 A/B 动态切换逻辑</div>
+                <div class="d"><span class="owner">林啸</span><span class="sep">·</span>周五前</div>
+              </div>
             </div>
           </div>
-          <div class="action-row" data-aid="ai-5" onclick="openActionItem('rec-2', 'ai-5')">
-            <div class="check" onclick="toggleActionItem(event, 'rec-2', 'ai-5')"></div>
-            <div class="txt">
-              <div class="t">集成 confidence decay 机制</div>
-              <div class="d"><span class="owner">王浩</span><span class="sep">·</span>下周</div>
+          <div class="action-row" data-aid="ai-5" data-card="rec-2">
+            <button class="reject-action" onclick="rejectActionItem(event, 'rec-2', 'ai-5')">✕</button>
+            <div class="row-inner">
+              <div class="check" onclick="toggleActionItem(event, 'rec-2', 'ai-5')"></div>
+              <div class="txt">
+                <div class="t">集成 confidence decay 机制</div>
+                <div class="d"><span class="owner">王浩</span><span class="sep">·</span>下周</div>
+              </div>
             </div>
           </div>
-          <div class="action-row" data-aid="ai-6" onclick="openActionItem('rec-2', 'ai-6')">
-            <div class="check" onclick="toggleActionItem(event, 'rec-2', 'ai-6')"></div>
-            <div class="txt">
-              <div class="t">搭 evaluation dashboard 跟踪指标</div>
-              <div class="d"><span class="owner">林啸</span><span class="sep">·</span>本周</div>
+          <div class="action-row" data-aid="ai-6" data-card="rec-2">
+            <button class="reject-action" onclick="rejectActionItem(event, 'rec-2', 'ai-6')">✕</button>
+            <div class="row-inner">
+              <div class="check" onclick="toggleActionItem(event, 'rec-2', 'ai-6')"></div>
+              <div class="txt">
+                <div class="t">搭 evaluation dashboard 跟踪指标</div>
+                <div class="d"><span class="owner">林啸</span><span class="sep">·</span>本周</div>
+              </div>
             </div>
           </div>
         </div>
@@ -2853,6 +2941,11 @@
         `<button>存为草稿</button><button class="primary">发送</button>`;
     }
 
+    // 如果是长录音, 绑定 action items 的左滑手势
+    if (type === 'rec') {
+      setTimeout(setupAllSwipeRows, 0);
+    }
+
     go(screenId);
   }
 
@@ -2988,14 +3081,16 @@
     openModal('modal-share');
   }
 
-  /* ====== Action Items 数据 + 点击交互 ======
-   * 点击 checkbox → 切换完成状态（后端: PATCH /cards/{id}/action-items/{item_id}）
-   * 点击 task 区域 → 打开 action item 详情 modal, 提供:
-   *   1. 标记完成 (等同 checkbox)
-   *   2. 推到 Linear (创建 issue)
-   *   3. 加到提醒事项 (创建 Reminder)
-   *   4. 生成 follow-up 邮件给 owner (触发新的指令卡)
-   *   5. 跳转到录音原话 (需要 source_offset_ms)
+  /* ====== Action Items 数据 + 交互 ======
+   *
+   * 核心产品哲学: 让用户表达意图, 让 Agent 做判断.
+   * 用户对每条 action item 只有 3 个操作:
+   *   1. ✓ 接受 (点 checkbox) → 自动同步到提醒事项 + Linear + Memory
+   *   2. ✕ 拒绝 (左滑整行) → Memory 学习"这条推断错了", 下次不要再猜
+   *   3. 🎙 让 Agent 继续推进 (点中间文字 → modal → 语音告诉 Agent)
+   *
+   * 每条 item 有 context-aware 的 agent_suggestions —— 根据内容动态生成
+   * 的 3 条建议 prompt, 用户可以 tap 快捷发给 Agent, 或用语音自己说.
    */
   const ACTION_ITEMS = {
     'rec-1': [
@@ -3006,7 +3101,12 @@
         deadline: '4 月底',
         source_quote: '"Marshall 你周五前要把 ODM 供应商的事情定下来，不然影响后面的节奏。我们不能再拖了，下轮融资前必须要有一个明确的交付节奏。"',
         source_time: '14:32',
-        source_card: '和蔡哥的 Series A 跟进会'
+        source_card: '和蔡哥的 Series A 跟进会',
+        agent_suggestions: [
+          '帮我起草一封 follow-up 邮件给 Marshall，语气温和但要给明确节奏',
+          '查一下我们目前评估过的 ODM 候选有哪些，各自的优劣',
+          '关联一下上次的硬件 roadmap 讨论，看看 ODM 选型会影响到哪些节点'
+        ]
       },
       {
         id: 'ai-2',
@@ -3015,7 +3115,12 @@
         deadline: '本周',
         source_quote: '"石慧你帮我把双麦 15dB 的数据提炼一下，不要用技术语言 —— 改成 freestyle recording 的场景故事，走路、开车、户外都能清晰录音。"',
         source_time: '27:18',
-        source_card: '和蔡哥的 Series A 跟进会'
+        source_card: '和蔡哥的 Series A 跟进会',
+        agent_suggestions: [
+          '帮我拉一下最近三次户外录音测试的 SNR 数据，整理成表格',
+          '写一版 "freestyle recording" 的场景故事草稿，三段就好',
+          '查一下竞品 Sandbar、Humane 他们是怎么讲录音清晰度的'
+        ]
       },
       {
         id: 'ai-3',
@@ -3024,7 +3129,12 @@
         deadline: '下周前',
         source_quote: '"明明你抽空看一下 EO 14117，这是美国对涉及敏感个人数据的外国控制技术的限制，可能影响 Monostone 进入美国市场的策略。下周前给我一份简短的分析。"',
         source_time: '38:45',
-        source_card: '和蔡哥的 Series A 跟进会'
+        source_card: '和蔡哥的 Series A 跟进会',
+        agent_suggestions: [
+          '帮我查 EO 14117 最近 3 个月的执行动态',
+          '找一下做 AI 硬件的中国公司是怎么应对这个法规的',
+          '生成一份 1 页纸分析给 Linear 的合规团队'
+        ]
       }
     ],
     'rec-2': [
@@ -3035,7 +3145,12 @@
         deadline: '周五前',
         source_quote: '"那我本周把动态切换逻辑 ship 出去。短会话走 baseline，长会话走 A 组，这样 latency 和准确率都不损失。"',
         source_time: '18:22',
-        source_card: '林啸 Memory A/B 对比测试评审'
+        source_card: '林啸 Memory A/B 对比测试评审',
+        agent_suggestions: [
+          '帮我看一下当前动态切换的代码 diff 和测试覆盖',
+          '起草一份上线公告给团队，说清楚为什么要动态切换',
+          '设定一个周四的提醒，跟进林啸的上线进度'
+        ]
       },
       {
         id: 'ai-5',
@@ -3044,7 +3159,12 @@
         deadline: '下周',
         source_quote: '"王浩你把 confidence decay 的 v1 做出来，先用指数衰减，参数粗调。记得预留受保护 memory 的锁定机制。"',
         source_time: '21:10',
-        source_card: '林啸 Memory A/B 对比测试评审'
+        source_card: '林啸 Memory A/B 对比测试评审',
+        agent_suggestions: [
+          '帮我找关于 SM-2 算法和 Ebbinghaus 遗忘曲线的权威资料',
+          '列一个 v1 confidence decay 的 task breakdown，按优先级',
+          '关联到之前明明走路时的那条灵感录音'
+        ]
       },
       {
         id: 'ai-6',
@@ -3053,7 +3173,12 @@
         deadline: '本周',
         source_quote: '"顺便 dashboard 加几个长尾指标，特别是 p99 latency 和 memory 泄漏率，这样我们能提前发现问题。"',
         source_time: '24:03',
-        source_card: '林啸 Memory A/B 对比测试评审'
+        source_card: '林啸 Memory A/B 对比测试评审',
+        agent_suggestions: [
+          '列一下需要跟踪的长尾指标清单',
+          '看看有没有现成的 dashboard 模板可以复用',
+          '关联上次 p95 latency 回归的讨论'
+        ]
       }
     ]
   };
@@ -3063,22 +3188,57 @@
     return list.find(i => i.id === itemId);
   }
 
-  /* 切换完成状态 */
+  /* ====== 切换完成状态 (checkbox 点击) ======
+   * 产品含义: 用户 "接受" 这条 action item
+   * 副作用 (后端):
+   *   - action_items[i].done = true
+   *   - 自动加到 Apple 提醒事项 (有 deadline 时) 或 Linear (有 owner + project 时)
+   *   - 写入 Memory: "{owner} 在 {now} 承诺在 {deadline} 前完成 {task}"
+   *   - 结构化摘要 "N 项待办" 计数 -1
+   *   - 反馈给分类器: "这条 AI 推断是对的"
+   */
   function toggleActionItem(e, cardId, itemId) {
-    e.stopPropagation(); // 不触发父 row 的 click
+    e.stopPropagation();
     const row = e.currentTarget.closest('.action-row');
     const wasDone = row.classList.toggle('done');
     if (wasDone) {
-      toast('已完成 · 同步到 Linear');
+      toast('已接受 · 已加到提醒事项并同步到 Linear');
     } else {
-      toast('已撤销完成');
+      toast('已撤销');
     }
   }
 
-  /* 打开 Action Item 详情 */
+  /* ====== 拒绝 action item (左滑后点 X) ======
+   * 产品含义: 用户认为这条 AI 推断不对 / 不想做
+   * 副作用 (后端):
+   *   - action_items[i].rejected = true (软删除, 不真的从 DB 删)
+   *   - 结构化摘要 "N 项待办" 计数 -1
+   *   - 反馈给分类器: "这条 AI 推断是错的", 用于训练/调优
+   *   - Memory: 不记录任何 commitment (用户主动拒绝, 不是承诺)
+   */
+  function rejectActionItem(e, cardId, itemId) {
+    e.stopPropagation();
+    const row = e.currentTarget.closest('.action-row');
+    row.classList.add('rejected');
+    toast('已删除 · Agent 会学习这个判断');
+    // demo: 动画完成后真正从 DOM 移除
+    setTimeout(() => { row.style.display = 'none'; }, 400);
+  }
+
+  /* ====== 打开 Action Item 详情 modal ======
+   * 产品含义: 用户想让 Agent 帮这条 item 往下推进
+   * 核心设计: 不堆 5 个固定按钮, 而是给一个语音入口 + 3 条 AI 建议 prompt
+   */
   function openActionItem(cardId, itemId) {
     const item = getActionItem(cardId, itemId);
     if (!item) return;
+    const suggestionsHtml = item.agent_suggestions.map(s => `
+      <button class="suggestion" onclick="sendToAgent(${JSON.stringify(s).replace(/"/g, '&quot;')})">
+        <span class="quote-ic">"</span>
+        <span class="q">${s}</span>
+        <span class="chev">›</span>
+      </button>
+    `).join('');
     document.getElementById('action-detail-content').innerHTML = `
       <div class="task-title">${item.text}</div>
       <div class="task-meta">
@@ -3090,58 +3250,127 @@
       <div class="quote-source">${item.source_quote}</div>
       <div class="quote-meta">${item.source_card} · ${item.source_time}</div>
 
-      <div class="sec-sep">操作</div>
-      <div class="action-list">
-        <button class="ai-btn primary" onclick="doActionItem('complete', '${cardId}', '${itemId}')">
-          <div class="ic">✓</div>
-          <div class="info"><div class="t">标记完成</div><div class="s">同步到已连接的外部系统</div></div>
-          <div class="chev">›</div>
-        </button>
-        <button class="ai-btn" onclick="doActionItem('linear', '${cardId}', '${itemId}')">
-          <div class="ic linear">L</div>
-          <div class="info"><div class="t">推到 Linear</div><div class="s">创建 issue · 分配给 ${item.owner} · 截止 ${item.deadline}</div></div>
-          <div class="chev">›</div>
-        </button>
-        <button class="ai-btn" onclick="doActionItem('reminder', '${cardId}', '${itemId}')">
-          <div class="ic reminder">⏰</div>
-          <div class="info"><div class="t">加到提醒事项</div><div class="s">Apple Reminders · 截止 ${item.deadline}</div></div>
-          <div class="chev">›</div>
-        </button>
-        <button class="ai-btn" onclick="doActionItem('email', '${cardId}', '${itemId}')">
-          <div class="ic mail">✉</div>
-          <div class="info"><div class="t">给 ${item.owner} 起草 follow-up 邮件</div><div class="s">Agent 会带上会议原文 context</div></div>
-          <div class="chev">›</div>
-        </button>
-        <button class="ai-btn" onclick="doActionItem('jump', '${cardId}', '${itemId}')">
-          <div class="ic play">▶</div>
-          <div class="info"><div class="t">跳转到录音原话</div><div class="s">${item.source_time} · 播放前后文</div></div>
-          <div class="chev">›</div>
+      <div class="sec-sep">告诉 Agent 下一步</div>
+      <div class="voice-prompt">
+        <div class="vp-text">想让 Agent 帮你推进这条？直接用语音告诉它要做什么 —— 起草邮件、查资料、关联历史、生成分析都可以。</div>
+        <button class="vp-mic" onclick="toast('按住戒指说话即可，或使用首页右下录音按钮')">
+          <span class="mic-dot"></span>
+          <span>告诉 Agent 下一步</span>
         </button>
       </div>
+
+      <div class="sec-sep">常用的后续动作</div>
+      <div class="suggestions">${suggestionsHtml}</div>
       <div style="height: 20px"></div>
     `;
     openModal('modal-action-item');
   }
 
-  function doActionItem(action, cardId, itemId) {
-    const item = getActionItem(cardId, itemId);
+  function sendToAgent(prompt) {
     closeModal('modal-action-item');
     setTimeout(() => {
-      if (action === 'complete') {
-        // 找到对应的 row 标记为 done
-        const rows = document.querySelectorAll(`#s3-scroll .action-row[data-aid="${itemId}"]`);
-        rows.forEach(r => r.classList.add('done'));
-        toast('已完成 · 同步到 Linear');
-      } else if (action === 'linear') {
-        toast('已创建 Linear issue · 分配给 ' + item.owner);
-      } else if (action === 'reminder') {
-        toast('已加到提醒事项');
-      } else if (action === 'email') {
-        toast('正在生成 follow-up 邮件…');
-      } else if (action === 'jump') {
-        toast('跳转到 ' + item.source_time + '（暂未实现音频播放）');
-      }
+      toast('已发给 Agent · 处理中…');
+      // demo: 可以触发一张新的 processing cmd 卡片
+      setTimeout(() => simulateIncomingCard('short'), 800);
     }, 250);
+  }
+
+  /* ====== 左滑手势 · 在 action-row 上 ======
+   * 鼠标或触屏按下 → 跟踪 x 位移
+   * 左滑 > 36px → snap 到 -72px 露出 X 按钮
+   * 左滑 < 36px → 弹回
+   * 再次点击露出状态的行 → 弹回
+   * 水平位移超过 8px 时, 抑制当前 tap, 不触发 openActionItem
+   */
+  function setupSwipeRow(row) {
+    const inner = row.querySelector('.row-inner');
+    if (!inner || inner.dataset.swipeReady) return;
+    inner.dataset.swipeReady = '1';
+
+    let startX = 0, startY = 0;
+    let isDown = false;
+    let moved = false;
+    let currentOffset = 0;
+    const maxSwipe = -72;
+
+    const getX = (e) => (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+    const getY = (e) => (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+
+    const onDown = (e) => {
+      // 点 check 或 reject 时不启动 swipe
+      if (e.target.closest('.check') || e.target.closest('.reject-action')) return;
+      startX = getX(e);
+      startY = getY(e);
+      isDown = true;
+      moved = false;
+      inner.style.transition = 'none';
+    };
+
+    const onMove = (e) => {
+      if (!isDown) return;
+      const dx = getX(e) - startX;
+      const dy = getY(e) - startY;
+      // 如果垂直位移更大, 认为是滚动, 不 swipe
+      if (!moved && Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) {
+        isDown = false;
+        inner.style.transition = 'transform 0.2s';
+        inner.style.transform = `translateX(${currentOffset}px)`;
+        return;
+      }
+      if (Math.abs(dx) > 6) moved = true;
+      let offset = currentOffset + dx;
+      offset = Math.max(maxSwipe - 10, Math.min(0, offset));
+      inner.style.transform = `translateX(${offset}px)`;
+      inner._pendingOffset = offset;
+    };
+
+    const onUp = (e) => {
+      if (!isDown) return;
+      isDown = false;
+      inner.style.transition = 'transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1)';
+      const offset = inner._pendingOffset ?? currentOffset;
+      if (offset < -36) {
+        inner.style.transform = `translateX(${maxSwipe}px)`;
+        currentOffset = maxSwipe;
+        row.classList.add('revealed');
+      } else {
+        inner.style.transform = 'translateX(0)';
+        currentOffset = 0;
+        row.classList.remove('revealed');
+      }
+      inner._pendingOffset = null;
+    };
+
+    inner.addEventListener('mousedown', onDown);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    inner.addEventListener('touchstart', onDown, { passive: true });
+    inner.addEventListener('touchmove', onMove, { passive: true });
+    inner.addEventListener('touchend', onUp);
+
+    // 点 row-inner 中间文字区: 打开 modal
+    inner.addEventListener('click', (e) => {
+      // 如果刚 swipe 过, 吃掉这次 click
+      if (moved) { moved = false; e.stopPropagation(); e.preventDefault(); return; }
+      // 如果 row 是 revealed 状态, 先 snap 回
+      if (row.classList.contains('revealed')) {
+        inner.style.transform = 'translateX(0)';
+        currentOffset = 0;
+        row.classList.remove('revealed');
+        e.stopPropagation();
+        return;
+      }
+      // 点 check 或 reject 的 click 已经被它们自己吞了, 这里不会触发
+      if (e.target.closest('.check') || e.target.closest('.reject-action')) return;
+      // 打开 modal
+      const cardId = row.getAttribute('data-card');
+      const itemId = row.getAttribute('data-aid');
+      openActionItem(cardId, itemId);
+    });
+  }
+
+  function setupAllSwipeRows() {
+    document.querySelectorAll('.action-row').forEach(setupSwipeRow);
   }
 
   function pickFormat(el) {
