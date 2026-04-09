@@ -784,6 +784,17 @@
     50%  { opacity: 0.3; max-height: 80px; }
     100% { opacity: 0; max-height: 0; padding: 0; margin: 0; border: 0; }
   }
+  /* 整个 Action Items section 在最后一条被滑掉后, 连标题一起收起 */
+  .sec.collapsing {
+    animation: sec-collapse 0.4s ease-out forwards;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  @keyframes sec-collapse {
+    0%   { opacity: 1; max-height: 400px; margin-top: 18px; }
+    40%  { opacity: 0;  max-height: 400px; margin-top: 18px; }
+    100% { opacity: 0;  max-height: 0;     margin-top: 0; padding: 0; border: 0; }
+  }
 
   .action-row .check { cursor: pointer; transition: all 0.2s; }
   .action-row .check:hover { border-color: var(--text); }
@@ -3385,7 +3396,19 @@
   function rejectActionItemBySwipe(row) {
     row.classList.add('rejected');
     toast('已删除 · Agent 会学习这个判断');
-    setTimeout(() => { row.style.display = 'none'; }, 400);
+    const parentSec = row.closest('.sec');
+    setTimeout(() => {
+      row.style.display = 'none';
+      // 如果 section 里已经没有任何可见的 action row, 把整个 Action Items 区块收起
+      if (parentSec) {
+        const stillVisible = Array.from(parentSec.querySelectorAll('.action-row'))
+          .some(r => r.style.display !== 'none');
+        if (!stillVisible) {
+          parentSec.classList.add('collapsing');
+          setTimeout(() => { parentSec.style.display = 'none'; }, 420);
+        }
+      }
+    }, 400);
   }
 
   /* ====== 打开 Action Item 详情 modal ======
