@@ -775,24 +775,6 @@
   }
   .action-row:first-child .row-inner { padding-top: 4px; }
   .action-row:last-child .row-inner { padding-bottom: 4px; }
-  .action-row .reject-action {
-    position: absolute;
-    top: 0; bottom: 0;
-    right: -6px;
-    width: 72px;
-    background: var(--red);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    font-weight: 400;
-    cursor: pointer;
-    z-index: 1;
-    border: none;
-    font-family: inherit;
-    box-shadow: -4px 0 6px -4px rgba(0,0,0,0.4);
-  }
   .action-row.rejected {
     animation: row-collapse 0.35s ease-out forwards;
     pointer-events: none;
@@ -2506,7 +2488,6 @@
         <div class="sec-title">Action Items</div>
         <div class="sec-box">
           <div class="action-row" data-aid="ai-1" data-card="rec-1">
-            <button class="reject-action" onclick="rejectActionItem(event, 'rec-1', 'ai-1')">✕</button>
             <div class="row-inner">
               <div class="check" onclick="toggleActionItem(event, 'rec-1', 'ai-1')"></div>
               <div class="txt">
@@ -2516,7 +2497,6 @@
             </div>
           </div>
           <div class="action-row" data-aid="ai-2" data-card="rec-1">
-            <button class="reject-action" onclick="rejectActionItem(event, 'rec-1', 'ai-2')">✕</button>
             <div class="row-inner">
               <div class="check" onclick="toggleActionItem(event, 'rec-1', 'ai-2')"></div>
               <div class="txt">
@@ -2526,7 +2506,6 @@
             </div>
           </div>
           <div class="action-row" data-aid="ai-3" data-card="rec-1">
-            <button class="reject-action" onclick="rejectActionItem(event, 'rec-1', 'ai-3')">✕</button>
             <div class="row-inner">
               <div class="check" onclick="toggleActionItem(event, 'rec-1', 'ai-3')"></div>
               <div class="txt">
@@ -2590,7 +2569,6 @@
         <div class="sec-title">Action Items</div>
         <div class="sec-box">
           <div class="action-row" data-aid="ai-4" data-card="rec-2">
-            <button class="reject-action" onclick="rejectActionItem(event, 'rec-2', 'ai-4')">✕</button>
             <div class="row-inner">
               <div class="check" onclick="toggleActionItem(event, 'rec-2', 'ai-4')"></div>
               <div class="txt">
@@ -2600,7 +2578,6 @@
             </div>
           </div>
           <div class="action-row" data-aid="ai-5" data-card="rec-2">
-            <button class="reject-action" onclick="rejectActionItem(event, 'rec-2', 'ai-5')">✕</button>
             <div class="row-inner">
               <div class="check" onclick="toggleActionItem(event, 'rec-2', 'ai-5')"></div>
               <div class="txt">
@@ -2610,7 +2587,6 @@
             </div>
           </div>
           <div class="action-row" data-aid="ai-6" data-card="rec-2">
-            <button class="reject-action" onclick="rejectActionItem(event, 'rec-2', 'ai-6')">✕</button>
             <div class="row-inner">
               <div class="check" onclick="toggleActionItem(event, 'rec-2', 'ai-6')"></div>
               <div class="txt">
@@ -3280,20 +3256,18 @@
     }
   }
 
-  /* ====== 拒绝 action item (左滑后点 X) ======
+  /* ====== 拒绝 action item (左滑直接删除) ======
    * 产品含义: 用户认为这条 AI 推断不对 / 不想做
+   * 交互: 在 row 上向左滑 > 100px 松手, 自动触发删除 (没有 X 按钮)
    * 副作用 (后端):
    *   - action_items[i].rejected = true (软删除, 不真的从 DB 删)
    *   - 结构化摘要 "N 项待办" 计数 -1
    *   - 反馈给分类器: "这条 AI 推断是错的", 用于训练/调优
    *   - Memory: 不记录任何 commitment (用户主动拒绝, 不是承诺)
    */
-  function rejectActionItem(e, cardId, itemId) {
-    e.stopPropagation();
-    const row = e.currentTarget.closest('.action-row');
+  function rejectActionItemBySwipe(row) {
     row.classList.add('rejected');
     toast('已删除 · Agent 会学习这个判断');
-    // demo: 动画完成后真正从 DOM 移除
     setTimeout(() => { row.style.display = 'none'; }, 400);
   }
 
@@ -3347,12 +3321,13 @@
     }, 250);
   }
 
-  /* ====== 左滑手势 · 在 action-row 上 ======
-   * 鼠标或触屏按下 → 跟踪 x 位移
-   * 左滑 > 36px → snap 到 -72px 露出 X 按钮
-   * 左滑 < 36px → 弹回
-   * 再次点击露出状态的行 → 弹回
-   * 水平位移超过 8px 时, 抑制当前 tap, 不触发 openActionItem
+  /* ====== 左滑手势 · swipe-to-delete ======
+   * 鼠标或触屏按下 → 跟踪 x 位移, row-inner 跟随手指位移
+   * 松手时:
+   *   - 左滑 > 100px: 继续滑出屏幕 + 触发 rejected 动画 (软删除)
+   *   - 否则: 弹回原位
+   * 水平位移 > 8px 时, 抑制当前 tap, 不触发 openActionItem
+   * 点 .check → 勾选完成; 点中间文字区 → 打开 modal
    */
   function setupSwipeRow(row) {
     const inner = row.querySelector('.row-inner');
@@ -3362,15 +3337,14 @@
     let startX = 0, startY = 0;
     let isDown = false;
     let moved = false;
-    let currentOffset = 0;
-    const maxSwipe = -72;
+    const deleteThreshold = -100;
 
     const getX = (e) => (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
     const getY = (e) => (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
 
     const onDown = (e) => {
-      // 点 check 或 reject 时不启动 swipe
-      if (e.target.closest('.check') || e.target.closest('.reject-action')) return;
+      // 点 check 时不启动 swipe
+      if (e.target.closest('.check')) return;
       startX = getX(e);
       startY = getY(e);
       isDown = true;
@@ -3386,12 +3360,12 @@
       if (!moved && Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) {
         isDown = false;
         inner.style.transition = 'transform 0.2s';
-        inner.style.transform = `translateX(${currentOffset}px)`;
+        inner.style.transform = 'translateX(0)';
         return;
       }
       if (Math.abs(dx) > 6) moved = true;
-      let offset = currentOffset + dx;
-      offset = Math.max(maxSwipe - 10, Math.min(0, offset));
+      // 只允许左滑 (右滑无意义)
+      const offset = Math.min(0, dx);
       inner.style.transform = `translateX(${offset}px)`;
       inner._pendingOffset = offset;
     };
@@ -3399,16 +3373,16 @@
     const onUp = (e) => {
       if (!isDown) return;
       isDown = false;
-      inner.style.transition = 'transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1)';
-      const offset = inner._pendingOffset ?? currentOffset;
-      if (offset < -36) {
-        inner.style.transform = `translateX(${maxSwipe}px)`;
-        currentOffset = maxSwipe;
-        row.classList.add('revealed');
+      const offset = inner._pendingOffset ?? 0;
+      if (offset < deleteThreshold) {
+        // 滑出屏幕 + 触发删除
+        inner.style.transition = 'transform 0.22s ease-out';
+        inner.style.transform = 'translateX(-420px)';
+        setTimeout(() => rejectActionItemBySwipe(row), 180);
       } else {
+        // 弹回原位
+        inner.style.transition = 'transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1)';
         inner.style.transform = 'translateX(0)';
-        currentOffset = 0;
-        row.classList.remove('revealed');
       }
       inner._pendingOffset = null;
     };
@@ -3424,16 +3398,8 @@
     inner.addEventListener('click', (e) => {
       // 如果刚 swipe 过, 吃掉这次 click
       if (moved) { moved = false; e.stopPropagation(); e.preventDefault(); return; }
-      // 如果 row 是 revealed 状态, 先 snap 回
-      if (row.classList.contains('revealed')) {
-        inner.style.transform = 'translateX(0)';
-        currentOffset = 0;
-        row.classList.remove('revealed');
-        e.stopPropagation();
-        return;
-      }
-      // 点 check 或 reject 的 click 已经被它们自己吞了, 这里不会触发
-      if (e.target.closest('.check') || e.target.closest('.reject-action')) return;
+      // 点 check 的 click 已经被它自己吞了, 这里不会触发
+      if (e.target.closest('.check')) return;
       // 打开 modal
       const cardId = row.getAttribute('data-card');
       const itemId = row.getAttribute('data-aid');
