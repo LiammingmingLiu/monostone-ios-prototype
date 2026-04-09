@@ -2,997 +2,1239 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Monostone — AI Smart Ring · iOS Prototype</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Monostone — AI Smart Ring</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
   :root {
-    --bg: #000;
-    --panel: #0a0a0a;
-    --phone: #0d0d0f;
-    --phone-border: #1f1f22;
-    --text: #f5f5f7;
-    --text-dim: #8e8e93;
-    --text-dimmer: #48484a;
-    --accent: #7cf7ff;
-    --accent-2: #a78bfa;
-    --danger: #ff453a;
-    --green: #30d158;
-    --orange: #ff9f0a;
-    --pink: #ff375f;
-    --card: rgba(255,255,255,0.04);
-    --card-border: rgba(255,255,255,0.08);
+    --bg: #0a0a0a;
+    --phone-bg: #000;
+    --panel: #1C1C1E;
+    --panel-2: #2C2C2E;
+    --text: #fff;
+    --text-2: #EBEBF5;
+    --text-dim: #98989F;
+    --text-dimmer: #636366;
+    --border: rgba(255,255,255,0.08);
+    --accent: #6B8CAE;
+    --accent-bright: #7cf7ff;
+    --blue: #0A84FF;
+    --green: #34C759;
+    --orange: #FF9500;
+    --purple: #AF52DE;
+    --red: #FF453A;
+    --pink: #FF375F;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
   html, body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Inter', -apple-system, system-ui, sans-serif;
-    font-feature-settings: 'ss01', 'cv11';
+    font-family: -apple-system, 'SF Pro Display', 'Inter', system-ui, sans-serif;
     min-height: 100vh;
+    overflow: hidden;
   }
   body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
     background:
-      radial-gradient(ellipse 80% 50% at 50% 0%, rgba(124,247,255,0.08), transparent 70%),
-      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(167,139,250,0.06), transparent 70%),
+      radial-gradient(ellipse 60% 40% at 20% 20%, rgba(124,247,255,0.06), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(167,139,250,0.05), transparent 60%),
       var(--bg);
   }
 
-  /* ---- Header ---- */
-  .header {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 80px 32px 40px;
-    text-align: center;
-  }
-  .wordmark {
-    font-size: 14px;
-    letter-spacing: 0.4em;
-    font-weight: 600;
-    color: var(--text-dim);
-    margin-bottom: 16px;
-  }
-  .wordmark span { color: var(--accent); }
-  .header h1 {
-    font-size: clamp(40px, 6vw, 72px);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1.05;
-    background: linear-gradient(180deg, #fff 0%, #888 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    margin-bottom: 24px;
-  }
-  .header p {
-    font-size: 18px;
-    color: var(--text-dim);
-    max-width: 600px;
-    margin: 0 auto;
-    line-height: 1.6;
-  }
-  .header .meta {
-    margin-top: 24px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    color: var(--text-dimmer);
-    letter-spacing: 0.1em;
-  }
-
-  /* ---- Grid of phones ---- */
-  .grid {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 40px 32px 120px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-    gap: 48px 32px;
-    justify-items: center;
-  }
-
-  /* ---- Phone frame ---- */
-  .phone-wrap {
+  /* ===== Stage ===== */
+  .stage {
+    position: relative;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 16px;
+    gap: 40px;
   }
+  .brand {
+    position: fixed;
+    top: 32px;
+    left: 32px;
+    font-size: 12px;
+    letter-spacing: 0.35em;
+    color: var(--text-dim);
+    font-weight: 600;
+    z-index: 100;
+  }
+  .brand span { color: var(--accent-bright); }
+  .hint {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--text-dimmer);
+    text-align: center;
+    z-index: 100;
+  }
+  .hint b { color: var(--accent-bright); font-weight: 500; }
+
+  /* ===== Phone ===== */
   .phone {
-    width: 290px;
-    height: 620px;
-    background: var(--phone);
-    border-radius: 48px;
-    border: 1.5px solid var(--phone-border);
+    width: 393px;
+    height: 852px;
+    background: var(--phone-bg);
+    border-radius: 55px;
+    border: 1.5px solid #1f1f22;
     position: relative;
     overflow: hidden;
     box-shadow:
       0 0 0 3px #000,
       0 0 0 4px #1a1a1c,
-      0 40px 80px -20px rgba(0,0,0,0.8),
-      0 0 60px rgba(124,247,255,0.06);
-    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-  .phone:hover {
-    transform: translateY(-8px);
+      0 50px 120px -20px rgba(0,0,0,0.9),
+      0 0 80px rgba(124,247,255,0.05);
   }
   .phone::before {
-    /* dynamic island */
     content: "";
     position: absolute;
-    top: 12px;
-    left: 50%;
+    top: 12px; left: 50%;
     transform: translateX(-50%);
-    width: 110px;
-    height: 30px;
+    width: 120px; height: 34px;
     background: #000;
-    border-radius: 16px;
-    z-index: 10;
+    border-radius: 20px;
+    z-index: 200;
+    pointer-events: none;
   }
   .status-bar {
     position: absolute;
-    top: 14px;
-    left: 0;
-    right: 0;
-    padding: 0 28px;
+    top: 0; left: 0; right: 0;
+    height: 59px;
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: center;
-    font-size: 13px;
-    font-weight: 600;
-    z-index: 5;
-    color: var(--text);
-  }
-  .status-bar .icons {
-    display: flex;
-    gap: 5px;
-    align-items: center;
-  }
-  .screen {
-    position: absolute;
-    top: 48px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 24px 22px 30px;
-    overflow: hidden;
-  }
-  .screen-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--text-dimmer);
-    letter-spacing: 0.1em;
-  }
-  .screen-label .num {
-    color: var(--accent);
-    font-weight: 600;
-  }
-  .screen-title {
-    font-size: 13px;
-    color: var(--text-dim);
-    font-weight: 500;
-    text-align: center;
-    letter-spacing: 0.02em;
-  }
-
-  /* ---- Screen 1: Splash ---- */
-  .s1 {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    padding-bottom: 80px;
-  }
-  .s1 .ring {
-    width: 130px;
-    height: 130px;
-    border-radius: 50%;
-    border: 2px solid var(--accent);
-    position: relative;
-    margin-bottom: 40px;
-    background:
-      radial-gradient(circle at 30% 30%, rgba(124,247,255,0.3), transparent 60%);
-    box-shadow:
-      0 0 40px rgba(124,247,255,0.3),
-      inset 0 0 30px rgba(124,247,255,0.1);
-    animation: pulse 3s ease-in-out infinite;
-  }
-  .s1 .ring::after {
-    content: "";
-    position: absolute;
-    inset: 14px;
-    border-radius: 50%;
-    border: 1px solid rgba(124,247,255,0.3);
-  }
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 40px rgba(124,247,255,0.3), inset 0 0 30px rgba(124,247,255,0.1); }
-    50% { box-shadow: 0 0 70px rgba(124,247,255,0.5), inset 0 0 40px rgba(124,247,255,0.2); }
-  }
-  .s1 .wm {
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: 0.35em;
-    margin-bottom: 8px;
-  }
-  .s1 .tag {
-    font-size: 12px;
-    color: var(--text-dim);
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    margin-bottom: 60px;
-  }
-  .cta {
-    background: #fff;
-    color: #000;
-    border: none;
-    border-radius: 100px;
-    padding: 16px 40px;
+    padding: 18px 32px 0;
     font-size: 15px;
     font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .cta.ghost {
-    background: transparent;
+    z-index: 150;
     color: var(--text);
-    border: 1px solid var(--card-border);
+    pointer-events: none;
   }
+  .status-bar .time { font-feature-settings: 'tnum'; }
+  .status-bar .icons { display: flex; gap: 6px; align-items: center; }
+  .status-bar .icons svg { width: 16px; height: 11px; }
 
-  /* ---- Screen 2: Problems ---- */
-  .s2 { display: flex; flex-direction: column; gap: 12px; height: 100%; }
-  .s2 h2 {
-    font-size: 22px;
-    font-weight: 700;
-    line-height: 1.2;
-    letter-spacing: -0.02em;
-    margin-bottom: 16px;
-  }
-  .s2 h2 em {
-    font-style: normal;
-    color: var(--accent);
-  }
-  .problem-card {
-    background: var(--card);
-    border: 1px solid var(--card-border);
-    border-radius: 16px;
-    padding: 14px 14px 14px 48px;
-    position: relative;
-    font-size: 12px;
-    line-height: 1.45;
-    color: var(--text-dim);
-  }
-  .problem-card .emoji {
+  /* ===== Screens ===== */
+  .screen {
     position: absolute;
-    left: 14px;
-    top: 12px;
-    font-size: 20px;
-  }
-  .problem-card b { color: var(--text); font-weight: 600; }
-  .s2 .login {
-    margin-top: auto;
-    display: flex;
+    inset: 0;
+    padding-top: 59px;
+    padding-bottom: 0;
+    display: none;
     flex-direction: column;
-    gap: 8px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
   }
-  .s2 .login button {
-    width: 100%;
-    padding: 14px;
-    border-radius: 100px;
-    font-size: 14px;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    font-family: inherit;
-  }
-  .s2 .login .primary { background: #fff; color: #000; }
-  .s2 .login .secondary { background: transparent; color: var(--text); border: 1px solid var(--card-border); }
-
-  /* ---- Screen 3: How It Works ---- */
-  .s3 { display: flex; flex-direction: column; height: 100%; }
-  .s3 h2 {
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    margin-bottom: 6px;
-  }
-  .s3 .sub { font-size: 12px; color: var(--text-dim); margin-bottom: 28px; }
-  .step {
+  .screen.active {
     display: flex;
-    gap: 14px;
-    padding: 16px 0;
-    border-bottom: 1px solid var(--card-border);
+    opacity: 1;
+    transform: translateY(0);
   }
-  .step:last-of-type { border-bottom: none; }
-  .step .n {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 1px solid var(--accent);
-    color: var(--accent);
+  .scroll {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 24px;
+    scrollbar-width: none;
+  }
+  .scroll::-webkit-scrollbar { display: none; }
+
+  /* Top nav bar for inner screens */
+  .navbar {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 600;
+    justify-content: space-between;
+    height: 44px;
+    padding: 0 16px;
+    position: relative;
     flex-shrink: 0;
   }
-  .step .txt h3 {
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 2px;
-  }
-  .step .txt p { font-size: 12px; color: var(--text-dim); line-height: 1.4; }
-
-  /* ---- Screen 4: Context Connect ---- */
-  .s4 { display: flex; flex-direction: column; height: 100%; }
-  .s4 h2 {
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    margin-bottom: 4px;
-  }
-  .s4 .sub { font-size: 12px; color: var(--text-dim); margin-bottom: 24px; }
-  .integrations {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-  .int {
-    aspect-ratio: 1;
-    background: var(--card);
-    border: 1px solid var(--card-border);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-  }
-  .s4 .count {
-    font-size: 11px;
-    color: var(--text-dim);
-    text-align: center;
-    margin-bottom: auto;
-  }
-  .s4 .count b { color: var(--accent); }
-  .s4 .skip {
-    margin-top: auto;
-    text-align: center;
-    font-size: 13px;
-    color: var(--text-dim);
-    padding: 12px;
-  }
-
-  /* ---- Screen 5: Ring Pairing ---- */
-  .s5 {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100%;
-    text-align: center;
-  }
-  .s5 .ring-viz {
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    border: 1.5px solid var(--accent);
-    position: relative;
-    margin: 24px 0 28px;
-    background: radial-gradient(circle, rgba(124,247,255,0.1), transparent 60%);
-  }
-  .s5 .ring-viz::before, .s5 .ring-viz::after {
-    content: "";
-    position: absolute;
-    inset: -10px;
-    border-radius: 50%;
-    border: 1px solid rgba(124,247,255,0.4);
-    animation: ripple 2s ease-out infinite;
-  }
-  .s5 .ring-viz::after { animation-delay: 1s; }
-  @keyframes ripple {
-    0% { transform: scale(0.9); opacity: 1; }
-    100% { transform: scale(1.4); opacity: 0; }
-  }
-  .s5 .status {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    color: var(--green);
-    background: rgba(48,209,88,0.1);
-    border: 1px solid rgba(48,209,88,0.3);
-    padding: 5px 12px;
-    border-radius: 100px;
-    margin-bottom: 16px;
-  }
-  .dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--green);
-    animation: blink 1.5s infinite;
-  }
-  @keyframes blink { 50% { opacity: 0.3; } }
-  .s5 h2 {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
-  .s5 .body {
-    font-size: 12px;
-    color: var(--text-dim);
-    line-height: 1.5;
-    max-width: 220px;
-    margin-bottom: 16px;
-  }
-  .s5 .actions {
-    margin-top: auto;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .s5 .actions button {
-    width: 100%;
-    padding: 13px;
-    border-radius: 100px;
-    font-size: 13px;
-    font-weight: 600;
+  .navbar .back {
+    color: var(--blue);
+    font-size: 17px;
+    font-weight: 400;
+    background: none;
     border: none;
     cursor: pointer;
-    font-family: inherit;
-  }
-  .s5 .actions .primary { background: var(--accent); color: #000; }
-  .s5 .actions .secondary { background: transparent; color: var(--text-dim); }
-
-  /* ---- Screen 6: Home Dashboard ---- */
-  .s6 { display: flex; flex-direction: column; height: 100%; gap: 14px; overflow-y: auto; padding-right: 4px; }
-  .s6::-webkit-scrollbar { display: none; }
-  .s6 .greet {
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-  }
-  .s6 .ring-status {
+    padding: 8px 8px 8px 0;
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    color: var(--text-dim);
-  }
-  .s6 .ring-status .d {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 8px var(--accent);
-    animation: blink 2s infinite;
-  }
-  .metric {
-    background: var(--card);
-    border: 1px solid var(--card-border);
-    border-radius: 16px;
-    padding: 16px;
-  }
-  .metric .big {
-    font-size: 34px;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    color: var(--accent);
-    line-height: 1;
-  }
-  .metric .lbl {
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-top: 4px;
-  }
-  .metric .hl {
-    font-size: 12px;
-    color: var(--text);
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid var(--card-border);
-  }
-  .tasks h3 {
-    font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-  }
-  .task {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--card-border);
-    font-size: 11px;
-  }
-  .task:last-child { border-bottom: none; }
-  .task .name { color: var(--text); font-weight: 500; line-height: 1.3; margin-bottom: 3px; }
-  .task .meta { color: var(--text-dim); font-size: 10px; }
-  .task .time { color: var(--text-dimmer); font-size: 10px; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; }
-  .task .time.live { color: var(--accent); }
-
-  /* ---- Screen 7: Listening ---- */
-  .s7 {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100%;
-    padding-top: 30px;
-    text-align: center;
-  }
-  .s7 .state {
-    font-size: 11px;
-    color: var(--accent);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-bottom: 20px;
-    font-weight: 600;
-  }
-  .s7 .wave {
-    display: flex;
     gap: 4px;
-    align-items: center;
-    justify-content: center;
-    height: 80px;
-    margin-bottom: 26px;
   }
-  .s7 .wave span {
-    display: block;
-    width: 4px;
-    background: var(--accent);
-    border-radius: 4px;
-    animation: wave 1.2s ease-in-out infinite;
+  .navbar .title {
+    font-size: 17px;
+    font-weight: 600;
   }
-  @keyframes wave {
-    0%, 100% { height: 12px; opacity: 0.5; }
-    50% { height: 60px; opacity: 1; }
-  }
-  .s7 .wave span:nth-child(1) { animation-delay: 0s; }
-  .s7 .wave span:nth-child(2) { animation-delay: 0.1s; }
-  .s7 .wave span:nth-child(3) { animation-delay: 0.2s; }
-  .s7 .wave span:nth-child(4) { animation-delay: 0.3s; }
-  .s7 .wave span:nth-child(5) { animation-delay: 0.4s; }
-  .s7 .wave span:nth-child(6) { animation-delay: 0.3s; }
-  .s7 .wave span:nth-child(7) { animation-delay: 0.2s; }
-  .s7 .wave span:nth-child(8) { animation-delay: 0.1s; }
-  .s7 .wave span:nth-child(9) { animation-delay: 0s; }
-  .s7 .wave span:nth-child(10) { animation-delay: 0.2s; }
-  .s7 .ctx-loaded {
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-bottom: 4px;
-  }
-  .s7 .ctx-loaded b { color: var(--text); font-weight: 500; }
-  .s7 .ctx-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    justify-content: center;
-    margin-top: 16px;
-    margin-bottom: auto;
-  }
-  .chip {
-    background: rgba(124,247,255,0.08);
-    border: 1px solid rgba(124,247,255,0.25);
-    color: var(--accent);
-    font-size: 10px;
-    padding: 5px 10px;
-    border-radius: 100px;
-  }
-  .s7 .stop {
-    width: 62px;
-    height: 62px;
-    border-radius: 50%;
-    background: var(--danger);
+  .navbar .right {
+    font-size: 17px;
+    color: var(--blue);
+    background: none;
     border: none;
-    margin-top: 20px;
     cursor: pointer;
-    position: relative;
-    box-shadow: 0 0 30px rgba(255,69,58,0.4);
-  }
-  .s7 .stop::after {
-    content: "";
-    position: absolute;
-    inset: 22px;
-    background: #fff;
-    border-radius: 4px;
+    font-weight: 400;
   }
 
-  /* ---- Screen 8: Processing ---- */
-  .s8 {
+  /* Tab bar */
+  .tabbar {
+    height: 83px;
+    background: rgba(22,22,23,0.94);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border-top: 0.5px solid var(--border);
     display: flex;
-    flex-direction: column;
-    height: 100%;
+    padding: 8px 0 30px;
+    flex-shrink: 0;
   }
-  .s8 .title {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-  .s8 .sub { font-size: 11px; color: var(--text-dim); margin-bottom: 22px; }
-  .s8 .center {
+  .tab {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 18px;
+    gap: 4px;
+    color: var(--text-dimmer);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: inherit;
+    padding: 6px 0;
+    transition: color 0.2s;
   }
-  .s8 .orbit {
-    position: relative;
+  .tab.active { color: var(--accent-bright); }
+  .tab .icon { font-size: 22px; line-height: 1; }
+  .tab .lbl { font-size: 10px; font-weight: 500; letter-spacing: 0.02em; }
+
+  button {
+    font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:active { transform: scale(0.97); }
+
+  /* ============================================================ */
+  /* Screen 1 · SPLASH                                              */
+  /* ============================================================ */
+  #s1 { padding-top: 0; }
+  #s1 .wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 40px 120px;
+  }
+  #s1 .ring {
     width: 160px;
     height: 160px;
-  }
-  .s8 .orbit .core {
-    position: absolute;
-    inset: 40%;
     border-radius: 50%;
-    background: radial-gradient(circle, var(--accent), transparent 70%);
-    box-shadow: 0 0 30px var(--accent);
+    border: 2px solid var(--accent-bright);
+    position: relative;
+    margin-bottom: 56px;
+    background: radial-gradient(circle at 30% 30%, rgba(124,247,255,0.3), transparent 60%);
+    box-shadow: 0 0 60px rgba(124,247,255,0.35), inset 0 0 40px rgba(124,247,255,0.12);
+    animation: pulse 3s ease-in-out infinite;
+  }
+  #s1 .ring::after {
+    content: "";
+    position: absolute;
+    inset: 18px;
+    border-radius: 50%;
+    border: 1px solid rgba(124,247,255,0.35);
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 60px rgba(124,247,255,0.35), inset 0 0 40px rgba(124,247,255,0.12); }
+    50% { box-shadow: 0 0 90px rgba(124,247,255,0.55), inset 0 0 50px rgba(124,247,255,0.22); }
+  }
+  #s1 h1 {
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: 0.32em;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  #s1 .tag {
+    font-size: 13px;
+    color: var(--text-dim);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin-bottom: 72px;
+  }
+  .primary-btn {
+    background: #fff;
+    color: #000;
+    border: none;
+    border-radius: 100px;
+    padding: 18px 56px;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 260px;
+    justify-content: center;
+    transition: transform 0.2s;
+  }
+  .ghost-btn {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 18px 56px;
+    font-size: 17px;
+    font-weight: 500;
+    cursor: pointer;
+    min-width: 260px;
+  }
+
+  /* ============================================================ */
+  /* Screen 2 · PROBLEM + LOGIN                                    */
+  /* ============================================================ */
+  #s2 .scroll { padding-top: 24px; padding-bottom: 0; }
+  #s2 h2 {
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 28px;
+  }
+  #s2 h2 em { font-style: normal; color: var(--accent-bright); }
+  .problem-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px 18px 18px 62px;
+    position: relative;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    animation: rise 0.5s ease-out both;
+  }
+  .problem-card:nth-child(2) { animation-delay: 0.1s; }
+  .problem-card:nth-child(3) { animation-delay: 0.2s; }
+  .problem-card:nth-child(4) { animation-delay: 0.3s; }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .problem-card .emoji {
+    position: absolute;
+    left: 18px;
+    top: 16px;
+    font-size: 28px;
+  }
+  .problem-card b { color: var(--text); font-weight: 600; display: block; margin-bottom: 3px; font-size: 14px; }
+  #s2 .login-actions {
+    padding: 16px 24px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  #s2 .login-actions .primary-btn,
+  #s2 .login-actions .ghost-btn { width: 100%; min-width: 0; }
+
+  /* ============================================================ */
+  /* Screen 3 · HOW IT WORKS                                       */
+  /* ============================================================ */
+  #s3 .scroll { padding-top: 24px; }
+  #s3 .header h2 {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  #s3 .header .sub { font-size: 15px; color: var(--text-dim); margin-bottom: 40px; }
+  .step {
+    display: flex;
+    gap: 18px;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .step:last-of-type { border-bottom: none; }
+  .step .n {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent-bright);
+    color: var(--accent-bright);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .step h3 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .step p { font-size: 14px; color: var(--text-dim); line-height: 1.5; }
+  #s3 .bottom-actions {
+    padding: 0 24px 40px;
+  }
+  #s3 .primary-btn { width: 100%; min-width: 0; }
+
+  /* ============================================================ */
+  /* Screen 4 · CONTEXT CONNECT                                    */
+  /* ============================================================ */
+  #s4 .scroll { padding-top: 24px; }
+  #s4 h2 { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 6px; }
+  #s4 .sub { font-size: 14px; color: var(--text-dim); margin-bottom: 24px; }
+  .integrations {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .int {
+    aspect-ratio: 1;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .int:hover, .int.on {
+    background: rgba(124,247,255,0.1);
+    border-color: rgba(124,247,255,0.4);
+  }
+  #s4 .count {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 28px;
+  }
+  #s4 .count b { color: var(--accent-bright); font-weight: 600; }
+  #s4 .bottom-actions { padding: 0 24px 40px; display: flex; flex-direction: column; gap: 10px; }
+  #s4 .primary-btn, #s4 .ghost-btn { width: 100%; min-width: 0; }
+
+  /* ============================================================ */
+  /* Screen 5 · RING PAIRING                                       */
+  /* ============================================================ */
+  #s5 .scroll { padding-top: 20px; display: flex; flex-direction: column; align-items: center; }
+  .pair-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--green);
+    background: rgba(52,199,89,0.12);
+    border: 1px solid rgba(52,199,89,0.35);
+    padding: 7px 16px;
+    border-radius: 100px;
+    margin-bottom: 30px;
+    font-weight: 500;
+  }
+  .pair-status .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: blink 1.5s infinite;
+    box-shadow: 0 0 8px var(--green);
+  }
+  @keyframes blink { 50% { opacity: 0.3; } }
+  .ring-viz {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    border: 2px solid var(--accent-bright);
+    position: relative;
+    margin-bottom: 44px;
+    background: radial-gradient(circle at 30% 30%, rgba(124,247,255,0.25), transparent 65%);
+    box-shadow: 0 0 60px rgba(124,247,255,0.3);
+  }
+  .ring-viz::before, .ring-viz::after {
+    content: "";
+    position: absolute;
+    inset: -16px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(124,247,255,0.45);
+    animation: ripple 2.5s ease-out infinite;
+  }
+  .ring-viz::after { animation-delay: 1.25s; }
+  @keyframes ripple {
+    0% { transform: scale(0.9); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+  #s5 h2 { font-size: 24px; font-weight: 700; margin-bottom: 10px; text-align: center; }
+  #s5 .body { font-size: 14px; color: var(--text-dim); line-height: 1.5; text-align: center; max-width: 280px; margin-bottom: auto; }
+  #s5 .bottom-actions { padding: 24px 24px 40px; width: 100%; display: flex; flex-direction: column; gap: 10px; }
+  #s5 .primary-btn, #s5 .ghost-btn { width: 100%; min-width: 0; }
+  #s5 .primary-btn { background: var(--accent-bright); color: #000; }
+
+  /* ============================================================ */
+  /* Screen 6 · HOME DASHBOARD (Timeline tab)                      */
+  /* ============================================================ */
+  #s6 .scroll { padding-top: 8px; }
+  .home-header {
+    padding: 8px 0 20px;
+  }
+  .home-header .greet {
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    margin-bottom: 4px;
+  }
+  .home-header .status {
+    font-size: 13px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .home-header .status .d {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent-bright);
+    box-shadow: 0 0 8px var(--accent-bright);
+    animation: blink 2s infinite;
+  }
+  .metric-card {
+    background: linear-gradient(135deg, rgba(124,247,255,0.12), rgba(167,139,250,0.08));
+    border: 1px solid rgba(124,247,255,0.2);
+    border-radius: 22px;
+    padding: 22px;
+    margin-bottom: 24px;
+    cursor: pointer;
+  }
+  .metric-card .big {
+    font-size: 52px;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    color: var(--accent-bright);
+    line-height: 1;
+  }
+  .metric-card .lbl {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+  .metric-card .hl {
+    font-size: 15px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    font-weight: 500;
+  }
+  .section-title {
+    font-size: 13px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .task-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 0.5px solid var(--border);
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .task-item:active { opacity: 0.6; }
+  .task-item:last-child { border-bottom: none; }
+  .task-item .name { color: var(--text); font-weight: 500; font-size: 15px; line-height: 1.35; margin-bottom: 3px; }
+  .task-item .meta { color: var(--text-dim); font-size: 13px; }
+  .task-item .time {
+    color: var(--text-dimmer);
+    font-size: 12px;
+    flex-shrink: 0;
+    font-feature-settings: 'tnum';
+    white-space: nowrap;
+  }
+  .task-item .time.live { color: var(--accent-bright); }
+
+  /* FAB — record */
+  .fab {
+    position: absolute;
+    bottom: 103px;
+    right: 24px;
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-bright), #a78bfa);
+    border: none;
+    color: #000;
+    font-size: 28px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(124,247,255,0.4);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .fab::before {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(124,247,255,0.3);
+    animation: ripple 2s ease-out infinite;
+  }
+
+  /* ============================================================ */
+  /* Screen 7 · LISTENING                                           */
+  /* ============================================================ */
+  #s7 { background: radial-gradient(circle at 50% 40%, rgba(124,247,255,0.08), #000 70%); }
+  #s7 .scroll {
+    padding-top: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+  }
+  .listening-state {
+    font-size: 13px;
+    color: var(--accent-bright);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 44px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .listening-state .d {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--red);
+    animation: blink 1s infinite;
+    box-shadow: 0 0 12px var(--red);
+  }
+  .wave {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+    height: 140px;
+    margin-bottom: 44px;
+  }
+  .wave span {
+    display: block;
+    width: 6px;
+    background: var(--accent-bright);
+    border-radius: 6px;
+    animation: wave 1.2s ease-in-out infinite;
+    box-shadow: 0 0 8px rgba(124,247,255,0.5);
+  }
+  @keyframes wave {
+    0%, 100% { height: 16px; opacity: 0.4; }
+    50% { height: 100px; opacity: 1; }
+  }
+  .wave span:nth-child(1) { animation-delay: 0s; }
+  .wave span:nth-child(2) { animation-delay: 0.08s; }
+  .wave span:nth-child(3) { animation-delay: 0.16s; }
+  .wave span:nth-child(4) { animation-delay: 0.24s; }
+  .wave span:nth-child(5) { animation-delay: 0.32s; }
+  .wave span:nth-child(6) { animation-delay: 0.4s; }
+  .wave span:nth-child(7) { animation-delay: 0.32s; }
+  .wave span:nth-child(8) { animation-delay: 0.24s; }
+  .wave span:nth-child(9) { animation-delay: 0.16s; }
+  .wave span:nth-child(10) { animation-delay: 0.08s; }
+  .ctx-loaded {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  .ctx-loaded b { color: var(--text); font-weight: 500; }
+  .ctx-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 14px;
+    padding: 0 24px;
+  }
+  .chip {
+    background: rgba(124,247,255,0.1);
+    border: 1px solid rgba(124,247,255,0.3);
+    color: var(--accent-bright);
+    font-size: 12px;
+    padding: 7px 14px;
+    border-radius: 100px;
+    font-weight: 500;
+  }
+  #s7 .stop-area {
+    padding: 40px 0;
+    display: flex;
+    justify-content: center;
+  }
+  .stop-btn {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: var(--red);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    box-shadow: 0 0 40px rgba(255,69,58,0.5);
+  }
+  .stop-btn::after {
+    content: "";
+    position: absolute;
+    inset: 28px;
+    background: #fff;
+    border-radius: 6px;
+  }
+
+  /* ============================================================ */
+  /* Screen 8 · PROCESSING                                         */
+  /* ============================================================ */
+  #s8 .scroll {
+    padding-top: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  #s8 h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  #s8 .sub { font-size: 13px; color: var(--text-dim); margin-bottom: 40px; }
+  .orbit {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    margin-bottom: 36px;
+  }
+  .orbit .core {
+    position: absolute;
+    inset: 42%;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent-bright), transparent 70%);
+    box-shadow: 0 0 40px var(--accent-bright);
     animation: pulse 2s ease-in-out infinite;
   }
-  .s8 .orbit .o {
+  .orbit .o {
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    border: 1px dashed rgba(124,247,255,0.3);
+    border: 1.5px dashed rgba(124,247,255,0.35);
     animation: spin 20s linear infinite;
   }
-  .s8 .orbit .o2 {
-    inset: 14px;
-    border-color: rgba(167,139,250,0.25);
-    animation: spin 15s linear infinite reverse;
-  }
-  .s8 .orbit .o3 {
-    inset: 28px;
-    border-color: rgba(124,247,255,0.18);
-    animation: spin 10s linear infinite;
-  }
+  .orbit .o2 { inset: 18px; border-color: rgba(167,139,250,0.3); animation: spin 15s linear infinite reverse; }
+  .orbit .o3 { inset: 36px; border-color: rgba(124,247,255,0.2); animation: spin 10s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .s8 .loading {
-    font-size: 11px;
+  .loading-label {
+    font-size: 12px;
     color: var(--text-dim);
-    letter-spacing: 0.1em;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
+    margin-bottom: 32px;
   }
-  .s8 .ctx-list {
-    margin-top: auto;
+  .ctx-list {
+    width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
   }
   .ctx-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
-    background: var(--card);
-    border: 1px solid var(--card-border);
-    border-radius: 10px;
-    font-size: 11px;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 14px;
+    text-align: left;
+    animation: rise 0.5s ease-out both;
   }
+  .ctx-row:nth-child(1) { animation-delay: 0.1s; }
+  .ctx-row:nth-child(2) { animation-delay: 0.25s; }
+  .ctx-row:nth-child(3) { animation-delay: 0.4s; }
+  .ctx-row:nth-child(4) { animation-delay: 0.55s; }
   .ctx-row .ic {
-    width: 22px;
-    height: 22px;
-    background: rgba(124,247,255,0.1);
-    border-radius: 6px;
+    width: 32px; height: 32px;
+    background: rgba(124,247,255,0.12);
+    border-radius: 9px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
+    font-size: 16px;
     flex-shrink: 0;
   }
-  .ctx-row .nm { flex: 1; color: var(--text); }
-  .ctx-row .mt { color: var(--text-dim); font-size: 10px; }
+  .ctx-row .nm { flex: 1; color: var(--text); font-weight: 500; }
+  .ctx-row .mt { color: var(--text-dim); font-size: 12px; }
 
-  /* ---- Screen 9: Result ---- */
-  .s9 { display: flex; flex-direction: column; height: 100%; }
-  .s9 .hd {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 14px;
-  }
-  .s9 .hd .close { font-size: 18px; color: var(--text-dim); cursor: pointer; }
-  .s9 .hd .done {
-    color: var(--accent);
-    font-size: 13px;
-    font-weight: 600;
-  }
+  /* ============================================================ */
+  /* Screen 9 · RESULT (email task)                                */
+  /* ============================================================ */
+  #s9 .scroll { padding-top: 10px; }
   .email-field {
-    padding: 9px 0;
-    border-bottom: 1px solid var(--card-border);
-    font-size: 11px;
-  }
-  .email-field .k { color: var(--text-dim); margin-right: 6px; }
-  .email-field .v { color: var(--text); }
-  .email-body {
-    margin-top: 14px;
-    font-size: 12px;
-    line-height: 1.55;
-    color: var(--text);
-    flex: 1;
-    overflow-y: auto;
-  }
-  .email-body::-webkit-scrollbar { display: none; }
-  .email-body b { color: var(--accent); font-weight: 500; }
-  .s9 .foot-actions {
+    padding: 13px 0;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 15px;
     display: flex;
     gap: 8px;
-    padding-top: 12px;
-    border-top: 1px solid var(--card-border);
-    margin-top: 10px;
   }
-  .s9 .foot-actions button {
-    flex: 1;
-    padding: 10px;
-    border-radius: 10px;
-    border: 1px solid var(--card-border);
-    background: var(--card);
+  .email-field .k { color: var(--text-dim); width: 40px; flex-shrink: 0; }
+  .email-field .v { color: var(--text); flex: 1; }
+  .email-field .v.link { color: var(--blue); }
+  .email-body {
+    margin-top: 18px;
+    font-size: 15px;
+    line-height: 1.55;
     color: var(--text);
-    font-size: 11px;
+    padding-bottom: 24px;
+  }
+  .email-body b { color: var(--accent-bright); font-weight: 500; }
+  .email-body p { margin-bottom: 14px; }
+  #s9 .bottom-actions {
+    padding: 14px 24px 30px;
+    display: flex;
+    gap: 10px;
+    border-top: 0.5px solid var(--border);
+    background: rgba(22,22,23,0.7);
+    backdrop-filter: blur(20px);
+  }
+  #s9 .bottom-actions button {
+    flex: 1;
+    padding: 13px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    font-family: inherit;
   }
-  .s9 .foot-actions button.primary {
-    background: var(--accent);
+  #s9 .bottom-actions button.primary {
+    background: var(--accent-bright);
     color: #000;
-    border-color: var(--accent);
+    border-color: var(--accent-bright);
+    font-weight: 600;
   }
 
-  /* ---- Screen 10: Memory Graph ---- */
-  .s10 { display: flex; flex-direction: column; height: 100%; }
-  .s10 h2 {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 2px;
+  /* ============================================================ */
+  /* Screen 10 · MEMORY GRAPH                                      */
+  /* ============================================================ */
+  #s10 .scroll { padding-top: 12px; }
+  #s10 h2 {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
   }
-  .s10 .sub { font-size: 11px; color: var(--text-dim); margin-bottom: 14px; }
+  #s10 .sub { font-size: 13px; color: var(--text-dim); margin-bottom: 20px; }
   .stats {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-    margin-bottom: 14px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
   }
   .stat {
-    background: var(--card);
-    border: 1px solid var(--card-border);
-    border-radius: 10px;
-    padding: 8px 10px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 8px;
     text-align: center;
   }
   .stat .v {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--accent);
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent-bright);
+    letter-spacing: -0.02em;
   }
-  .stat .l { font-size: 9px; color: var(--text-dim); margin-top: 2px; }
+  .stat .l {
+    font-size: 9px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
   .graph-svg {
     width: 100%;
-    height: 180px;
-    margin-bottom: 12px;
+    height: 240px;
+    margin-bottom: 20px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 18px;
   }
   .top-ctx h3 {
-    font-size: 10px;
+    font-size: 12px;
     color: var(--text-dim);
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    font-weight: 600;
   }
   .top-ctx .row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 7px 0;
-    border-bottom: 1px solid var(--card-border);
-    font-size: 10px;
+    padding: 13px 0;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 14px;
   }
   .top-ctx .row:last-child { border-bottom: none; }
   .top-ctx .p { color: var(--text); font-weight: 500; }
-  .top-ctx .r { color: var(--text-dim); font-size: 9px; }
-  .top-ctx .s {
-    color: var(--accent);
-    font-family: 'JetBrains Mono', monospace;
+  .top-ctx .r { color: var(--text-dim); font-size: 12px; margin-top: 2px; }
+  .top-ctx .s { color: var(--accent-bright); font-weight: 700; font-size: 15px; font-feature-settings: 'tnum'; }
+
+  /* ============================================================ */
+  /* Screen 11 · AGENT (simple)                                    */
+  /* ============================================================ */
+  #s11 .scroll { padding-top: 12px; display: flex; flex-direction: column; }
+  .agent-header { text-align: center; padding: 12px 0 20px; }
+  .agent-header h2 { font-size: 22px; font-weight: 700; }
+  .agent-header .sub { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+  .msg {
+    max-width: 78%;
+    padding: 12px 16px;
+    border-radius: 20px;
+    font-size: 15px;
+    line-height: 1.4;
+    margin-bottom: 10px;
+    animation: rise 0.4s ease-out both;
+  }
+  .msg.user {
+    background: var(--blue);
+    color: #fff;
+    align-self: flex-end;
+    border-bottom-right-radius: 6px;
+    margin-left: auto;
+  }
+  .msg.bot {
+    background: var(--panel);
+    color: var(--text);
+    align-self: flex-start;
+    border-bottom-left-radius: 6px;
+  }
+  .msg.bot b { color: var(--accent-bright); }
+  .agent-input {
+    margin-top: auto;
+    padding: 14px 0 20px;
+    display: flex;
+    gap: 10px;
+  }
+  .agent-input .field {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 12px 18px;
+    font-size: 14px;
+    color: var(--text-dim);
+  }
+  .agent-input .send {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--accent-bright);
+    border: none;
+    color: #000;
+    font-size: 18px;
+    cursor: pointer;
+  }
+
+  /* ============================================================ */
+  /* Screen 12 · PROFILE                                           */
+  /* ============================================================ */
+  #s12 .scroll { padding-top: 12px; }
+  .profile-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0 22px;
+  }
+  .avatar {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-bright), var(--purple));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: 700;
+    color: #000;
+  }
+  .profile-head .name { font-size: 20px; font-weight: 700; }
+  .profile-head .plan {
+    font-size: 12px;
+    color: var(--accent-bright);
+    background: rgba(124,247,255,0.12);
+    padding: 3px 10px;
+    border-radius: 100px;
+    display: inline-block;
+    margin-top: 4px;
+  }
+  .profile-ring {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .profile-ring .ic { font-size: 28px; }
+  .profile-ring .info { flex: 1; }
+  .profile-ring .info .t { font-size: 15px; font-weight: 600; }
+  .profile-ring .info .s { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+  .profile-ring .battery {
+    font-size: 13px;
+    color: var(--green);
     font-weight: 600;
   }
-
-  /* ---- Footer ---- */
-  footer {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 40px 32px 80px;
-    text-align: center;
-    font-size: 12px;
-    color: var(--text-dimmer);
-    border-top: 1px solid var(--card-border);
+  .list-group {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 14px;
   }
-  footer a {
-    color: var(--accent);
-    text-decoration: none;
+  .list-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 0.5px solid var(--border);
+    cursor: pointer;
+    font-size: 15px;
   }
+  .list-row:last-child { border-bottom: none; }
+  .list-row .ic {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    background: rgba(124,247,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  .list-row .t { flex: 1; }
+  .list-row .chev { color: var(--text-dimmer); font-size: 14px; }
 
-  @media (max-width: 640px) {
-    .header { padding: 60px 20px 30px; }
-    .grid { padding: 20px 16px 80px; gap: 40px; }
-    .phone { transform: scale(0.95); }
+  /* Responsive scale for small screens */
+  @media (max-width: 460px), (max-height: 900px) {
+    .stage { gap: 0; }
+    .phone {
+      transform: scale(0.88);
+      transform-origin: center;
+    }
+    .brand { top: 16px; left: 16px; font-size: 10px; }
+    .hint { bottom: 12px; font-size: 10px; }
+  }
+  @media (max-height: 780px) {
+    .phone { transform: scale(0.78); }
+  }
+  @media (max-height: 680px) {
+    .phone { transform: scale(0.7); }
   }
 </style>
 </head>
 <body>
 
-<header class="header">
-  <div class="wordmark">MONO<span>•</span>STONE</div>
-  <h1>AI Smart Ring<br/>iOS Prototype</h1>
-  <p>10 screens. Zero friction. Your personal context infrastructure — from unboxing to compounding knowledge graph.</p>
-  <div class="meta">v0.1 · 10 SCREENS · MONOSTONE 2026</div>
-</header>
+<div class="brand">MONO<span>•</span>STONE</div>
+<div class="hint">Interactive iOS Prototype · tap <b>buttons</b> and <b>cards</b> to navigate</div>
 
-<main class="grid">
+<div class="stage">
+  <div class="phone">
 
-  <!-- Screen 1: Splash -->
-  <div class="phone-wrap">
-    <div class="phone">
-      <div class="status-bar"><span>9:41</span><span class="icons">●●● ▲ ▮</span></div>
-      <div class="screen s1">
+    <!-- Status bar (persistent) -->
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <span class="icons">
+        <svg viewBox="0 0 16 11" fill="currentColor"><path d="M1 9h1v2H1zM4 7h1v4H4zM7 5h1v6H7zM10 3h1v8h-1zM13 1h1v10h-1z"/></svg>
+        <svg viewBox="0 0 16 11" fill="currentColor"><path d="M8 3c2 0 4 1 5 2l1-1C13 3 11 2 8 2S3 3 2 4l1 1c1-1 3-2 5-2zm0 3c1 0 2 0 3 1l1-1c-1-1-2-2-4-2S5 5 4 6l1 1c1-1 2-1 3-1zm0 3a1 1 0 100 2 1 1 0 000-2z"/></svg>
+        <svg viewBox="0 0 22 11" fill="none" stroke="currentColor"><rect x="1" y="2" width="18" height="7" rx="2"/><rect x="3" y="4" width="14" height="3" fill="currentColor"/><rect x="20" y="4" width="1" height="3" fill="currentColor"/></svg>
+      </span>
+    </div>
+
+    <!-- ============ Screen 1: Splash ============ -->
+    <div class="screen active" id="s1">
+      <div class="wrap">
         <div class="ring"></div>
-        <div class="wm">MONOSTONE</div>
+        <h1>MONOSTONE</h1>
         <div class="tag">AI Smart Ring</div>
-        <button class="cta">Begin →</button>
+        <button class="primary-btn" onclick="go('s2')">Begin →</button>
       </div>
     </div>
-    <div class="screen-label"><span class="num">01</span> · SPLASH</div>
-  </div>
 
-  <!-- Screen 2: Problem + Login -->
-  <div class="phone-wrap">
-    <div class="phone">
-      <div class="status-bar"><span>9:41</span><span class="icons">●●● ▲ ▮</span></div>
-      <div class="screen s2">
-        <h2>Every day, the <em>best ideas</em> happen where you can't type.</h2>
+    <!-- ============ Screen 2: Problem + Login ============ -->
+    <div class="screen" id="s2">
+      <div class="scroll">
+        <h2>The best <em>ideas</em> happen where you can't type.</h2>
         <div class="problem-card">
           <span class="emoji">🚶</span>
-          <b>Walking to your next meeting</b> — you think of a perfect follow-up email.
+          <b>Walking to your next meeting</b>
+          You think of a perfect follow-up email.
         </div>
         <div class="problem-card">
           <span class="emoji">🚗</span>
-          <b>Driving home</b> — you want to rethink the pitch deck structure.
+          <b>Driving home</b>
+          You want to rethink the pitch deck structure.
         </div>
         <div class="problem-card">
           <span class="emoji">🍽</span>
-          <b>At lunch</b> — a quick competitor check would change your strategy.
-        </div>
-        <div class="login">
-          <button class="primary">Continue with Apple</button>
-          <button class="secondary">Sign in with Email</button>
+          <b>At lunch</b>
+          A quick competitor check would change your strategy.
         </div>
       </div>
+      <div class="login-actions">
+        <button class="primary-btn" onclick="go('s3')">Continue with Apple</button>
+        <button class="ghost-btn" onclick="go('s3')">Sign in with Email</button>
+      </div>
     </div>
-    <div class="screen-label"><span class="num">02</span> · PROBLEM · LOGIN</div>
-  </div>
 
-  <!-- Screen 3: How It Works -->
-  <div class="phone-wrap">
-    <div class="phone">
-      <div class="status-bar"><span>9:41</span><span class="icons">●●● ▲ ▮</span></div>
-      <div class="screen s3">
-        <h2>How it works</h2>
-        <div class="sub">Three seconds. No typing. Ever.</div>
+    <!-- ============ Screen 3: How It Works ============ -->
+    <div class="screen" id="s3">
+      <div class="navbar">
+        <button class="back" onclick="go('s2')">‹ Back</button>
+        <div class="title">How it works</div>
+        <button class="right" style="visibility:hidden">Skip</button>
+      </div>
+      <div class="scroll">
+        <div class="header">
+          <h2>Three seconds.<br/>No typing. Ever.</h2>
+          <div class="sub">Monostone learns your context — so you don't have to explain yourself again.</div>
+        </div>
         <div class="step">
           <div class="n">1</div>
-          <div class="txt"><h3>Raise</h3><p>3-second trigger. Double-tap your ring.</p></div>
+          <div>
+            <h3>Raise</h3>
+            <p>3-second trigger. Double-tap your ring to start.</p>
+          </div>
         </div>
         <div class="step">
           <div class="n">2</div>
-          <div class="txt"><h3>Speak</h3><p>Brief & natural. Just talk it out.</p></div>
+          <div>
+            <h3>Speak</h3>
+            <p>Brief & natural. Just talk it out.</p>
+          </div>
         </div>
         <div class="step">
           <div class="n">3</div>
-          <div class="txt"><h3>Done</h3><p>AI handles the rest. Draft ready in your pocket.</p></div>
+          <div>
+            <h3>Done</h3>
+            <p>AI handles the rest. Draft ready in your pocket.</p>
+          </div>
         </div>
       </div>
+      <div class="bottom-actions">
+        <button class="primary-btn" onclick="go('s4')">Continue →</button>
+      </div>
     </div>
-    <div class="screen-label"><span class="num">03</span> · HOW IT WORKS</div>
-  </div>
 
-  <!-- Screen 4: Context Connect -->
-  <div class="phone-wrap">
-    <div class="phone">
-      <div class="status-bar"><span>9:41</span><span class="icons">●●● ▲ ▮</span></div>
-      <div class="screen s4">
+    <!-- ============ Screen 4: Context Connect ============ -->
+    <div class="screen" id="s4">
+      <div class="navbar">
+        <button class="back" onclick="go('s3')">‹ Back</button>
+        <div class="title">Connect</div>
+        <button class="right" onclick="go('s5')">Skip</button>
+      </div>
+      <div class="scroll">
         <h2>Connect your context</h2>
         <div class="sub">Plug in where your work already lives.</div>
         <div class="integrations">
-          <div class="int">📝</div><div class="int">📅</div><div class="int">📧</div><div class="int">💬</div>
-          <div class="int">📊</div><div class="int">🗂</div><div class="int">🔗</div><div class="int">☁️</div>
-          <div class="int">🧠</div><div class="int">🎥</div><div class="int">📂</div><div class="int">⚙️</div>
+          <div class="int" onclick="this.classList.toggle('on')">📝</div>
+          <div class="int on" onclick="this.classList.toggle('on')">📅</div>
+          <div class="int on" onclick="this.classList.toggle('on')">📧</div>
+          <div class="int" onclick="this.classList.toggle('on')">💬</div>
+          <div class="int" onclick="this.classList.toggle('on')">📊</div>
+          <div class="int on" onclick="this.classList.toggle('on')">🗂</div>
+          <div class="int" onclick="this.classList.toggle('on')">🔗</div>
+          <div class="int" onclick="this.classList.toggle('on')">☁️</div>
+          <div class="int" onclick="this.classList.toggle('on')">🧠</div>
+          <div class="int" onclick="this.classList.toggle('on')">🎥</div>
+          <div class="int" onclick="this.classList.toggle('on')">📂</div>
+          <div class="int" onclick="this.classList.toggle('on')">⚙️</div>
         </div>
         <div class="count"><b>+992</b> integrations available</div>
-        <div class="skip">Skip for now →</div>
+      </div>
+      <div class="bottom-actions">
+        <button class="primary-btn" onclick="go('s5')">Continue →</button>
+        <button class="ghost-btn" onclick="go('s5')">Skip for now</button>
       </div>
     </div>
-    <div class="screen-label"><span class="num">04</span> · CONTEXT CONNECT</div>
-  </div>
 
-  <!-- Screen 5: Ring Pairing -->
-  <div class="phone-wrap">
-    <div class="phone">
-      <div class="status-bar"><span>9:41</span><span class="icons">●●● ▲ ▮</span></div>
-      <div class="screen s5">
-        <div class="status"><span class="dot"></span>Monostone Ring · detected</div>
+    <!-- ============ Screen 5: Ring Pairing ============ -->
+    <div class="screen" id="s5">
+      <div class="navbar">
+        <button class="back" onclick="go('s4')">‹ Back</button>
+        <div class="title">Pair Ring</div>
+        <button class="right" style="visibility:hidden">Skip</button>
+      </div>
+      <div class="scroll">
+        <div class="pair-status"><span class="dot"></span>Monostone Ring · detected</div>
         <div class="ring-viz"></div>
         <h2>Keep your ring nearby</h2>
         <div class="body">Keep your ring charged and within 30cm. Pairing takes under 10 seconds.</div>
-        <div class="actions">
-          <button class="primary">Pair Ring →</button>
-          <button class="secondary">Skip for now</button>
-        </div>
+      </div>
+      <div class="bottom-actions">
+        <button class="primary-btn" onclick="go('s6')">Pair Ring →</button>
+        <button class="ghost-btn" onclick="go('s6')">Skip for now</button>
       </div>
     </div>
-    <div class="screen-label"><span class="num">05</span> · RING PAIRING</div>
-  </div>
 
-  <!-- Screen 6: Home Dashboard -->
-  <div class="phone-wrap">
-    <div class="phone">
-      <div class="status-bar"><span>9:41</span><span class="icons">●●● ▲ ▮</span></div>
-      <div class="screen s6">
-        <div>
+    <!-- ============ Screen 6: Home Dashboard (Timeline Tab) ============ -->
+    <div class="screen" id="s6">
+      <div class="scroll">
+        <div class="home-header">
           <div class="greet">Good morning.</div>
-          <div class="ring-status"><span class="d"></span>Day 12 · Ring connected</div>
+          <div class="status"><span class="d"></span>Day 12 · Ring connected</div>
         </div>
-        <div class="metric">
+        <div class="metric-card" onclick="go('s10')">
           <div class="big">87%</div>
           <div class="lbl">312 interactions logged</div>
           <div class="hl">Emails now near send-ready ✨</div>
         </div>
-        <div class="tasks">
-          <h3>Recent tasks</h3>
-          <div class="task">
-            <div>
-              <div class="name">Drafted follow-up for Chen</div>
-              <div class="meta">Series A · investor meeting</div>
-            </div>
-            <div class="time">2h</div>
+        <div class="section-title">Recent tasks</div>
+        <div class="task-item" onclick="go('s9')">
+          <div>
+            <div class="name">Drafted follow-up for Chen</div>
+            <div class="meta">Series A · investor meeting</div>
           </div>
-          <div class="task">
-            <div>
-              <div class="name">Logged team sync issues</div>
-              <div class="meta">4 items added to Linear</div>
-            </div>
-            <div class="time">4h</div>
-          </div>
-          <div class="task">
-            <div>
-              <div class="name">Set dentist reminder</div>
-              <div class="meta">Thu 2:30 pm · Calendar</div>
-            </div>
-            <div class="time">6h</div>
-          </div>
-          <div class="task">
-            <div>
-              <div class="name">Sandbar competitor research</div>
-              <div class="meta">Working · ~3 min remaining</div>
-            </div>
-            <div class="time live">now</div>
-          </div>
+          <div class="time">2h</div>
         </div>
+        <div class="task-item">
+          <div>
+            <div class="name">Logged team sync issues</div>
+            <div class="meta">4 items added to Linear</div>
+          </div>
+          <div class="time">4h</div>
+        </div>
+        <div class="task-item">
+          <div>
+            <div class="name">Set dentist reminder</div>
+            <div class="meta">Thu 2:30 pm · Calendar</div>
+          </div>
+          <div class="time">6h</div>
+        </div>
+        <div class="task-item">
+          <div>
+            <div class="name">Sandbar competitor research</div>
+            <div class="meta">Working · ~3 min remaining</div>
+          </div>
+          <div class="time live">now</div>
+        </div>
+        <div style="height: 120px"></div>
+      </div>
+      <button class="fab" onclick="go('s7')">🎙</button>
+      <div class="tabbar">
+        <button class="tab active" onclick="tabGo('s6', this)"><span class="icon">🏠</span><span class="lbl">Home</span></button>
+        <button class="tab" onclick="tabGo('s10', this)"><span class="icon">🧠</span><span class="lbl">Memory</span></button>
+        <button class="tab" onclick="tabGo('s11', this)"><span class="icon">🤖</span><span class="lbl">Agent</span></button>
+        <button class="tab" onclick="tabGo('s12', this)"><span class="icon">👤</span><span class="lbl">Profile</span></button>
       </div>
     </div>
-    <div class="screen-label"><span class="num">06</span> · HOME DASHBOARD</div>
-  </div>
 
-  <!-- Screen 7: Listening -->
-  <div class="phone-wrap">
-    <div class="phone">
-      <div class="status-bar"><span>9:41</span><span class="icons">●●● ▲ ▮</span></div>
-      <div class="screen s7">
-        <div class="state">● Listening</div>
+    <!-- ============ Screen 7: Listening ============ -->
+    <div class="screen" id="s7">
+      <div class="navbar">
+        <button class="back" onclick="go('s6')">‹ Cancel</button>
+        <div class="title"></div>
+        <button class="right" style="visibility:hidden">Skip</button>
+      </div>
+      <div class="scroll">
+        <div class="listening-state"><span class="d"></span>Listening</div>
         <div class="wave">
           <span></span><span></span><span></span><span></span><span></span>
           <span></span><span></span><span></span><span></span><span></span>
@@ -1003,116 +1245,105 @@
           <span class="chip">Meeting · 2h ago</span>
           <span class="chip">3 open threads</span>
         </div>
-        <button class="stop"></button>
+        <div class="stop-area">
+          <button class="stop-btn" onclick="go('s8')"></button>
+        </div>
       </div>
     </div>
-    <div class="screen-label"><span class="num">07</span> · LISTENING</div>
-  </div>
 
-  <!-- Screen 8: Processing -->
-  <div class="phone-wrap">
-    <div class="phone">
-      <div class="status-bar"><span>9:41</span><span class="icons">●●● ▲ ▮</span></div>
-      <div class="screen s8">
-        <div class="title">Connecting the dots</div>
+    <!-- ============ Screen 8: Processing ============ -->
+    <div class="screen" id="s8">
+      <div class="navbar">
+        <button class="back" onclick="go('s6')">‹ Back</button>
+        <div class="title">Processing</div>
+        <button class="right" style="visibility:hidden">Skip</button>
+      </div>
+      <div class="scroll">
+        <h2>Connecting the dots</h2>
         <div class="sub">Pulling in everything relevant to this moment…</div>
-        <div class="center">
-          <div class="orbit">
-            <div class="o"></div><div class="o o2"></div><div class="o o3"></div>
-            <div class="core"></div>
-          </div>
-          <div class="loading">Synthesizing…</div>
+        <div class="orbit">
+          <div class="o"></div><div class="o o2"></div><div class="o o3"></div>
+          <div class="core"></div>
         </div>
+        <div class="loading-label">Synthesizing…</div>
         <div class="ctx-list">
           <div class="ctx-row"><div class="ic">🎙</div><div class="nm">Meeting recording</div><div class="mt">2h ago</div></div>
           <div class="ctx-row"><div class="ic">👤</div><div class="nm">Chen Wei</div><div class="mt">investor profile</div></div>
           <div class="ctx-row"><div class="ic">✉️</div><div class="nm">Your email tone & style</div><div class="mt">learned</div></div>
           <div class="ctx-row"><div class="ic">🧵</div><div class="nm">Series A thread</div><div class="mt">8 messages</div></div>
         </div>
+        <div style="height: 24px"></div>
+        <button class="primary-btn" onclick="go('s9')" style="width:100%;min-width:0">See result →</button>
+        <div style="height: 24px"></div>
       </div>
     </div>
-    <div class="screen-label"><span class="num">08</span> · PROCESSING</div>
-  </div>
 
-  <!-- Screen 9: Result -->
-  <div class="phone-wrap">
-    <div class="phone">
-      <div class="status-bar"><span>9:41</span><span class="icons">●●● ▲ ▮</span></div>
-      <div class="screen s9">
-        <div class="hd">
-          <span class="close">✕</span>
-          <span class="done">Send</span>
-        </div>
-        <div class="email-field"><span class="k">To:</span><span class="v">chen.wei@sequoia.com</span></div>
+    <!-- ============ Screen 9: Result (email) ============ -->
+    <div class="screen" id="s9">
+      <div class="navbar">
+        <button class="back" onclick="go('s6')">‹ Close</button>
+        <div class="title">New Draft</div>
+        <button class="right">Edit</button>
+      </div>
+      <div class="scroll">
+        <div class="email-field"><span class="k">To:</span><span class="v link">chen.wei@sequoia.com</span></div>
         <div class="email-field"><span class="k">Re:</span><span class="v">Following up — Series A discussion</span></div>
         <div class="email-body">
-          Hi Chen,<br/><br/>
-          Really enjoyed our conversation. A few things I want to follow up on:<br/><br/>
-          <b>On the GTM question</b> — we're targeting enterprise knowledge workers first, with a self-serve motion launching Q3. ARR target is <b>$2M EOY</b>.<br/><br/>
-          <b>On the moat</b> — context compounding is the durable layer. Every recording makes the next output better, which is why Day 30 answers take 3 seconds, not 30.<br/><br/>
-          Happy to dig in deeper on any of this. Thanks again —<br/>
-          Mingming
-        </div>
-        <div class="foot-actions">
-          <button>Edit</button>
-          <button>Regenerate</button>
-          <button class="primary">Send →</button>
+          <p>Hi Chen,</p>
+          <p>Really enjoyed our conversation. A few things I want to follow up on:</p>
+          <p><b>On the GTM question</b> — we're targeting enterprise knowledge workers first, with a self-serve motion launching Q3. ARR target is <b>$2M EOY</b>.</p>
+          <p><b>On the moat</b> — context compounding is the durable layer. Every recording makes the next output better, which is why Day 30 answers take 3 seconds, not 30.</p>
+          <p>Happy to dig in deeper on any of this. Thanks again —</p>
+          <p>Mingming</p>
         </div>
       </div>
+      <div class="bottom-actions">
+        <button>Regenerate</button>
+        <button class="primary" onclick="go('s6')">Send →</button>
+      </div>
     </div>
-    <div class="screen-label"><span class="num">09</span> · RESULT · TASK</div>
-  </div>
 
-  <!-- Screen 10: Memory Graph -->
-  <div class="phone-wrap">
-    <div class="phone">
-      <div class="status-bar"><span>9:41</span><span class="icons">●●● ▲ ▮</span></div>
-      <div class="screen s10">
-        <h2>The compounding knowledge graph</h2>
+    <!-- ============ Screen 10: Memory Graph ============ -->
+    <div class="screen" id="s10">
+      <div class="scroll">
+        <h2>Knowledge graph</h2>
         <div class="sub">Your context. Compounding every day.</div>
         <div class="stats">
           <div class="stat"><div class="v">30</div><div class="l">DAYS</div></div>
-          <div class="stat"><div class="v">312</div><div class="l">INTERACTIONS</div></div>
+          <div class="stat"><div class="v">312</div><div class="l">LOGS</div></div>
           <div class="stat"><div class="v">47</div><div class="l">CONTACTS</div></div>
           <div class="stat"><div class="v">89</div><div class="l">MEETINGS</div></div>
         </div>
-        <svg class="graph-svg" viewBox="0 0 240 180" xmlns="http://www.w3.org/2000/svg">
-          <!-- Edges -->
-          <g stroke="rgba(124,247,255,0.3)" stroke-width="0.8" fill="none">
-            <line x1="120" y1="90" x2="50" y2="40"/>
-            <line x1="120" y1="90" x2="200" y2="45"/>
-            <line x1="120" y1="90" x2="40" y2="130"/>
-            <line x1="120" y1="90" x2="210" y2="135"/>
-            <line x1="120" y1="90" x2="120" y2="25"/>
-            <line x1="50" y1="40" x2="120" y2="25"/>
-            <line x1="200" y1="45" x2="120" y2="25"/>
-            <line x1="40" y1="130" x2="210" y2="135" stroke-dasharray="2,3"/>
+        <svg class="graph-svg" viewBox="0 0 340 240" xmlns="http://www.w3.org/2000/svg">
+          <g stroke="rgba(124,247,255,0.35)" stroke-width="1" fill="none">
+            <line x1="170" y1="120" x2="70" y2="60"/>
+            <line x1="170" y1="120" x2="270" y2="65"/>
+            <line x1="170" y1="120" x2="60" y2="180"/>
+            <line x1="170" y1="120" x2="280" y2="185"/>
+            <line x1="170" y1="120" x2="170" y2="35"/>
+            <line x1="70" y1="60" x2="170" y2="35"/>
+            <line x1="270" y1="65" x2="170" y2="35"/>
+            <line x1="60" y1="180" x2="280" y2="185" stroke-dasharray="3,4"/>
           </g>
-          <!-- Nodes -->
-          <g font-family="Inter" font-size="7" fill="#fff" text-anchor="middle">
-            <circle cx="120" cy="90" r="16" fill="rgba(124,247,255,0.2)" stroke="#7cf7ff" stroke-width="1.5"/>
-            <text x="120" y="93" font-weight="600" font-size="8">YOU</text>
-
-            <circle cx="50" cy="40" r="11" fill="rgba(167,139,250,0.2)" stroke="#a78bfa" stroke-width="1"/>
-            <text x="50" y="43" font-size="6">Chen Wei</text>
-
-            <circle cx="200" cy="45" r="10" fill="rgba(167,139,250,0.2)" stroke="#a78bfa" stroke-width="1"/>
-            <text x="200" y="48" font-size="6">Sarah Kim</text>
-
-            <circle cx="120" cy="25" r="10" fill="rgba(255,159,10,0.2)" stroke="#ff9f0a" stroke-width="1"/>
-            <text x="120" y="28" font-size="6">Series A</text>
-
-            <circle cx="40" cy="130" r="10" fill="rgba(48,209,88,0.2)" stroke="#30d158" stroke-width="1"/>
-            <text x="40" y="133" font-size="6">GTM</text>
-
-            <circle cx="210" cy="135" r="11" fill="rgba(48,209,88,0.2)" stroke="#30d158" stroke-width="1"/>
-            <text x="210" y="138" font-size="6">Pitch deck</text>
+          <g font-family="-apple-system, Inter" font-size="10" fill="#fff" text-anchor="middle">
+            <circle cx="170" cy="120" r="22" fill="rgba(124,247,255,0.25)" stroke="#7cf7ff" stroke-width="2"/>
+            <text x="170" y="124" font-weight="700" font-size="11">YOU</text>
+            <circle cx="70" cy="60" r="16" fill="rgba(167,139,250,0.25)" stroke="#a78bfa" stroke-width="1.5"/>
+            <text x="70" y="63">Chen Wei</text>
+            <circle cx="270" cy="65" r="15" fill="rgba(167,139,250,0.25)" stroke="#a78bfa" stroke-width="1.5"/>
+            <text x="270" y="68">Sarah K.</text>
+            <circle cx="170" cy="35" r="14" fill="rgba(255,149,0,0.25)" stroke="#ff9500" stroke-width="1.5"/>
+            <text x="170" y="38">Series A</text>
+            <circle cx="60" cy="180" r="14" fill="rgba(52,199,89,0.25)" stroke="#34c759" stroke-width="1.5"/>
+            <text x="60" y="183">GTM</text>
+            <circle cx="280" cy="185" r="15" fill="rgba(52,199,89,0.25)" stroke="#34c759" stroke-width="1.5"/>
+            <text x="280" y="188">Pitch</text>
           </g>
         </svg>
         <div class="top-ctx">
           <h3>Top context · by strength</h3>
           <div class="row">
-            <div><div class="p">Chen Wei</div><div class="r">Sequoia · 12 meetings</div></div>
+            <div><div class="p">Chen Wei</div><div class="r">Sequoia · 12 meetings · Series A</div></div>
             <div class="s">98%</div>
           </div>
           <div class="row">
@@ -1124,17 +1355,104 @@
             <div class="s">74%</div>
           </div>
         </div>
+        <div style="height: 120px"></div>
+      </div>
+      <div class="tabbar">
+        <button class="tab" onclick="tabGo('s6', this)"><span class="icon">🏠</span><span class="lbl">Home</span></button>
+        <button class="tab active" onclick="tabGo('s10', this)"><span class="icon">🧠</span><span class="lbl">Memory</span></button>
+        <button class="tab" onclick="tabGo('s11', this)"><span class="icon">🤖</span><span class="lbl">Agent</span></button>
+        <button class="tab" onclick="tabGo('s12', this)"><span class="icon">👤</span><span class="lbl">Profile</span></button>
       </div>
     </div>
-    <div class="screen-label"><span class="num">10</span> · MEMORY GRAPH</div>
+
+    <!-- ============ Screen 11: Agent ============ -->
+    <div class="screen" id="s11">
+      <div class="scroll">
+        <div class="agent-header">
+          <h2>Agent</h2>
+          <div class="sub">Ask anything · context-aware</div>
+        </div>
+        <div class="msg bot">Hi Mingming 👋 What can I do for you right now?</div>
+        <div class="msg user">Draft a follow-up for Chen based on yesterday's meeting</div>
+        <div class="msg bot">Pulling in <b>Chen Wei · Sequoia</b>, the recording from 2h ago, and your email style. One moment…</div>
+        <div class="msg bot">✅ Draft ready. Want me to open it?</div>
+        <div class="agent-input">
+          <div class="field">Ask or tell Monostone…</div>
+          <button class="send">↑</button>
+        </div>
+      </div>
+      <div class="tabbar">
+        <button class="tab" onclick="tabGo('s6', this)"><span class="icon">🏠</span><span class="lbl">Home</span></button>
+        <button class="tab" onclick="tabGo('s10', this)"><span class="icon">🧠</span><span class="lbl">Memory</span></button>
+        <button class="tab active" onclick="tabGo('s11', this)"><span class="icon">🤖</span><span class="lbl">Agent</span></button>
+        <button class="tab" onclick="tabGo('s12', this)"><span class="icon">👤</span><span class="lbl">Profile</span></button>
+      </div>
+    </div>
+
+    <!-- ============ Screen 12: Profile ============ -->
+    <div class="screen" id="s12">
+      <div class="scroll">
+        <div class="profile-head">
+          <div class="avatar">M</div>
+          <div>
+            <div class="name">Mingming</div>
+            <div class="plan">Max Plan</div>
+          </div>
+        </div>
+        <div class="profile-ring">
+          <div class="ic">💍</div>
+          <div class="info">
+            <div class="t">Monostone Ring</div>
+            <div class="s">Connected · Day 12</div>
+          </div>
+          <div class="battery">87%</div>
+        </div>
+        <div class="list-group">
+          <div class="list-row"><div class="ic">📅</div><div class="t">Integrations</div><div class="chev">›</div></div>
+          <div class="list-row"><div class="ic">🔗</div><div class="t">Destinations</div><div class="chev">›</div></div>
+          <div class="list-row"><div class="ic">🔑</div><div class="t">BYOK · API Keys</div><div class="chev">›</div></div>
+        </div>
+        <div class="list-group">
+          <div class="list-row"><div class="ic">🔒</div><div class="t">Privacy & Data</div><div class="chev">›</div></div>
+          <div class="list-row"><div class="ic">📦</div><div class="t">Export Data</div><div class="chev">›</div></div>
+          <div class="list-row"><div class="ic">⚙️</div><div class="t">Advanced</div><div class="chev">›</div></div>
+        </div>
+        <div class="list-group">
+          <div class="list-row" onclick="go('s1')"><div class="ic">↩️</div><div class="t">Restart Onboarding</div><div class="chev">›</div></div>
+        </div>
+        <div style="height: 120px"></div>
+      </div>
+      <div class="tabbar">
+        <button class="tab" onclick="tabGo('s6', this)"><span class="icon">🏠</span><span class="lbl">Home</span></button>
+        <button class="tab" onclick="tabGo('s10', this)"><span class="icon">🧠</span><span class="lbl">Memory</span></button>
+        <button class="tab" onclick="tabGo('s11', this)"><span class="icon">🤖</span><span class="lbl">Agent</span></button>
+        <button class="tab active" onclick="tabGo('s12', this)"><span class="icon">👤</span><span class="lbl">Profile</span></button>
+      </div>
+    </div>
+
   </div>
+</div>
 
-</main>
-
-<footer>
-  <p>Monostone — AI Smart Ring · iOS Prototype<br/>
-  Built from the 10-screen wireframe · Monostone 2026 · <a href="#">monostone.ai</a></p>
-</footer>
-
+<script>
+  function go(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById(id);
+    el.classList.add('active');
+    // reset scroll
+    const sc = el.querySelector('.scroll');
+    if (sc) sc.scrollTop = 0;
+  }
+  function tabGo(id, btn) {
+    go(id);
+  }
+  // keyboard: left/right to navigate demo order
+  const order = ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12'];
+  document.addEventListener('keydown', (e) => {
+    const active = document.querySelector('.screen.active').id;
+    const idx = order.indexOf(active);
+    if (e.key === 'ArrowRight' && idx < order.length - 1) go(order[idx+1]);
+    if (e.key === 'ArrowLeft' && idx > 0) go(order[idx-1]);
+  });
+</script>
 </body>
 </html>
