@@ -11,13 +11,15 @@
 | 页面 ID | 中文名 | 类型 | DOM 锚点 | 优先级 |
 |---|---|---|---|---|
 | `splash` | 启动页 | screen | `#s1` | P0 |
-| `home_feed` | 首页 Feed | screen | `#s2` | P0 |
+| `home_feed` | 首页 Feed（Tab Root） | screen | `#s2` | P0 |
 | `recording_details` | 长录音详情 | screen | `#s3` | P0 |
 | `command_details` | 指令详情 | screen | `#s4` | P0 |
 | `idea_details` | 灵感详情 | screen | `#s5` | P1 |
 | `schedule_details` | 日程详情 | screen | `#s6` | P1 |
 | `record_long` | 录音中 | screen | `#s7` | P0 |
-| `profile` | 个人中心 | screen | `#s10` | P0 |
+| `memory_tab` | 记忆（Tab Root） | screen | `#s8` | P0 |
+| `agent_tab` | Agent 聊天（Tab Root） | screen | `#s9` | P0 |
+| `profile` | 个人中心（Tab Root） | screen | `#s10` | P0 |
 | `delivery_targets` | 投递目标 | screen | `#s11` | P1 |
 | `api_keys` | 自带 API Key | screen | `#s12` | P1 |
 | `calendar_settings` | 日历与提醒 | screen | `#s13` | P1 |
@@ -27,6 +29,8 @@
 | `modal_full_summary` | 完整会议纪要 | modal | `#modal-full-summary` | P0 |
 | `modal_action_item` | Action Item 详情 | modal | `#modal-action-item` | P1 |
 | `modal_share` | 分享 Sheet | modal | `#modal-share` | P1 |
+
+> **Tab Bar 结构**：底部有 **4 个 root tabs**——`home_feed`（首页）/ `memory_tab`（记忆）/ `agent_tab`（Agent）/ `profile`（我）。所有非 root 页面（详情页、设置子页、录音中）**不显示 tab bar**，通过顶部 back 按钮返回。
 
 ---
 
@@ -211,6 +215,70 @@
   - **入口**：`home_feed` → FAB 快速点击
   - **出口**：停止 / 取消 → `home_feed`
 - **本地状态**：实时计时器、波形动画
+
+---
+
+## 7.5 `memory_tab` — 记忆（Tab Root）
+
+- **DOM 锚点**：`#s8`
+- **页面用途**：浏览 Agent 为你沉淀的所有记忆——今天学到的新东西、高频实体、最近的 human correction
+- **UI 元素**：
+  - 顶部 `.tab-screen-head`：大标题"记忆" + 副标题"47 个实体 · 1,842 条沉淀 · 今天新增 4 条"
+  - Memory Tree 5 列 stats：L0 场景 / L1 项目 / L2 片段 / L3 描述 / L4 原始
+  - **"今天学到的"** section：4 条 insight cards（每条带青绿圆点 + HTML 片段 + 来源时间戳）
+  - **"高频实体"** section：7 条 entity rows（头像 + 名字 + 副标题 + kind badge `人/项目/组织/概念/事件` + chevron）
+  - **"最近纠正"** section：2 条 correction cards（金色圆点标记——区别于 insight 的青绿）
+  - Tab Bar（`memory_tab` 激活）
+- **数据依赖**：
+  - `GET /v1/memory/overview` → `MemoryOverview`
+  - 原型从 `window.MEMORY_OVERVIEW`（`data/mock.js`）读取
+- **写入操作**：
+  - 点 entity → 打开 entity 详情（原型只 toast 提示，真实实现 `GET /v1/memory/entities/{id}`）
+  - 长按 insight / correction → `POST /v1/memory/correct`（原型未实现 UI）
+- **导航关系**：
+  - **入口**：任何页面点击 Tab Bar "记忆"
+  - **出口**：
+    - Tab "首页" / "Agent" / "我" → 对应 tab root
+    - 点 entity row → entity 详情页（未实现，预留）
+- **关键函数**：`renderMemoryScreen()`（index.html）
+
+---
+
+## 7.6 `agent_tab` — Agent 聊天（Tab Root）
+
+- **DOM 锚点**：`#s9`
+- **页面用途**：和你的 Agent 做 IM 式对话——问 memory、让它起草东西、追问细节。这是 Agent 的**主界面**，不是旁枝
+- **UI 元素**：
+  - **顶部导航栏**：青绿圆点头像（脉动）+ "Agent" 标题 + 绿色在线状态点 + "Claude Opus 4.6 · 已加载 42 天 context" 副标题
+  - **聊天滚动区**（`.chat-scroll`）：时间分隔符 / 系统提示 / 用户气泡（右对齐青绿背景黑字）/ Agent 气泡（左对齐深灰背景白字）
+  - Agent 气泡内可能包含：
+    - 普通文本（HTML 片段允许 `<b>` / `<br>`）
+    - **思考步骤块**（`.thinking`）：折叠式 `✓ 调用 memory / ✓ 检索会议纪要`
+    - **附件卡片**（`.attach`）：icon + 标题 + 副标题（邮件 / deck / 报告 / 文档）
+    - **快捷按钮组**（`.chat-actions`）：例如 `查看全文` / `改得正式一点` / `直接发送`
+    - **Typing indicator**（`.typing`）：3 个跳动的灰色圆点
+  - **底部输入栏**（`.chat-input`）：
+    - 麦克风按钮（按住录音 / 松开发送）
+    - 输入框占位符"问你的 Agent 任何事情..."
+    - 发送按钮（↑）
+  - Tab Bar（`agent_tab` 激活）
+- **数据依赖**：
+  - `GET /v1/agent/conversation` → `AgentConversation + AgentMessage[]`
+  - 原型从 `window.AGENT_CONVERSATION`（`data/mock.js`）读取
+- **写入操作**：
+  - 发送消息（文字 / 语音） → `POST /v1/agent/messages`
+  - 订阅 Agent 响应流 → `WS /v1/agent/conversation/{id}/stream`
+  - 点快捷按钮 → `POST /v1/agent/quick-action`
+- **导航关系**：
+  - **入口**：任何页面点击 Tab Bar "Agent"
+  - **出口**：
+    - Tab "首页" / "记忆" / "我" → 对应 tab root
+    - 点附件卡片 → 根据 `attachment_type` 跳转（邮件详情 / deck 预览 / 报告详情）
+- **本地状态**：
+  - 当前输入框内容
+  - 是否正在显示 typing indicator
+  - 滚动位置（每次进入自动滚到底部）
+- **关键函数**：`renderAgentChat()`（index.html）——每次进入 s9 时重新渲染以重置动画
 
 ---
 
@@ -444,12 +512,21 @@
 ```mermaid
 flowchart TD
   splash -->|"开始"| home_feed
+
+  %% === Tab Bar 4 个 root 互相切换 ===
+  home_feed <-->|"Tab"| memory_tab
+  home_feed <-->|"Tab"| agent_tab
+  home_feed <-->|"Tab"| profile
+  memory_tab <-->|"Tab"| agent_tab
+  memory_tab <-->|"Tab"| profile
+  agent_tab <-->|"Tab"| profile
+
+  %% === 首页下钻 ===
   home_feed -->|"长录音卡片"| recording_details
   home_feed -->|"指令卡片"| command_details
   home_feed -->|"灵感卡片"| idea_details
   home_feed -->|"待办卡片"| schedule_details
   home_feed -->|"FAB 快速点击"| record_long
-  home_feed -->|"Tab: 我"| profile
 
   recording_details -->|"返回"| home_feed
   recording_details -->|"查看完整总结"| modal_full_summary
@@ -465,6 +542,13 @@ flowchart TD
   modal_action_item -->|"关闭 / 发给 Agent"| recording_details
   modal_share -->|"关闭"| recording_details
 
+  %% === 记忆 tab (预留入口) ===
+  memory_tab -.->|"点 entity (预留)"| entity_detail_placeholder[entity 详情 · 未实现]
+
+  %% === Agent tab (附件预留跳转) ===
+  agent_tab -.->|"点附件卡片 (预留)"| command_details
+
+  %% === 个人中心 ===
   profile -->|"投递目标"| delivery_targets
   profile -->|"自带 API Key"| api_keys
   profile -->|"日历与提醒"| calendar_settings
@@ -472,7 +556,6 @@ flowchart TD
   profile -->|"导出所有数据"| export_data
   profile -->|"高级设置"| advanced_settings
   profile -->|"重新开始引导"| splash
-  profile -->|"Tab: 首页"| home_feed
 
   delivery_targets -->|"返回"| profile
   api_keys -->|"返回"| profile
@@ -674,6 +757,103 @@ flowchart TD
   - T+4500ms：移除 `.processing`，卡片最终化为完整内容
 - **复杂度**：**简单** — Timer 驱动 `@State` 切换；长录音场景需要搭配 WebSocket 实时消息
 - **JS 参考**：`simulateIncomingCard()` 第 3707-3774 行
+
+---
+
+## 记忆 memory_tab
+
+### MT1. Memory Tree 5 列 stats 淡入
+- **位置**：`memory_tab` 顶部 stats 栏
+- **触发**：进入页面
+- **效果**：5 个数字（L0-L4）从 0 开始计数跳到目标值（可选的入场动画），200-400ms
+- **复杂度**：**简单** — SwiftUI `Text(verbatim:)` + `withAnimation`
+- **JS 参考**：`renderMemoryScreen()` 目前直接赋值，iOS 版本可增强为计数动画
+
+### MT2. Insight bullet 发光
+- **位置**：`memory_tab` 的"今天学到的"section，每条左侧的 6px 圆点
+- **触发**：静态
+- **效果**：青绿色 `box-shadow: 0 0 8px rgba(111,212,224,0.5)` 外发光
+- **复杂度**：**简单**
+- **CSS 参考**：`.insight-card .bullet`
+
+### MT3. Correction bullet 金色变体
+- **位置**：`memory_tab` 的"最近纠正"section
+- **触发**：静态
+- **效果**：区别于 insight 的青绿，改用金色 `var(--t-idea)` + 对应发光
+- **复杂度**：**简单**
+- **JS 参考**：`renderMemoryScreen()` 中 correction 渲染时 inline style override
+
+---
+
+## Agent agent_tab （**最复杂的 IM 层**）
+
+### AT1. 消息气泡入场动画
+- **位置**：`agent_tab` 每条新消息 `.chat-row`
+- **触发**：消息被添加到 DOM 时
+- **效果**：从 `opacity: 0 + translateY(8px)` 到 `opacity: 1 + translateY(0)`，300ms，`cubic-bezier(0.2,0.8,0.2,1)`（带弹性）
+- **复杂度**：**简单** — SwiftUI `.transition(.asymmetric(insertion: .opacity.combined(with: .offset(y: 8))))`
+- **CSS 参考**：`@keyframes bubble-in`
+
+### AT2. Typing indicator（3 点波浪跳动）
+- **位置**：`agent_tab` 的 typing 消息
+- **触发**：Agent 正在响应时
+- **效果**：3 个 6px 灰色圆点，每个在 1.4s 周期内从 `opacity: 0.3` + `translateY(0)` 跳到 `opacity: 1` + `translateY(-4px)` 然后回落；第 2、3 个分别延迟 0.15s / 0.3s 形成波浪
+- **复杂度**：**简单** — SwiftUI 三个独立 `Circle` + 不同 `animation delay`
+- **CSS 参考**：`@keyframes typing-bounce`
+
+### AT3. 头像在线状态脉动
+- **位置**：`agent_tab` 导航栏的 `.nav-status::before` 绿点
+- **触发**：静态
+- **效果**：5px 绿色圆点 + `0 0 6px rgba(127,192,144,0.6)` 发光，与状态文案"在线"联动
+- **复杂度**：**简单** — SwiftUI `.shadow()` 或 CAShapeLayer
+
+### AT4. Agent 思考步骤展开 (`.thinking`)
+- **位置**：Agent 消息气泡内的 `.thinking` 块
+- **触发**：消息渲染时
+- **效果**：`background: rgba(255,255,255,0.02)` + `border: 0.5px dashed` + 每行 `.step.done` 前带绿色 ✓（使用文字 unicode，不是动画）。理想情况可加 "步骤逐行出现" 动画
+- **复杂度**：**中等** — SwiftUI 需要 `ForEach` 配合 `onAppear` 延迟显示每一行
+- **CSS 参考**：`.chat-row .thinking`
+
+### AT5. 附件卡片 (`.attach`) 插入动画
+- **位置**：Agent 气泡内的附件卡片
+- **触发**：Agent 回复包含 attachment 时
+- **效果**：跟随气泡入场一起淡入；点击可跳转（预留）
+- **复杂度**：**简单**
+- **CSS 参考**：`.chat-row .attach`
+
+### AT6. 快捷按钮 pill 组
+- **位置**：Agent 回复下的 `.chat-actions`
+- **触发**：Agent 消息包含 actions 时
+- **效果**：横向排列的 pill 按钮（青绿边框、透明背景、青绿文字），点击 `transform: scale(0.96)` + toast 反馈
+- **复杂度**：**简单** — SwiftUI `Button` + `.buttonStyle(.bordered)` 风格
+- **CSS 参考**：`.chat-actions .pill`
+
+### AT7. 输入栏置底 + 安全区处理
+- **位置**：`agent_tab` 底部 `.chat-input`
+- **触发**：键盘弹起 / 收起
+- **效果**：
+  - 输入栏固定在 tab bar 之上
+  - 真实 iOS 版需要处理 `keyboard avoidance`（键盘弹起时输入栏要抬起到键盘顶部）
+  - 麦克风按钮和发送按钮圆形、带边框，和输入框胶囊形对齐
+- **复杂度**：**中等** — SwiftUI 的 `.safeAreaInset(edge: .bottom)` 配合 `@FocusState` 处理键盘
+- **CSS 参考**：`.chat-input`
+
+### AT8. 自动滚到底部
+- **位置**：`agent_tab` 的 `.chat-scroll`
+- **触发**：
+  1. 每次进入 `agent_tab` 页面
+  2. 新消息追加时
+- **效果**：瞬时或平滑滚动到最底（新消息可见）
+- **复杂度**：**简单** — `ScrollViewReader` + `proxy.scrollTo(lastMessageId, anchor: .bottom)`
+- **JS 参考**：`renderAgentChat()` 里的 `requestAnimationFrame(() => { container.scrollTop = container.scrollHeight; })`
+
+### AT9. 跨 tab 切换时的状态保留
+- **位置**：`home_feed` / `memory_tab` / `agent_tab` / `profile` 4 个 root 之间
+- **触发**：底部 tab bar 点击切换
+- **效果**：
+  - 每个 tab 保留各自的滚动位置（真实 iOS 原生 tab controller 默认行为）
+  - `agent_tab` 每次重新进入时 `renderAgentChat()` 会重置 typing animation（这是 demo 的故意行为，真实版本应该保留状态）
+- **复杂度**：**简单** — iOS 原生 `UITabBarController` / SwiftUI `TabView` 默认就是这样
 
 ---
 

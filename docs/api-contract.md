@@ -424,13 +424,60 @@
 
 ## Memory
 
+### `GET /v1/memory/overview`
+- **用途**：拉取 Memory tab（`memory_tab` 页面）的完整概览数据，包括 Memory Tree 层级统计、今日新学到的 insights、高频实体列表、最近的 human correction 记录
+- **触发场景**：用户点击底部 Tab Bar 的"记忆"进入 `memory_tab` 页面时
+- **响应结构**：
+  ```json
+  {
+    "stats": {
+      "L0_scenes": "number — L0 场景层级数量",
+      "L1_projects": "number — L1 项目层级数量",
+      "L2_episodes": "number — L2 片段层级数量",
+      "L3_descriptions": "number — L3 描述层级数量",
+      "L4_raw": "number — L4 原始层级数量"
+    },
+    "insights": [
+      {
+        "id": "string",
+        "body": "string — 可含 <b> 加粗的 HTML 片段",
+        "source": "string — 来源描述, 如 '和敦敏的 Series A 跟进会 · 10:34'",
+        "highlight": "'new' | 'updated' | null"
+      }
+    ],
+    "entities": [
+      {
+        "id": "string",
+        "avatar": "string — 单字或首字母",
+        "name": "string",
+        "kind": "'人' | '项目' | '组织' | '概念' | '事件'",
+        "memory_count": "number",
+        "sub": "string — 一行副标题"
+      }
+    ],
+    "corrections": [
+      {
+        "id": "string",
+        "body": "string — 纠正描述, HTML 片段",
+        "source": "string — 时间戳 + 状态",
+        "effect": "string — 'propagated_N' 表示传播到 N 条记忆"
+      }
+    ]
+  }
+  ```
+- **实现状态**：未实现但需要（原型从 `window.MEMORY_OVERVIEW` 读取，定义见 `data/mock.js`）
+
 ### `GET /v1/memory/search`
-- **用途**：按 query 搜索 memory（用于显示 `memory-row` 的 "本次会议学到的信息"）
-- **触发场景**：长录音详情页加载时，取 top-N 条新学到的 memory 显示
+- **用途**：按 query 搜索 memory（用于显示 `memory-row` 的 "本次会议学到的信息" 或 memory tab 里的搜索框）
+- **触发场景**：
+  - 长录音详情页加载时取 top-N 条新学到的 memory
+  - `memory_tab` 页面顶部搜索框（当前原型未实现 UI）
 - **请求参数**：
   ```json
   {
-    "source_card_id": "string — 只要从这张卡片里学到的",
+    "q": "string | null — 全文 query",
+    "source_card_id": "string | null — 只要从这张卡片里学到的",
+    "entity_id": "string | null — 按实体过滤",
     "limit": "number"
   }
   ```
@@ -451,9 +498,32 @@
   ```
 - **实现状态**：未实现但需要
 
+### `GET /v1/memory/entities/{entityId}`
+- **用途**：查看单个实体的详情页——所有和这个实体关联的 memory、提及过它的卡片、学习时间线
+- **触发场景**：`memory_tab` 页面点击任意 entity row 时
+- **响应结构**：
+  ```json
+  {
+    "entity": {
+      "id": "string",
+      "name": "string",
+      "kind": "'人' | '项目' | '组织' | '概念' | '事件'",
+      "avatar": "string | null",
+      "memory_count": "number",
+      "first_seen_at": "string",
+      "last_seen_at": "string"
+    },
+    "memories": "Memory[] — 按时间倒序",
+    "mentioned_in": "Array<{ card_id: string, card_title: string, timestamp: string }>"
+  }
+  ```
+- **实现状态**：未实现但需要
+
 ### `POST /v1/memory/correct`
-- **用途**：用户纠正一条 memory（`human correction` 机制，见 `data-flow.md`）
-- **触发场景**：Daily digest 里用户点击"这条不对"（当前原型未实现 UI，但数据流文档定义了此机制）
+- **用途**：用户纠正一条 memory（`human correction` 机制，见 `data-flow.md`）。Correction 会 **泛化传播**——例如把 "敦敏是投资总监" 纠正为 "敦敏是合伙人"，后端会找到所有引用这条事实的 memory 并级联更新
+- **触发场景**：
+  - Daily digest 里用户点击"这条不对"
+  - `memory_tab` 页面长按某条 insight / correction 卡片
 - **请求参数**：
   ```json
   {
@@ -462,7 +532,103 @@
     "correction_text": "string"
   }
   ```
-- **响应结构**：`{ "ok": true, "will_retrain_at": "string" }`
+- **响应结构**：
+  ```json
+  {
+    "ok": true,
+    "propagated_count": "number — 级联更新了多少条相关 memory",
+    "will_retrain_at": "string"
+  }
+  ```
+- **副作用**：
+  - 更新 classifier 训练集
+  - 触发相关 memory 的 confidence 重新计算
+- **实现状态**：未实现但需要
+
+---
+
+## Agent 聊天（IM 会话）
+
+### `GET /v1/agent/conversation`
+- **用途**：拉取 Agent tab（`agent_tab` 页面）的 IM 聊天记录
+- **触发场景**：用户点击底部 Tab Bar 的 "Agent" 进入聊天页面
+- **请求参数**（query string）：
+  ```json
+  {
+    "date": "string | null — ISO 日期, 默认今天",
+    "cursor": "string | null",
+    "limit": "number — 默认 50"
+  }
+  ```
+- **响应结构**：
+  ```json
+  {
+    "conversation_id": "string",
+    "agent_model": "string — 'Claude Opus 4.6'",
+    "context_days_loaded": "number",
+    "messages": [
+      {
+        "role": "'date' | 'system' | 'user' | 'agent'",
+        "type": "'text' | 'steps' | 'attachment' | 'actions' | 'typing'",
+        "text": "string | null — role=user/agent/system/date 时使用",
+        "steps": "AgentThinkingStep[] | null — type=steps 时",
+        "attachment": "AgentAttachment | null — type=attachment 时",
+        "actions": "AgentQuickAction[] | null — type=actions 时",
+        "timestamp": "string — ISO 8601"
+      }
+    ],
+    "next_cursor": "string | null"
+  }
+  ```
+- **实现状态**：未实现但需要（原型从 `window.AGENT_CONVERSATION` 读取）
+
+### `POST /v1/agent/messages`
+- **用途**：用户在 Agent tab 发送一条新消息（文字输入或语音转写）
+- **触发场景**：Agent tab 底部 input 栏点击发送按钮 或 语音录制完毕
+- **请求参数**：
+  ```json
+  {
+    "conversation_id": "string",
+    "content": "string",
+    "input_mode": "'text' | 'voice'",
+    "audio_url": "string | null — voice 模式时的原音频",
+    "attach_card_ids": "string[] — 用户引用的卡片 id"
+  }
+  ```
+- **响应结构**：
+  ```json
+  {
+    "user_message_id": "string",
+    "agent_stream_url": "string — WebSocket URL 订阅 Agent 的流式响应"
+  }
+  ```
+- **实现状态**：未实现但需要
+
+### `WS /v1/agent/conversation/{conversationId}/stream`
+- **用途**：订阅 Agent 响应流，支持思考步骤、文本增量、附件生成、快捷按钮
+- **触发场景**：每次用户发消息后自动订阅至该轮响应结束
+- **推送消息**：
+  ```json
+  {
+    "event": "'step_start' | 'step_done' | 'text_delta' | 'attachment' | 'actions' | 'complete'",
+    "payload": "object — 对应 AgentMessage 片段"
+  }
+  ```
+- **实现状态**：未实现但需要
+
+### `POST /v1/agent/quick-action`
+- **用途**：点击 Agent 回复中的快捷按钮（例如"直接发送"、"改得正式一点"）
+- **触发场景**：Agent tab 消息里的 `.chat-actions .pill` 按钮
+- **请求参数**：
+  ```json
+  {
+    "conversation_id": "string",
+    "message_id": "string — 触发 action 的 agent 消息 id",
+    "action_id": "string",
+    "params": "object | null"
+  }
+  ```
+- **响应结构**：`{ "ok": true, "new_message_id": "string | null" }`
 - **实现状态**：未实现但需要
 
 ---

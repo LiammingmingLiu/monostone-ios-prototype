@@ -479,13 +479,14 @@
 
 ## 19. Memory · 记忆条目
 
-> **注**：原型 UI 只显示 memory_row（本次学到的信息），但 Memory 作为独立实体需要完整建模。详见 `docs/data-flow.md` 的 Memory Tree L0-L4 层级。
+> **注**：原型 `memory_tab` 页面显示 Memory tree 统计 + entities + insights + corrections，Memory 作为独立实体需要完整建模。详见 `docs/data-flow.md` 的 Memory Tree L0-L4 层级。
 
 | 字段 | 类型 | 必填 | 说明 |
 |---|---|---|---|
 | `id` | `string` | ✓ | |
 | `user_id` | `string` | ✓ | |
-| `entity` | `string` | ✓ | 指向的实体（人 / 项目 / 概念） |
+| `entity_id` | `string \| null` | ✗ | 关联的实体 id（见 Entity 实体） |
+| `entity` | `string` | ✓ | 冗余显示名 |
 | `learning` | `string` | ✓ | 学到的内容 |
 | `confidence` | `number` | ✓ | 0-1 |
 | `source_card_id` | `string` | ✓ | 首次被学到的源卡片 |
@@ -498,7 +499,138 @@
 **关联**：
 - `Memory.source_card_id → Card.id`（N:1）
 - `Memory.user_id → User.id`（N:1）
+- `Memory.entity_id → Entity.id`（N:1）
 - Memory 之间存在 parent-child 关系（L0 Scene → L1 Project → L2 Episode → L3 Description → L4 Raw）
+
+---
+
+## 19.a Entity · 实体
+
+> **场景**：`memory_tab` 页面的高频实体列表。Entity 是 Memory 之上的聚合——同一个"敦敏"下可能有几十条独立的 Memory 记录，但对用户而言他们会把"敦敏"视为一个整体来浏览。
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `id` | `string` | ✓ | |
+| `user_id` | `string` | ✓ | |
+| `name` | `string` | ✓ | 显示名 |
+| `avatar` | `string \| null` | ✗ | 单字 / 首字母 / URL |
+| `kind` | `'人' \| '项目' \| '组织' \| '概念' \| '事件'` | ✓ | 实体类型 |
+| `memory_count` | `number` | ✓ | 聚合到该实体的 memory 数量（冗余字段，便于列表快速显示） |
+| `sub` | `string` | ✗ | 一行副标题 |
+| `first_seen_at` | `string` | ✓ | |
+| `last_seen_at` | `string` | ✓ | |
+| `mentioned_in_cards` | `string[]` | ✓ | 提及过该实体的卡片 id 列表 |
+
+**枚举值**：
+- `kind`：`人` / `项目` / `组织` / `概念` / `事件`
+
+**关联**：
+- `Entity.user_id → User.id`（N:1）
+- `Entity` 1:N `Memory`
+
+---
+
+## 19.b MemoryOverview · 记忆页概览 (页面聚合结构)
+
+> **用途**：`memory_tab` 页面一次性拉取的聚合数据（对应 `GET /v1/memory/overview`）。这是一个**页面视图模型**，不是持久化实体——后端可以实时聚合计算。
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `stats` | `MemoryTreeStats` | ✓ | Memory Tree 5 层计数 |
+| `insights` | `MemoryInsight[]` | ✓ | 今天新学到的 N 条（通常 3-5 条） |
+| `entities` | `Entity[]` | ✓ | Top-N 高频实体 |
+| `corrections` | `CorrectionRecord[]` | ✓ | 最近 N 条 human correction |
+
+### 19.b.1 MemoryTreeStats
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `L0_scenes` | `number` | L0 场景层级条数 |
+| `L1_projects` | `number` | L1 项目层级条数 |
+| `L2_episodes` | `number` | L2 片段层级条数 |
+| `L3_descriptions` | `number` | L3 描述层级条数 |
+| `L4_raw` | `number` | L4 原始层级条数 |
+
+### 19.b.2 CorrectionRecord
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `id` | `string` | |
+| `body` | `string` | 纠正描述（HTML 片段） |
+| `source` | `string` | 时间戳 + 状态描述 |
+| `effect` | `string` | `propagated_N` 表示级联更新了 N 条 memory |
+| `corrected_by_user_at` | `string (ISO 8601)` | |
+
+---
+
+## 19.c AgentConversation · Agent 聊天会话
+
+> **场景**：`agent_tab` 页面的 IM 聊天视图。每天自动开一个新 conversation（也可以手动跨天串起来）。
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `id` | `string` | ✓ | conversation id |
+| `user_id` | `string` | ✓ | |
+| `agent_model` | `string` | ✓ | 如 `Claude Opus 4.6` |
+| `context_days_loaded` | `number` | ✓ | 加载了多少天的 context |
+| `started_at` | `string (ISO 8601)` | ✓ | |
+| `last_message_at` | `string (ISO 8601)` | ✓ | |
+| `message_count` | `number` | ✓ | |
+
+**关联**：
+- `AgentConversation.user_id → User.id`（N:1）
+- `AgentConversation` 1:N `AgentMessage`
+
+---
+
+## 19.d AgentMessage · Agent 聊天消息
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `id` | `string` | ✓ | |
+| `conversation_id` | `string` | ✓ | |
+| `role` | `'date' \| 'system' \| 'user' \| 'agent'` | ✓ | |
+| `type` | `'text' \| 'steps' \| 'attachment' \| 'actions' \| 'typing'` | ✓ | 消息子类型 |
+| `text` | `string \| null` | ✗ | `type=text/date/system` 时使用（HTML 片段，允许 `<b>` / `<br>`） |
+| `steps` | `AgentThinkingStep[] \| null` | ✗ | `type=steps` 时使用 |
+| `attachment` | `AgentAttachment \| null` | ✗ | `type=attachment` 时使用 |
+| `actions` | `AgentQuickAction[] \| null` | ✗ | `type=actions` 时使用 |
+| `timestamp` | `string (ISO 8601)` | ✓ | |
+| `input_mode` | `'text' \| 'voice' \| null` | ✗ | 仅 `role=user` 时有意义 |
+| `source_audio_url` | `string \| null` | ✗ | 语音输入时的原音频 |
+
+**枚举值**：
+- `role`：`date`（日期分隔符）/ `system`（系统提示）/ `user`（用户）/ `agent`（AI）
+- `type`：`text`（普通文本气泡）/ `steps`（可折叠的思考步骤）/ `attachment`（附件卡片）/ `actions`（快捷按钮组）/ `typing`（正在输入动画）
+
+### 19.d.1 AgentThinkingStep
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `status` | `'pending' \| 'running' \| 'done' \| 'failed'` | 步骤状态 |
+| `text` | `string` | 步骤描述（可带前缀标记如 ✓） |
+| `duration_ms` | `number \| null` | 执行耗时 |
+
+### 19.d.2 AgentAttachment
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `icon` | `string` | 字符或 emoji |
+| `title` | `string` | 附件标题 |
+| `sub` | `string` | 一行副标题 |
+| `attachment_type` | `'email' \| 'deck' \| 'report' \| 'doc' \| 'link'` | |
+| `attachment_url` | `string \| null` | 打开后跳转的 URL |
+| `card_id` | `string \| null` | 若附件来自某张卡片 |
+
+### 19.d.3 AgentQuickAction
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `id` | `string` | |
+| `label` | `string` | 按钮文字 |
+| `action_type` | `'follow_up_prompt' \| 'send' \| 'open' \| 'save'` | |
+| `params` | `object \| null` | 执行时传给后端的参数 |
+| `toast` | `string \| null` | 成功后的 toast 文案（原型演示用） |
 
 ---
 
@@ -553,6 +685,13 @@ User
  ├── 1:1 AdvancedSettings
  ├── 1:N ExportJob
  ├── 1:N Memory
+ │     └── N:1 Entity (同一个实体可以有多条 memory)
+ ├── 1:N Entity
+ ├── 1:N AgentConversation
+ │     └── 1:N AgentMessage
+ │           ├── N:1 AgentThinkingStep (type=steps)
+ │           ├── N:1 AgentAttachment (type=attachment)
+ │           └── N:1 AgentQuickAction (type=actions)
  └── 1:N AnalyticsEvent
 ```
 
@@ -562,13 +701,22 @@ User
 
 | 原型位置 | 对应实体 | 备注 |
 |---|---|---|
-| `FULL_SUMMARIES['rec-1']` | `FullSummary` | 敦敏 Series A 跟进会，层级化内容示例 |
-| `FULL_SUMMARIES['rec-2']` | `FullSummary` | 林啸 Memory A/B 测试，旧版纯段落格式 |
-| `CARDS` 数组 | `Card[]` | 首页 feed 数据 |
-| `ACTION_ITEMS` 对象 | `ActionItem[]` | key 是 card id |
-| `MEMORY_INSIGHTS` 片段 | `MemoryInsight[]` | 显示在长录音详情底部 |
+| `window.FULL_SUMMARIES['rec-1']` | `FullSummary` | 敦敏 Series A 跟进会，层级化内容示例（现在在 `data/mock.js`） |
+| `window.FULL_SUMMARIES['rec-2']` | `FullSummary` | 林啸 Memory A/B 测试（现在在 `data/mock.js`） |
+| `window.ACTION_ITEMS` 对象 | `ActionItem[]` | key 是 card id（现在在 `data/mock.js`） |
+| `window.MEMORY_OVERVIEW` | `MemoryOverview` | memory_tab 的完整页面数据（`data/mock.js`） |
+| `window.MEMORY_OVERVIEW.stats` | `MemoryTreeStats` | L0-L4 计数 |
+| `window.MEMORY_OVERVIEW.insights` | `MemoryInsight[]` | 今天学到的 4 条示例 |
+| `window.MEMORY_OVERVIEW.entities` | `Entity[]` | 7 个高频实体示例 |
+| `window.MEMORY_OVERVIEW.corrections` | `CorrectionRecord[]` | 2 条最近纠正示例 |
+| `window.AGENT_CONVERSATION` | `AgentConversation + AgentMessage[]` | 今天的 Agent 聊天记录（`data/mock.js`） |
+| 首页卡片列表的 HTML | `Card[]` | 直接写成 DOM，未提取成 JS 对象 |
+| `MEMORY_INSIGHTS` 片段 | `MemoryInsight[]` | 显示在长录音详情底部（仍然 inline 在 HTML） |
 | `user = { name: '明明', subscription: 'max' }` | `User` | profile 页写死 |
 | `battery_pct = 87` | `RingStatus` | profile 页写死 |
 | `day_count = 12` | `DailySummary` | 首页写死 |
 
-**共性特点**：所有字段在原型中都是硬编码 JS 字面值，真实实现时都需要由后端接口供给。
+**共性特点**：
+- 所有字段在原型中都是硬编码 JS 字面值，真实实现时都需要由后端接口供给
+- 已提取到 `data/mock.js` 的：FULL_SUMMARIES、ACTION_ITEMS、MEMORY_OVERVIEW、AGENT_CONVERSATION（共 4 个顶层对象）
+- 未提取（仍 inline 在 HTML 里）：首页卡片列表、profile 页的用户信息、各 settings 子页的静态配置值
