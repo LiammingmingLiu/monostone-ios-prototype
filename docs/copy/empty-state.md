@@ -1,0 +1,42 @@
+---
+type: copy
+category: empty-state
+---
+
+# 空态文案
+
+> 规则：≤ 30 字，含一句"行动建议"
+
+## Home
+
+| key | 文案 |
+|---|---|
+| `home.first_use` | 长按戒指开始第一次录音 |
+| `home.no_today` | 今天还没有新内容 · 试试录一段 |
+| `home.network_offline` | 离线中 · 旧记录可读，新录音待恢复 |
+
+## Memory
+
+| key | 文案 |
+|---|---|
+| `memory.empty` | 还没有记忆 · 录音后会自动入库 |
+| `memory.no_search_result` | 没找到 · 换个关键词试试 |
+
+## Agent
+
+| key | 文案 |
+|---|---|
+| `agent.no_tasks` | 还没有 Agent 任务 |
+| `agent.no_messages` | 和 Agent 说点什么开始 |
+
+## Plugins
+
+| key | 文案 |
+|---|---|
+| `plugins.none_installed` | 还没装插件 · 去商店看看 |
+| `plugins.market_empty` | 商店暂时没有可用插件 |
+
+## TODO（明明）
+
+- [ ] 灵感无法归属时的 inbox 空态
+- [ ] 第一次连戒指失败的引导
