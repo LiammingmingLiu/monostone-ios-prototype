@@ -72,13 +72,19 @@ category: toast
 | `command.failed` | 失败 · 点击重试 | task.status = failed |
 | `command.context_overflow` | … 还有 {N} 项 › | 上下文 > 4 项时的省略行 |
 
-## Todo（M2）
+## 日程 / Smart Calendar（M2 · MON-17）
+
+> v0.5 不存在 todo / 待办类型；语音里"提醒我 X 时 Y"全部归"日程"。日程不只是日历事件，是 Smart Calendar（带 Smart Brief）。
+> 全 App 禁止 emoji（明明强调），冲突视觉用红色 + 排版承载，不用 ⚠️。
 
 | key | 文案 | 触发 |
 |---|---|---|
-| `todo.calendar_added` | 已加入日历 · {时间} | EventKit 写入成功 |
-| `todo.conflict` | 和 `{event}` 重叠 · 仍要添加？ | 冲突检测 |
-| `todo.calendar_removed` | 已从日历删除 | 卡片删除时 |
+| `cal.added` | 已加入日历 · 撤销 | EventKit 写入成功（5s toast 含撤销） |
+| `cal.undone` | 已撤销 | 5s 内点撤销 |
+| `cal.parse_failed` | 时间没识别出来 · 在主页跟我说一句 | cal_parse.parse_failed = true |
+| `cal.removed` | 已从日历移除 | navbar `···` → 从日历移除 |
+| `cal.brief_loading` | 正在为你想想… | §C Smart Brief async loading |
+| `cal.opened_in_apple` | 打开 Apple 日历 | §D 点 `打开` 按钮 |
 
 ## 通用
 

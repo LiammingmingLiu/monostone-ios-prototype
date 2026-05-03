@@ -265,8 +265,185 @@ var showSteps: Bool {
 | `cmd-3` | needs_input · 邮件 | 等待确认态（拒绝/允许 按钮） |
 | `cmd-4` | needs_input · 日历 | 等待确认态（同样 拒绝/允许）— 验证按钮通用 |
 
-### 4.2 TodoDetailView
-- TODO（已有骨架, commit 389826c）
+### 4.2 CalendarDetailView · Smart Calendar 详情页（v0.5 核心差异化）
+
+> **重新定位（2026-05-03 与明明拍板）**：v0.5 不存在 "todo / 待办" 类型；语音里说"提醒我 X 时 Y"全部归到「日程」。日程不是普通日历事件，而是 **Smart Calendar** —— 模型在理解用户意图后，**带着 context 帮用户准备这个日程要做的事**（送什么礼、带什么文档、对方偏好、风险提醒等）。
+
+#### 4.2.0 概念厘清
+
+| 概念 | 定义 | v0.5 |
+|---|---|---|
+| 普通日历 | 时间 + 标题 + 地点 | ❌ 不是这个 |
+| **Smart Calendar（v0.5 做的）** | 时间 + 标题 + 地点 + **Agent 自动生成的"为这件事你需要知道/准备什么"** | ✅ 这是 Monostone 在日历场景的护城河体现 |
+| Todo / 待办 | "周五前完成 X" 这种无具体时间点 / 任务追踪导向 | ❌ v0.5 not in scope（语音里这种诉求归"指令"，让 Agent 提醒别人） |
+
+**Context 复利在日历的具象**：你跟某人/某事的过往交互越多，下一次相关日程的 Smart Brief 越精准。
+
+#### 4.2.1 Detail 页结构（4 段，无 emoji）
+
+```
+┌─────────────────────────────────┐
+│ [日程] 舟舟生日                 │
+│ 已加入日历                      │     ← §A Head（极简 3 件事）
+├─────────────────────────────────┤
+│ 时间    9 月 9 日（下周二）全天 │
+│ 参与人  舟舟                    │     ← §B 日历卡本体（structured）
+│ 提醒    提前 1 天               │
+├─────────────────────────────────┤
+│ [Agent 写的 markdown brief]     │     ← §C Smart Brief
+│ 舟舟最近一次跟你聊...           │       async loading
+│ 要不要送她原研哉的作品集？...   │
+├─────────────────────────────────┤
+│ [icon] 已加入 Apple 日历 [打开] │     ← §D 已写入标识（明明强调要保留）
+└─────────────────────────────────┘
+```
+
+| § | 内容 | 必出 | 数据源 |
+|---|---|---|---|
+| **A. Head** | 类型 chip + 标题 + 状态 badge | 永远 | task |
+| **B. 日历卡本体** | 时间 / 地点 / 参与人 / 提醒（无值的字段不显示） | 永远 | task.calendar_event |
+| **C. Smart Brief** | Agent 写的 markdown brief，async loading | 永远（loading 中显示 shimmer） | task.output.display_markdown |
+| **D. 已写入标识** | `已加入 Apple 日历` + `打开` 按钮（跳系统日历） | 写入成功后 | EventKit 写入回调 |
+
+**砍掉的内容**（之前 todo detail 的）：
+- ❌ "你说的原话"（日历卡不需要回放原话）
+- ❌ "上下文" 4 行 chip section（这是 cmd 的设计；日程不在 detail 里展示 context，context 体现在 brief 文字里）
+- ❌ "解析结果" parse-grid（结构化字段直接在 §B 显示）
+- ❌ "冲突检测" 独立 section（冲突变成 §C brief 里的红色顶段）
+- ❌ reclass-picker（移到 navbar `···` 菜单）
+- ❌ inline chat / 继续和 Agent 沟通
+
+#### 4.2.2 §A Head 状态映射
+
+| status | text | color |
+|---|---|---|
+| `parsing` | 排队中 | `--text-dim` |
+| `parse_failed` | 时间未识别 · 在 AgentView 补充 | `--red` |
+| `brief_loading` | 已加入日历（brief 在生成） | `--text-dim` |
+| `synced` | 已加入日历 | `--text-dim` |
+| `removed` | 已从日历移除 | `--text-dimmer` |
+
+#### 4.2.3 §B 日历卡本体 — 字段集
+
+只 4 个字段，无值的字段不显示这一行：
+
+| 字段 | 显示规则 | 示例 |
+|---|---|---|
+| 时间 | `{月日}（{周几}）{时间段}` 或 `{月日}（{周几}）· 全天` | `9 月 9 日（下周二）· 全天` / `6 月 12 日（周三）14:00 – 15:00` |
+| 地点 | 原文 | `静安区` / `会议室 A` |
+| 参与人 | 逗号分隔，**只有自己时不显示这一行** | `林啸、明明` |
+| 提醒 | 多个用 `·` 分隔 | `提前 1 小时` / `提前 1 天` |
+
+**砍掉的字段**：项目、负责人、优先级、截止日期、重复 — 这些是 todo/issue 概念，Smart Calendar 不要。
+
+#### 4.2.4 §C Smart Brief — 核心差异化
+
+**Brief 的两个维度（v0.5 锁定 = B 方案）**：
+
+| 维度 | 干什么 | 数据源 |
+|---|---|---|
+| **B1. context** | 关于这个人 / 这件事的过往精华 | Memory（聊天、灵感、过往 cmd） |
+| **B2. 准备建议** | 送什么礼 / 带什么文档 / 注意什么 | Memory + 模型推断 |
+
+**v0.5 显式不做**：
+- ❌ B3 实务信息（天气 / 路程 / 周边推荐）— 不接外部 MCP
+- ❌ B4 风险/雷点单独维度（融在 B1/B2 文字里即可）
+
+**渲染规范**：
+- **单一 markdown** 渲染（复用 MON-16 双层 contract: `display_markdown` + `structured_payload`）
+- **像朋友/助理说话**，不要技术术语；不要 sec-title，brief 直接是 §C 主体
+- **全 App 禁止 emoji**（明明强调）— 视觉语义靠颜色 + 排版承载，不要 ✦/⚠️/→ 等符号
+- 支持的 markdown：`p`, `b/strong`, `i/em`, `ul/ol`, `hr`
+
+**Brief 全文由明明撰写 prompt**（见 [MON-37 占位 issue]）— v0.5 ux05 prototype 里的 brief 文案是 mock，最终由 prompt 生成。
+
+#### 4.2.5 冲突的视觉表达（无 emoji，但要刺眼）
+
+**模型 prompt 约定**：检测到冲突时，brief 第一段以 `**冲突：**` 开头（粗体冒号开场），第二行必须给具体改期建议（"建议挪到 X"）。
+
+**前端识别 + 染色**：
+- 第一段如果以 `**冲突：**` 起头 → 整段渲染为 `<p class="conflict">`：
+  - 文字色 `var(--red)` (`#d4574a`)
+  - 加粗
+  - 段首左侧红色竖线（`border-left: 2px solid var(--red)`）
+  - 浅红背景 `rgba(212,87,74,0.04)`
+  - 段后 24px 强分割
+- 第二段恢复正常颜色（暖灰），保持对话感
+
+**示例 markdown**：
+```markdown
+**冲突：**那天下午你还约了和林啸的 Memory 评审会。建议把和敦敏的会面挪到 **6 月 12 日 16:30** 之后。
+
+敦敏对你 Series A 那次的**估值**和 **GTM** 还没回邮件...
+```
+
+**冲突仍然写入日历**（不擅自不写）：用户看到红色后自己决定改不改。这是 Smart Calendar "建议"而非"阻止"的姿态。
+
+#### 4.2.6 §D 已写入标识
+
+**保留的理由（明明强调）**：让用户明确感知 "这个日历已经被同步到原生日历 App 了"，强化"无感同步"的信任感。
+
+**视觉**：
+- 左侧 iOS 风格日历 icon（红色月份缩写 + 大字号日期）
+- 中间 `已加入 Apple 日历` + 副信息 `主日历 · iCloud`
+- 右侧 `打开` 按钮（用 `--accent` 橙色）→ 跳 system 日历 app
+
+#### 4.2.7 时间地点解析失败 UX（B2 方案，明明拍板）
+
+- 不弹窗、不 block
+- §B 日历卡本体显示 `时间未识别`（红色）
+- §C 显示一段提示："**还差一点**：你想约的是哪天？回到主页跟我说一句就行（比如"周五下午 3 点"）"
+- §D 不显示（没写入日历）
+
+#### 4.2.8 撤销窗口（E1 方案，明明拍板）
+
+- 写完 EventKit → 立刻 toast `已加入日历 · 撤销`，5s 内可点撤销 → 删 EventKit + 标 task `cancelled`
+- detail 页**不放永久"从日历移除"按钮**（保持极简；过期想删去 system 日历手删）
+- navbar 右上 `···` 菜单里可以放 `从日历移除`（poweruser 路径，不主推）
+
+#### 4.2.9 撤销时的 Agent 反馈（F3 方案，明明拍板）
+
+- 静默撤销，不打扰用户
+- Agent 后台学习写 Memory：`user-rejected-time-pattern`（如"每周二下午都被拒"→ Agent 下次默认避开周二下午）
+- 不弹"告诉 Agent 哪里不对" prompt
+
+#### 4.2.10 Brief 是 async（明明 Q5 拍板）
+
+- §A + §B + §D 秒进（解析成功 + EventKit 写入 → 立即可见）
+- §C `cal-brief.loading` shimmer，文案 `正在为你想想…`，几秒后 `display_markdown` 填入
+- 这样写日历的"已写入"反馈不被 brief 生成时长拖累
+
+#### 4.2.d 后端依赖检查表 ✅ 零改动 / ⚠️ 需要后端配合
+
+| 项 | 状态 | 备注 |
+|---|---|---|
+| `understanding-prompt` 输出 `cal_parse: {title, start_at, end_at, location, attendees, reminder, parse_failed, has_specific_time}` | ⚠️ **prompt 改字段名**（之前是 todo_parse） | 林啸 |
+| **新 plugin `calendar-smart-brief-generator`**（pod 部署，复用 plugin-runtime 架构，**不是新 service**） | ⚠️ 新 plugin pod | 林啸 |
+| Smart Brief prompt 全文 | ⚠️ **由明明撰写**（见 MON-37 占位 issue） | **明明** |
+| 冲突检测：传 `existing_events_today/week` 给 brief prompt 输入 | ⚠️ retrieval 加一类 source（读 EventKit 上下文） | 林啸 |
+| Brief 输出 `display_markdown` + `structured_payload` 双层 contract | ✅ 零改动（复用 MON-16 设计） | — |
+| iOS EventKit 写日历 + 打开 system 日历 app | ✅ 现有 | — |
+| 5s toast 撤销 → 删 EventKit + 标 task cancelled | ✅ 现有 | — |
+| 撤销学习写 Memory（`user-rejected-time-pattern`）| ⚠️ 复用现有 Memory write 通道 | 林啸 |
+| `agent-orchestrator-service` task type — 复用现有 `command_execute`，plugin = `calendar-smart-brief-generator` | ✅ 架构零改动 | — |
+
+**总结**：核心后端工作 = **新 plugin pod** + **明明写 brief prompt**，不动 service 架构。
+
+#### 4.2.11 v0.5 显式排除清单
+
+- ❌ Todo / 待办类型（无具体时间点的诉求归"指令"或不进 v0.5）
+- ❌ B3 实务信息（天气 / 路程 / 周边推荐）— 不接外部 MCP
+- ❌ 周期事件（每周一次的会议等，v0.6+）
+- ❌ Linear / Asana / Jira 等 issue tracker 写入
+- ❌ 冲突检测的"自动改期"（只建议，不替用户改）
+- ❌ Brief 历史版本管理 / 重新生成
+
+#### 4.2.12 ux05 prototype 对应 mock
+
+| mock id | 场景 | 演示 |
+|---|---|---|
+| `cal-1` | 朋友生日（无冲突，社交场景） | Smart Brief 完整形态 — 关于人的 context + 准备建议（送礼） |
+| `cal-2` | 上海见敦敏（**有冲突**，工作场景） | 红色冲突顶段 + 工作 brief（带 deck + 偏好提醒） |
 
 ### 4.3 短录音处理中卡片
 - 状态机: `pending` → `executing` → `done` / `failed` / `needs_input`
