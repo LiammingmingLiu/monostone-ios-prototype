@@ -196,6 +196,19 @@ iOS
 ### 4.9 IdeaDetailView · Agent 发散
 - 触发 `POST /agent/tasks`（type=brainstorm）
 
+#### 4.1.f 后端依赖检查（MON-9 范围）⚠️ 一项可选
+
+| 元素 | 数据来源 | 后端 |
+|---|---|---|
+| 完整纪要 H1/meta/H2/H3/p | `understanding.full_summary_html` 或等价结构 | ⚠️ 见下 |
+| 分享原文 (ASR) | `understanding.full_transcript` | ✅ 已有 |
+| 分享纪要弹 sheet | 同上完整纪要数据 | ✅ |
+
+⚠️ **唯一可能要后端配合**:
+- `understanding-service` 的 `understanding` 输出 **必须包含** 完整纪要的结构化数据（不只是 `bullet_points`）
+- **零改动方案**：让 MON-6 (`docs/prompts/llm-worker/understanding-prompt.md`) 的输出 schema 包含一个 `full_summary` 字段（结构化 sections + paragraphs）。这是 prompt 输出 schema 决定，不需要改 backend code。
+- **prototype mock**: `data/mock.js` 的 `FULL_SUMMARIES` 已经是正确格式 (sections[].paragraphs[])，作为 backend prompt 输出参考
+
 ## 5. 后端变更
 
 ### 5.1 `multimodal-ingestion-service`
@@ -205,6 +218,7 @@ iOS
 - 引用 `docs/prompts/llm-worker/summary-prompt.md`
 - 引用 `docs/prompts/llm-worker/understanding-prompt.md`
 - 引用 `docs/prompts/llm-worker/recording-mode-router.md`
+- **MON-9 约束**: understanding 输出必须含 `full_summary: { title, meta, sections: [{h, paragraphs}] }`
 
 ### 5.3 `understanding-service` 返回 schema
 - 引用 `docs/data/card-recording.md`

@@ -35,11 +35,20 @@ category: toast
 
 ## Action Items（M1）
 
+> ⚠️ MON-9 (2026-05-03) 起，长录音详情页不再显示 Action Items。这些 toast 仅用于 Memory tab 或其他可能展示 Action Item 的场景。
+
 | key | 文案 | 触发 |
 |---|---|---|
 | `actionItem.accepted` | 已接受 · 同步到提醒事项 | ✓ 勾选 |
 | `actionItem.deleted` | 已删除 · Agent 会学习 | 左滑删 |
 | `actionItem.undo` | 撤销 | 5s 内 |
+
+## RecordingDetailView 分享（M1, MON-9）
+
+| key | 文案 | 触发 |
+|---|---|---|
+| `share.transcript_copied` | 已复制原文到剪贴板 | 点底部 `分享原文` |
+| `share.summary_sheet_opened` | （无 toast，弹 share sheet） | 点底部 `分享纪要` |
 
 ## Command（M2）
 
