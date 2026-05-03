@@ -91,6 +91,79 @@ iOS
 
 > TODO（明明）: 每个 view 按以下小节填充
 
+### 4.0 HomeView · 极简卡片列表（MON-32 已 LOCKED 2026-05-03）
+
+**视觉真相**：https://monostone-ux05.vercel.app
+
+#### 4.0.a 整体范式
+首页只回答一个问题：**"AI 给我处理出了什么？"** —— 删除一切其他元素。
+
+**保留**: 顶部 Monostone logo / 卡片列表（白底无类型颜色）/ 底部 4 tab / 右下 FAB
+
+**删除**:
+- ❌ greeting "早上好，明明"
+- ❌ 状态行 "第 N 天 · 戒指已连接 · 今日第 X 次交互"
+- ❌ "今日速览"整块（3 行 + "省下 X 分钟"）
+- ❌ filter chips（5 类型筛选）
+- ❌ "今天 / 昨天" 时间分隔
+- ❌ 卡片上的 type label / 卡片彩色区分 / 双行 head / meta 第二行
+
+#### 4.0.b 卡片视觉规范
+
+| 元素 | 规范 |
+|---|---|
+| 卡片背景 | `--panel` 纯白 `#ffffff` |
+| 卡片边框 | `0.5px solid --border`（`rgba(0,0,0,0.06)`） |
+| 卡片圆角 | `12px` |
+| 卡片间距 | `8px` |
+| title 字号 | `15px / 500` |
+| title 截断 | 最多 2 行 + ellipsis（`-webkit-line-clamp: 2`） |
+| meta-min 字号 | `12px / --text-dimmer` |
+
+#### 4.0.c 卡片 5 状态视觉（**这是核心决策**）
+
+| 状态 | meta-min 文案 | 视觉补充 |
+|---|---|---|
+| `done` | 相对时间："2 小时前" / "昨天 22:14" | 无 |
+| `processing` | "处理中 · 还剩 X 分钟" | shimmer 微弱（cyan rgba 0.05）|
+| `needs_input` | "需要确认 · {时间}" + 颜色 `#d4a868` | **右上角黄色小圆点** 8px |
+| `failed` | "失败 · 点击重试 · {时间}" + 颜色 `--red` | **右上角红色小圆点** 8px |
+
+文案 key 详见 `docs/copy/toast.md` § HomeView 卡片 meta-min 状态文案。
+
+#### 4.0.d 后端依赖检查 ✅ 零改动
+
+| 视觉元素 | 数据来源 | 后端是否要改 |
+|---|---|---|
+| 卡片 title | `understanding-service` 的 `title` 字段 | ✅ 已存在 |
+| 相对时间 | `created_at` (ISO8601) iOS 端格式化 | ✅ 已存在 |
+| `processing` 状态 | `agent-orchestrator-service` task `status` = `transcribing` / `structuring` / `executing` | ✅ 已存在 |
+| `needs_input` | task `status` = `awaiting_input` / `awaiting_confirmation` | ✅ 已存在 |
+| `failed` | task `status` = `failed` | ✅ 已存在 |
+| 4 种类型混合排序 | `timeline-service` `/timeline/feed` 已聚合 | ✅ 已存在 |
+
+⚠️ **唯一需要后端配合的（v0.5 不做，v1.0 再说）**:
+- "处理中 · 还剩 X 分钟" 的 ETA 数字。当前 `agent-orchestrator-service` 没有 `estimated_remaining_seconds` 字段。
+- **v0.5 fallback**：iOS 拿不到 ETA 时显示 "处理中"，不显示分钟数。HTML prototype 演示用的 "还剩 3 分钟" 是 mock。
+- v1.0 加字段时:
+  - service: `agent-orchestrator-service`
+  - schema 加: `AgentTask.estimated_remaining_seconds: int?`
+  - 算法: 后端基于历史 task 同类 P50 估算
+
+#### 4.0.e 林啸 vibecoding 时要做的事
+1. **删除** `App/Features/Home/HomeView.swift` 里:
+   - `header` greeting + status-line
+   - `TodayDigestText`
+   - `FilterChipBar`
+   - 时间分隔逻辑
+2. **改 cardList**：每个 Card 简化为 title + meta-min（一行）。删除 type label / type 颜色。
+3. **加** 卡片 5 状态视觉规则（按 4.0.c 表格）
+4. **不动**: Repository / Store / RingCoordinator / Live Activity / FAB / 数据加载逻辑
+
+预计代码改动：删 ~150 行，加 ~30 行，零后端改动。
+
+---
+
 ### 4.1 RecordingDetailView · 参与人 section
 - **UI**: 头像横排，最多 5，溢出 "+N"
 - **数据来源**: `RecordingSummary.participants`（来自 `understanding` artifact 的 understanding 输出，由 `llm-worker` 提取）

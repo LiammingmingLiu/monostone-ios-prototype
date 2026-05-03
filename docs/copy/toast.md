@@ -16,6 +16,23 @@ category: toast
 | `recording.done` | 已完成 | `understanding-service` 200 |
 | `recording.upload_failed` | 上传失败 · 重试 | iOS 网络错误 |
 
+## HomeView 卡片 meta-min 状态文案（MON-32）
+
+> 极简版首页：卡片只显示 title + meta-min 一行。meta-min 默认是相对时间，状态非 done 时改成状态文案。
+
+| key | 文案 | 触发 |
+|---|---|---|
+| `card.meta.relative_time` | `{2 小时前}` / `{45 分钟前}` / `{昨天 22:14}` | done 卡片，默认显示 |
+| `card.meta.processing` | 处理中 · 还剩 {X} 分钟 | task status = transcribing/structuring/executing，**ETA 后端没字段时降级为** "处理中" |
+| `card.meta.processing_no_eta` | 处理中 | 没 ETA 时的 fallback |
+| `card.meta.needs_input` | 需要确认 · {2 小时前} | task status = needs_input/awaiting_input，配右上角黄点 |
+| `card.meta.failed` | 失败 · 点击重试 · {3 小时前} | task status = failed，配右上角红点 |
+
+**视觉规则**：
+- meta-min 字号 12px，颜色 `--text-dimmer`
+- needs_input 时颜色覆盖为 `#d4a868`（暖黄）
+- failed 时颜色覆盖为 `--red`
+
 ## Action Items（M1）
 
 | key | 文案 | 触发 |
@@ -52,6 +69,7 @@ category: toast
 
 ## TODO（明明）
 
-- [ ] M1 上传链路文案补全（含 5 状态）
+- [x] ~~HomeView 卡片 5 状态 meta-min 文案~~（2026-05-03 完成 MON-32）
+- [ ] M1 上传链路文案补全（含 5 状态 toast）
 - [ ] M2 command 详细执行步骤的 inline status 文案
 - [ ] 灵感卡 auto-attribution 反馈文案
