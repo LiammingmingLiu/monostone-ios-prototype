@@ -164,28 +164,80 @@ iOS
 
 ---
 
-### 4.1 RecordingDetailView · 参与人 section
-- **UI**: 头像横排，最多 5，溢出 "+N"
-- **数据来源**: `RecordingSummary.participants`（来自 `understanding` artifact 的 understanding 输出，由 `llm-worker` 提取）
-- **交互**: 折叠/展开（spring 0.3s）
-- **边界**: 0 人 → 隐藏；识别失败 → "未识别参与人 · 手动添加"
-- **Acceptance**: …
+### 4.1 RecordingDetailView · ux0.5 极简化（MON-9 已 LOCKED 2026-05-03）
 
-### 4.2 RecordingDetailView · 结构化摘要
-- TODO
+> **重大产品决策**: 详情页不再显示 6 section（参与人 / 摘要 / Action Items / 决策 / Memory / 完整纪要 modal）。
+> 改为 **直接 inline 显示完整纪要本身** + 底部 2 个分享按钮。
 
-### 4.3 RecordingDetailView · Action Items
-- TODO（已有左滑删除骨架，commit 71955b9）
+#### 4.1.a 范式变化
+- **之前**: detail-head + 6 个独立 section（每个 section 都有 sec-title + sec-box）+ 底部"分享"单按钮 + "查看完整总结" link → modal
+- **之后**: 详情页 = 完整纪要本身（H1 标题 + meta 表 + H2/H3 sections + 表格/引用/列表）+ 底部 `[分享原文] [分享纪要]` 2 按钮
 
-### 4.4 RecordingDetailView · 决策
-- TODO
+#### 4.1.b 砍掉了什么 + 用户接受的代价
 
-### 4.5 RecordingDetailView · Memory
-- 列出本次录音入库的 memory tree 节点（按 `memory_node_ids`）
-- 点击 → 跳转 MemoryView 并定位到节点
+| 删掉的元素 | 原价值 | 删掉后用户怎么办 |
+|---|---|---|
+| 参与人头像横排 | 5 秒看到谁参会 | 完整纪要 meta 表里有"参会人员" |
+| 结构化摘要 4 bullet | 5 秒看核心要点 | 读完整纪要前 1-2 段 |
+| **Action Items 列表 + checkbox** | "我接下来要做什么" | **要在纪要里翻找 ⚠️**（用户已接受此代价）|
+| 决策 section | 看决策 + 主张人 | 完整纪要"决策"小节 |
+| Memory "学到了什么" | 看 AI 提取的 memory 节点 | 跳 Memory tab 看（不在详情页展示）|
+| 完整纪要 modal | 弹出查看长内容 | 详情页本身就是完整纪要，无需 modal |
+| "查看完整总结" link | 入口 | 不需要 |
+| 完整转录 4281 字 inline 展开 | 看 ASR 原文 | 移到底部 `[分享原文]` 按钮（导出而非 inline 阅读）|
 
-### 4.6 RecordingDetailView · 完整纪要 modal
-- TODO
+#### 4.1.c 详情页结构（单一）
+
+```
+┌─ navbar (返回 + (空 title) + ···)
+│
+├─ <h1>和敦敏的 Series A 跟进会 · 会议纪要</h1>
+├─ <dl meta-table>
+│     会议时间 / 时长 / 参会人员 / 项目 / 形式
+│  </dl>
+│
+├─ <h2>会议背景</h2> ... <h3>...</h3> <p>...</p>
+├─ <blockquote>...</blockquote>
+├─ <table>...</table>
+├─ ...（更多 section）
+│
+└─ 底部固定: [分享原文] [分享纪要(primary)]
+```
+
+#### 4.1.d 渲染 spec
+- `<h1>`: 22px / 700, 文本色 `--text`
+- `<h2>`: 17px / 600, top margin 24px
+- `<h3>`: 15px / 600, top margin 16px
+- `<p>`: 15px / 1.55 line-height, margin-bottom 12px
+- `<dl meta-table>`: dt 11px dim / dd 13px text, 2 列 grid
+- `<blockquote>`: 左 3px 边线 + 14px italic + dim quote-author
+- `<table>`: 边框 0.5px + cell 8px padding + thead 加粗
+- `<ul>/<ol>`: 缩进 16px + bullet 12px
+- 整体 `.inline-summary` 容器 padding `20px 22px 30px`
+
+#### 4.1.e 底部分享 actions
+
+| 按钮 | 样式 | 行为 |
+|---|---|---|
+| **分享原文** | secondary（panel 底色 + border） | 调 `shareTranscript(cardId)` → mock 弹"已复制原文到剪贴板" |
+| **分享纪要** | primary（accent 橙底 + 白字） | 调 `openShareSheet(cardId)` → 弹 share modal（Markdown / PDF / TXT 格式选 + 8 目的地：复制/邮件/iMessage/Notion/Slack/微信/AirDrop/Files）|
+
+**关键差异**:
+- "分享原文" = 直接导出 ASR `understanding.full_transcript` 的纯文本
+- "分享纪要" = 弹现有 share modal（已支持 Markdown/PDF/TXT 多格式 + 多目的地）
+
+#### 4.1.f 后端依赖检查 ⚠️ 一项可选
+
+| 元素 | 数据来源 | 后端 |
+|---|---|---|
+| 完整纪要 H1/meta/H2/H3/p 等 | `understanding.full_summary` | ⚠️ 见下 |
+| 分享原文 (ASR) | `understanding.full_transcript` | ✅ 已有 |
+| 分享纪要弹 sheet | 同上完整纪要数据 | ✅ |
+
+⚠️ **唯一可能要后端配合**:
+- `understanding-service` 的 `understanding` 输出 **必须包含** 完整纪要的结构化数据（不只是 `bullet_points`）
+- **零改动方案**: 让 MON-6 (`docs/prompts/llm-worker/understanding-prompt.md`) 的输出 schema 包含 `full_summary: { title, meta, sections: [{h, paragraphs}] }`。这是 prompt 输出 schema 决定，不需要改 backend code。
+- **prototype mock**: `data/mock.js` 的 `FULL_SUMMARIES` 已是正确格式，作为 backend prompt 输出参考
 
 ### 4.7 IdeaDetailView · 自动归属
 - 引用 `agent-orchestrator-service` 的 retrieval policy（M3 prompt）
