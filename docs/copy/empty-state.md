@@ -36,6 +36,13 @@ category: empty-state
 | `plugins.none_installed` | 还没装插件 · 去商店看看 |
 | `plugins.market_empty` | 商店暂时没有可用插件 |
 
+## Drawer (MON-35 全局抽屉)
+
+| key | 文案 |
+|---|---|
+| `drawer.recents_empty` | 还没有记录 · 长按戒指开始 |
+| `drawer.section_recents` | 最近 |
+
 ## TODO（明明）
 
 - [ ] 灵感无法归属时的 inbox 空态
