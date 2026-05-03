@@ -50,6 +50,14 @@ category: toast
 | `share.transcript_copied` | 已复制原文到剪贴板 | 点底部 `分享原文` |
 | `share.summary_sheet_opened` | （无 toast，弹 share sheet） | 点底部 `分享纪要` |
 
+## IdeaDetailView 灵感详情页（M1, MON-10）
+
+| key | 文案 | 触发 |
+|---|---|---|
+| `idea.attribution_changed` | 已归属到「{project}」 · Agent 会学习 | 点 §C 归属 → 弹框选项目 |
+| `idea.to_command_created` | 已创建指令任务 · 跳到确认页 | 点 §E action card "让 Agent 做 X" / "写成 X" |
+| `idea.to_todo_added` | 已加入待办 · 已写入 Apple 提醒事项 | 点 §E action card "加成 todo" |
+
 ## Command（M2）
 
 > CommandDetailView 极简 V2（MON-16）：底部永远只有 `[拒绝]` `[允许]` 两个按钮，所有 plugin 通用。

@@ -239,14 +239,141 @@ iOS
 - **零改动方案**: 让 MON-6 (`docs/prompts/llm-worker/understanding-prompt.md`) 的输出 schema 包含 `full_summary: { title, meta, sections: [{h, paragraphs}] }`。这是 prompt 输出 schema 决定，不需要改 backend code。
 - **prototype mock**: `data/mock.js` 的 `FULL_SUMMARIES` 已是正确格式，作为 backend prompt 输出参考
 
-### 4.7 IdeaDetailView · 自动归属
-- 引用 `agent-orchestrator-service` 的 retrieval policy（M3 prompt）
+### 4.7 ~ 4.9 IdeaDetailView · ux0.5 重构（MON-10 已 LOCKED 2026-05-03）
 
-### 4.8 IdeaDetailView · 相关灵感
-- 检索来源：memory-api `POST /memory/tree/search`
+> **核心定位**: 灵感不是 "信息档案"，是 **思考的记录 + 未来行动的种子**。
+> 详情页的目标：让用户主动打开时，立即能 (a) 回到当时语境 (b) 看到相关 context (c) 一键转化为行动。
 
-### 4.9 IdeaDetailView · Agent 发散
-- 触发 `POST /agent/tasks`（type=brainstorm）
+#### 4.7.a 5 块结构（替代旧 7 段）
+
+```
+┌─ navbar (返回 + ··· menu)
+│
+├─ §Head: [灵感 chip] + 标题 + 一行 meta
+│
+├─ §A 当时        ← 场景 2 关键，新增
+│   📍 走路时 · 4/8 22:14 · 0:08
+│   上一条录音是「和敦敏的 Series A 跟进会」
+│
+├─ §B 想法        ← LLM 整理版（不显示原话）
+│
+├─ §C 归属        ← 一行 + 点击 → 下拉/小框选 project
+│
+├─ §D 相关 context ⚠️ prompt-driven smart retrieval
+│   🎙 「Anki spaced repetition」指令 · 3 天前      L1
+│   📝 「Memory A/B 评审」长录音 · 昨天             L2
+│   💡 灵感 · 4/2                                    L3
+│   ⏱ 待办 · 下周三                                 L1
+│
+├─ §E 接下来你可以...   ⚠️ AI suggested actions
+│   ▸ 让 Agent 做 SM-2 调研               ›
+│   ▸ 加成 todo「本周做 POC」             ›
+│   ▸ 写成 Memory 设计 RFC                ›
+│
+└─ (底部无 actions bar，分享 / 归档 / 删除 进 ··· menu)
+```
+
+#### 4.7.b 砍掉了什么
+
+| 删 | 理由 |
+|---|---|
+| 原声播放块 | 用户基本不再听，浪费空间 |
+| reclass-picker | 移到 navbar `···` menu（一致 cmd 决策）|
+| 自动归属 confidence 数字 | 只显示 project 名字（用户不关心 91% 数字）|
+| "相关的过往灵感" 3 个 card | 改成 §D smart context（4 类 source 混排）|
+| "和 Agent 一起发散" inline chat | 改成 §E action card 单击转 cmd task（避免详情页变成第二个 Agent 入口）|
+| 底部 [归档][加入项目] | 归属已在 §C 完成，归档/分享进 ··· menu |
+
+#### 4.7.c §A 当时 — 新增的"语境"块
+
+**价值**: 解决场景 2（用户在做任务时回看灵感）— 让用户立即想起 "我当时为什么会想到这个"。
+
+| 字段 | 数据源 | 后端 |
+|---|---|---|
+| 场景标签（走路时/开车时/在办公室）| 戒指 IMU + 时间推断 | ✅ 戒指已有 IMU；后端推断逻辑 v0.5 不实现也 OK（fallback 不显示） |
+| 时间 | `recording.recorded_at` | ✅ |
+| 时长 | `recording.duration_seconds` | ✅ |
+| 上一条录音标题 | `timeline-service /timeline/feed?around={event_id}` | ✅ 已有（feed 临近 events） |
+
+#### 4.7.d §B 想法 — LLM 整理版
+
+**用户拍板**: 不显示原话切换，只信任 LLM 整理。如果 LLM 整理错了，用户在 §C 改归属时反馈。
+
+**字段**: `understanding.title` 或 `understanding.summary_text`（短叙述版，不是 bullet）
+
+#### 4.7.e §C 归属 — 一行可点击
+
+**交互**: 点击 → 弹小框/下拉（不占满屏）→ 选 project（含"+ 新建项目"）→ 写回
+
+**API**: `memory-api POST /memory/feedback`（已有）
+
+#### 4.7.f §D 相关 context — Smart Retrieval ⚠️
+
+**核心产品决策**: 这块不是 dumb similarity search，而是 **smart context retrieval**。系统要回答 "用户面对这条灵感，如果想推进，他需要哪些 context 才能做出好决策？"
+
+**3 个层次（按价值排序）**:
+
+| 层次 | 包含 | 例子 |
+|---|---|---|
+| **L1 直接 actionable** | 已经做过 / 已经写过 / 已经决定 | "你 3 天前已经让 Agent 做过 SM-2 调研" |
+| **L2 决策支撑** | 相关讨论 / 相关人物 / 项目状态 | "林啸在 A/B 测试评审讨论了 promotion 阈值" |
+| **L3 启发拓展** | 相似主题的过往灵感 | "你 4 周前想过 Memory 衰减曲线" |
+
+**跨类型 source**: long_rec / command / idea / todo 四类都可能出现。
+
+**⚠️ 后端配合（仅 prompt schema 约束）**:
+- 在 **MON-8 agent fetch pipeline** 加第 6 个 prompt: `docs/prompts/agent-orchestrator/idea-context-retriever.md`
+- 输出 schema:
+  ```typescript
+  {
+    relevant_context: Array<{
+      node_id: string,
+      source_type: "long_rec" | "command" | "idea" | "todo",
+      title: string,             // ≤ 20 字
+      why_relevant: string,      // ≤ 30 字 — 关键字段
+      relevance_layer: "L1" | "L2" | "L3",
+      importance: number,
+    }>,  // 总数 3-5 条
+  }
+  ```
+- **不需要 backend code 改动**，是 prompt 输出 schema 决定
+- **iOS fallback**: prompt 还没写时，前端用 `memory-api POST /memory/tree/search` 拿 raw nodes 显示（无 why_relevant 字段）
+
+#### 4.7.g §E 接下来你可以... — AI Suggested Actions ⚠️
+
+**核心产品决策**: 灵感的核心价值是"种子"，详情页应该让灵感"立即能转化为行动"。
+
+**3 张 action card，单击 = 创建 cmd task → 跳 CommandDetailView 等待 [拒绝][允许]**
+
+| 用户点 | 后端发生 |
+|---|---|
+| "让 Agent 做 X 调研" | `POST /agent/tasks` (type=command_execute, prompt 含灵感 id) → 跳 cmd detail |
+| "加成 todo「Y」" | `POST /timeline/events` (kind=todo) → toast "已加入待办" |
+| "写成 RFC" | `POST /agent/tasks` (type=command_execute, plugin=document-writer) → 跳 cmd detail |
+
+**为什么不要"忽略"按钮**: 不点就是忽略，加按钮反而鼓励主动忽略行为。
+
+**为什么不要展开预览**: CommandDetailView 已经是预览页（你的原话 + 上下文 + 产出 + 拒绝/允许），重复设计无意义。
+
+**⚠️ 后端配合（仅 prompt schema 约束）**:
+- **MON-6 understanding-prompt** 输出加 `suggested_actions: Array<{title: string, why: string, action_type: "command" | "todo"}>`
+- 总数 ≤ 3，每条 title ≤ 20 字，why ≤ 30 字
+- **不需要 backend code 改动**，是 prompt schema
+- **iOS fallback**: prompt 还没写时，前端 hardcode 3 条通用 action（"让 Agent 调研" / "加为 todo" / "写成文档"）
+
+#### 4.7.h 后端依赖完整 check ✅ 零 backend code 改动
+
+| UX 元素 | 后端 |
+|---|---|
+| §A 当时 (location/前后录音) | ✅ 已有 |
+| §B 想法 (LLM 整理版) | ✅（understanding.title / summary_text）|
+| §C 归属改 | ✅（memory-api /memory/feedback）|
+| §D 相关 context smart retrieval | ⚠️ **MON-8 加新 prompt** `idea-context-retriever.md` |
+| §E suggested actions | ⚠️ **MON-6 prompt schema** 加 `suggested_actions` 字段 |
+| §E 转 cmd task | ✅（POST /agent/tasks）|
+| §E 转 todo | ✅（POST /timeline/events）|
+
+**两个 ⚠️ 都是 prompt 输出 schema 约束**，不是 backend code 改动。林啸在做 MON-6 / MON-8 时按这个约束写。
 
 #### 4.1.f 后端依赖检查（MON-9 范围）⚠️ 一项可选
 
