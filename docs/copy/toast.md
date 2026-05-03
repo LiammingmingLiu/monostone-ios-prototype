@@ -43,12 +43,17 @@ category: toast
 
 ## Command（M2）
 
+> CommandDetailView 极简 V2（MON-16）：底部永远只有 `[拒绝]` `[允许]` 两个按钮，所有 plugin 通用。
+
 | key | 文案 | 触发 |
 |---|---|---|
-| `command.draft_ready` | 草稿已生成 · 检查后发送 | confirmation pending |
-| `command.executed` | 已发送 | plugin 执行成功 |
-| `command.cancelled` | 已取消 | 用户撤销 |
-| `command.needs_input` | 需要补充 · 点击查看 | needs_input 状态 |
+| `command.draft_ready` | 等待你确认 | needs_input 进入 detail |
+| `command.allowed` | 已允许 · 正在执行 | 用户点 `允许` |
+| `command.rejected` | 已拒绝 | 用户点 `拒绝` |
+| `command.executing_cancelled` | 已取消执行 | 用户点 `取消执行`（executing 态） |
+| `command.executed` | 已完成 | plugin 执行成功 |
+| `command.failed` | 失败 · 点击重试 | task.status = failed |
+| `command.context_overflow` | … 还有 {N} 项 › | 上下文 > 4 项时的省略行 |
 
 ## Todo（M2）
 
