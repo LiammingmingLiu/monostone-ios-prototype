@@ -263,7 +263,11 @@ var showSteps: Bool {
 | `cmd-1` | done · 邮件 | 完成态参考（无步骤、无按钮） |
 | `cmd-2` | executing · research | 执行态参考（含步骤；research 本身 v0.5 不上线，仅演示 layout） |
 | `cmd-3` | needs_input · 邮件 | 等待确认态（拒绝/允许 按钮） |
-| `cmd-4` | needs_input · 日历 | 等待确认态（同样 拒绝/允许）— 验证按钮通用 |
+
+**指令 vs 日程 边界（2026-05-04 与明明对齐）**：
+- "约会议 / 创建日历事件" 类 = **日程**（MON-17 / 4.2 节），**不是指令**
+- 之前 cmd-4 (calendar create) mock 已删除，因为是分类错误
+- v0.5 指令 cmd 类只剩 **邮件发送** 一种 plugin（其他 plugin 在 v0.6+ 接入 MCP 时自动 cover 通用契约）
 
 ### 4.2 CalendarDetailView · Smart Calendar 详情页（v0.5 核心差异化）
 
