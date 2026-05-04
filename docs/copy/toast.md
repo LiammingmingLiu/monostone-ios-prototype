@@ -64,7 +64,7 @@ category: toast
 
 **交互**：
 - 处理中 3 状态：仅显示，不可 dismiss
-- done 状态：**永久保留直到用户 dismiss 或点击进入卡片详情**（不自动收起）
+- done 状态：**停留 5 秒后自动收起**（点击进入 = 立即收起 + 跳详情）
 - failed 状态：点击 → 跳首页对应卡片，在卡片上重试（Live Activity 不承载 [重试] 按钮）
 
 ## RecordingDetailView 分享（M1, MON-9）

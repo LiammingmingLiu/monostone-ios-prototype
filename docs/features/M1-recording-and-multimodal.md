@@ -452,7 +452,7 @@ iOS
 |---|---|---|
 | 5 状态 | `agent-orchestrator-service` task `status` 字段 | ✅ 已有 |
 | Live Activity 启动 / 更新 / 结束 | iOS ActivityKit 端到端 | ✅ 纯前端 |
-| done 永久保留 | iOS ActivityKit `staleDate` = nil | ✅ |
+| done 5 秒自动收起 | iOS ActivityKit `staleDate` = +5s, 然后 `end()` | ✅ |
 | failed 跳卡片 | iOS Deep link（已实现, commit fec25ef）| ✅ |
 
 ### 4.10.e prototype mock
