@@ -457,9 +457,21 @@ var showSteps: Bool {
 
 ## 5. 后端变更
 
-### 5.1 `llm-worker` 的 recording-mode-router prompt
-- 引用 `docs/prompts/llm-worker/recording-mode-router.md`
-- 必须输出: `recording_mode: "command" | "todo" | "idea" | "longRec"`, `confidence`, `reason`
+### 5.1 `llm-worker` 的 recording-mode-router prompt（MON-18 v2 重新框架）
+
+**核心改变（2026-05-04 与明明拍板）**：长 vs 短不在这里分类 —— 由 iOS **手势直接决定**（按住 = 长 / 按一下 = 短），物理硬约束。prompt 缩窄到"短录音子类 3 选 1"。
+
+- 引用 `docs/prompts/llm-worker/recording-mode-router.md` (v2)
+- 输出 schema: `recording_mode: "command" | "cal" | "idea"`, `confidence`, `reason`, `fallback_used`, `schema_version: 2`
+- 命名严格沿用现有：文件名 `recording-mode-router.md` 不改、字段名 `recording_mode` 不改、service 名 `llm-worker` / `post-recording-coordinator` 不改
+
+**调用场景**：
+1. 正常路径：iOS 短按 → batch-asr-worker → llm-worker (本 prompt) → post-recording-coordinator 路由
+2. **场景 A（长按 fallback）**：iOS 长按但 `duration_seconds < 30` → post-recording-coordinator **fallback 调本 prompt** 拿子类 → 当短录音处理。**模型自动归类，不打扰用户**（无 UX 提醒）
+
+**唯一林啸要做的事**：`post-recording-coordinator` 加场景 A 路由分支（长按 < 30s → 调 recording-mode-router）。其他全复用现有通道。
+
+**Few-shot prompt 全文** ⚠️ 拆给明明撰写：见 MON-38。我已在 prompt 文件里写完 framework + 3 个示范 few-shot，明明补 4+ 真实语料即可。
 
 ### 5.2 `post-recording-coordinator` 路由逻辑
 - TODO: command → 创建 agent task; todo → 写 timeline event
