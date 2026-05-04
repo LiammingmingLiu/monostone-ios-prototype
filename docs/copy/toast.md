@@ -55,6 +55,8 @@ category: toast
 | key | 文案 | 触发 |
 |---|---|---|
 | `idea.attribution_changed` | 已归属到「{project}」 · Agent 会学习 | 点 §C 归属 → 弹框选项目 |
+| `attribution.changed` | 已归属到「{project}」 · Agent 会学习 | 点 meta line 归属 → 弹 sheet 选 (rec + idea 通用) |
+| `attribution.new_project` | 新建项目 · 开发中 | 点 "+ 新建项目"（v0.5 mock） |
 | `idea.to_command_created` | 已创建指令任务 · 跳到确认页 | 点 §E action card "让 Agent 做 X" / "写成 X" |
 | `idea.to_todo_added` | 已加入待办 · 已写入 Apple 提醒事项 | 点 §E action card "加成 todo" |
 

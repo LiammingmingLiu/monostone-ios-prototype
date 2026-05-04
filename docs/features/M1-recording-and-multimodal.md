@@ -226,6 +226,34 @@ iOS
 - "分享原文" = 直接导出 ASR `understanding.full_transcript` 的纯文本
 - "分享纪要" = 弹现有 share modal（已支持 Markdown/PDF/TXT 多格式 + 多目的地）
 
+#### 4.1.g 归属（MON-12 LOCKED 2026-05-04）
+
+**决策**: 长录音和灵感都显示归属，cmd 和 todo 不显示。
+
+| 类型 | 显示归属 | 理由 |
+|---|---|---|
+| 长录音 | ✅ | 内容类，一定属于某 project |
+| 灵感 | ✅ | 内容类（MON-10 已实现）|
+| cmd | ❌ | 动作类，核心是 owner / 执行结果，project 是 secondary |
+| todo | ❌ | 动作类，核心是时间 / 提醒 |
+
+**展示形式**：嵌在 meta line 末尾（不开独立 sec block）
+
+- 灵感: `走路时 · 45 分钟前 · 0:08 · Monostone 后端 ›`
+- 长录音: H1 后单独一行 `归属 · Series A ›`（H1 后没 .mt 行）
+
+`.attr-inline` class: accent 橙色 + chevron，可点击
+
+**点击改归属**: 弹 in-style bottom sheet `#modal-project-picker`（不是 native prompt）
+- 复用现有 `.modal-sheet` 暖白样式
+- project list + 当前归属 highlight
+- 点击 row 即选中（无需确认按钮，iOS action sheet 风格）
+- "+ 新建项目" 用 accent 橙色 highlight
+
+**校正学习**: prompt 自动加权重 +0.15（MON-12 已 LOCKED 在 episode-to-project.md），不显式询问用户。
+
+**v0.5 不做**：多次校正同一类型主动询问 "以后这种归到 X？"（避免打扰）
+
 #### 4.1.f 后端依赖检查 ⚠️ 一项可选
 
 | 元素 | 数据来源 | 后端 |
