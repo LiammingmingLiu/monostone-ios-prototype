@@ -37,12 +37,16 @@ category: error
 | `memory.search_failed` | 搜索失败 · 稍后再试 |
 | `memory.delete_failed` | 删除失败 · 稍后再试 |
 
-## Plugins
+## Plugins (M4 · MON-28)
 
 | key | 文案 |
 |---|---|
-| `plugin.oauth_failed` | 授权失败 · 重新授权 |
+| `plugin.oauth_failed` | 授权失败 · 在 {provider} 检查权限后重试 |
+| `plugin.oauth_expired` | {plugin_name} 授权已过期 · 重新授权 |
 | `plugin.disabled_by_admin` | 该插件暂时不可用 |
+| `plugin.tool_disabled_by_user` | 我想做 X 但「{tool_name}」被你关了 · 去插件设置打开 |
+| `plugin.no_oauth_provider` | 该插件不需要授权 · 直接使用 |
+| `plugin.execute_failed` | {plugin_name} 调用失败 · 可在主页让我重试 |
 
 ## TODO（明明）
 

@@ -43,6 +43,30 @@ category: toast
 | `actionItem.deleted` | 已删除 · Agent 会学习 | 左滑删 |
 | `actionItem.undo` | 撤销 | 5s 内 |
 
+## Live Activity 5 状态文案（M1, MON-14）
+
+> Live Activity 范围：iOS 灵动岛 + 锁屏浮动卡片。home feed 内卡片状态文案另见 §HomeView 卡片 meta-min。
+
+| key | 文案 | 触发 / 视觉 |
+|---|---|---|
+| `la.uploading` | 上传中 | iOS PUT S3 中 · spinner |
+| `la.transcribing` | 转写中 | batch-asr-worker · spinner |
+| `la.structuring` | 整理中 | llm-worker / understanding-service · spinner |
+| `la.done` | 已完成 | understanding-service 返回 · ✓ |
+| `la.failed` | 失败 · 点击重试 | task.status=failed · ! |
+
+**视觉规则**：
+- 锁屏 / 灵动岛展开：图标 + 标题 + 副标题（"和敦敏的 Series A · 处理 1 条录音"）+ trail (spinner / ✓ / !)
+- 灵动岛紧凑态 (Dynamic Island compact)：状态 emoji + 数字（处理几条）
+- 多录音并发：合并显示 "处理 N 条录音中"（不堆叠 / 不丢失）
+- ETA "还剩 X 分钟" v0.5 不显示（后端无字段, MON-32 已决定）
+- failed 不显示具体原因（极简, 详细原因看卡片错误态 MON-15）
+
+**交互**：
+- 处理中 3 状态：仅显示，不可 dismiss
+- done 状态：**永久保留直到用户 dismiss 或点击进入卡片详情**（不自动收起）
+- failed 状态：点击 → 跳首页对应卡片，在卡片上重试（Live Activity 不承载 [重试] 按钮）
+
 ## RecordingDetailView 分享（M1, MON-9）
 
 | key | 文案 | 触发 |
@@ -96,6 +120,22 @@ category: toast
 | `network.retrying` | 正在重试 |
 | `permission.granted` | 已授权 |
 | `permission.denied` | 已拒绝 · 设置中开启 |
+
+## Plugins (M4 · MON-28)
+
+> 关键原则：toggle 是即时操作，不用感叹号 / 不用"成功"。toast 仅在用户主动 toggle 时弹（自动状态变化不弹）。
+
+| key | 文案 | 触发 |
+|---|---|---|
+| `plugin.tool_enabled` | 已开启「{tool_name}」 | 单个 tool toggle on |
+| `plugin.tool_disabled` | 已关闭「{tool_name}」 | 单个 tool toggle off |
+| `plugin.all_enabled` | 已开启 {plugin_name} 全部能力 | 顶部"全部能力" toggle on |
+| `plugin.all_disabled` | 已停用 {plugin_name} | 顶部"全部能力" toggle off |
+| `plugin.oauth_relinking` | 正在重新授权… | 点"重新授权"链接 |
+| `plugin.oauth_success` | {plugin_name} · 重新授权完成 | OAuth 回调成功 |
+| `plugin.oauth_failed` | 授权失败 · 在 {provider} 检查权限 | OAuth 回调失败 |
+| `plugin.installing` | 正在连接 {plugin_name}… | 首次安装 OAuth 跳浏览器前 |
+| `plugin.installed` | {plugin_name} 已就绪 | 首次安装 + scope 配置完成 |
 
 ## TODO（明明）
 

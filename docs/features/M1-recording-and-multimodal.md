@@ -416,6 +416,48 @@ iOS
 - **零改动方案**：让 MON-6 (`docs/prompts/llm-worker/understanding-prompt.md`) 的输出 schema 包含一个 `full_summary` 字段（结构化 sections + paragraphs）。这是 prompt 输出 schema 决定，不需要改 backend code。
 - **prototype mock**: `data/mock.js` 的 `FULL_SUMMARIES` 已经是正确格式 (sections[].paragraphs[])，作为 backend prompt 输出参考
 
+## 4.10 Live Activity 5 状态（MON-14 LOCKED 2026-05-04）
+
+> **范围**：iOS 灵动岛 + 锁屏浮动卡片。和 home feed 内卡片状态视觉是不同的 surface（home 见 §4.0.c）。
+
+### 4.10.a 5 状态文案
+
+| 状态 | 标题 | 副标题 | trail |
+|---|---|---|---|
+| uploading | 上传中 | "{title} · 处理 {N} 条录音" | spinner |
+| transcribing | 转写中 | 同上 | spinner |
+| structuring | 整理中 | 同上 | spinner |
+| done | 已完成 | "{title} · 点击查看" | ✓ |
+| failed | 失败 · 点击重试 | "{title}" | ! |
+
+### 4.10.b 视觉差异（3 个 surface）
+
+| Surface | 内容 |
+|---|---|
+| **锁屏 / 灵动岛展开** (long press) | 图标 + 标题 + 副标题 + trail |
+| **灵动岛紧凑态** (Dynamic Island compact) | 状态 emoji + 数字（处理几条），最小空间 |
+| **首页卡片 meta-min** (home feed) | 见 §4.0.c（不同 surface 不同视觉）|
+
+### 4.10.c 关键决策
+
+1. **进度形态**：处理中 3 状态用 spinner（不显示 % 或 ETA）。理由：后端无 `estimated_remaining_seconds` 字段（MON-32 决定 v0.5 fallback）
+2. **完成停留**：done 状态 **永久显示直到用户 dismiss 或点击进入卡片详情**（不自动收起 5 秒）。这是和 home 卡片不同的策略
+3. **多录音并发**：合并显示 "处理 N 条录音中"，**不堆叠**（避免占满锁屏）
+4. **失败原因**：Live Activity 不显示具体原因。点击 → 跳首页对应卡片，详细原因在卡片错误态展示（MON-15 范围）
+5. **重试入口**：Live Activity 上**不**放 [重试] 按钮。点击 = 跳卡片，在卡片上重试。Live Activity 不承载 action
+
+### 4.10.d 后端依赖检查 ✅ 零改动
+
+| 元素 | 数据源 | 后端 |
+|---|---|---|
+| 5 状态 | `agent-orchestrator-service` task `status` 字段 | ✅ 已有 |
+| Live Activity 启动 / 更新 / 结束 | iOS ActivityKit 端到端 | ✅ 纯前端 |
+| done 永久保留 | iOS ActivityKit `staleDate` = nil | ✅ |
+| failed 跳卡片 | iOS Deep link（已实现, commit fec25ef）| ✅ |
+
+### 4.10.e prototype mock
+ux05 home 页 navbar 下方有 `.la-preview` mock 展示 5 状态 cycle 视觉（点击切换）。这是纯演示，iOS 端用 ActivityKit 真实实现。
+
 ## 5. 后端变更
 
 ### 5.1 `multimodal-ingestion-service`
