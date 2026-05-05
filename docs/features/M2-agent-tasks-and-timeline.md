@@ -467,9 +467,9 @@ var showSteps: Bool {
 
 **调用场景**：
 1. 正常路径：iOS 短按 → batch-asr-worker → llm-worker (本 prompt) → post-recording-coordinator 路由
-2. **场景 A（长按 fallback）**：iOS 长按但 `duration_seconds < 30` → post-recording-coordinator **fallback 调本 prompt** 拿子类 → 当短录音处理。**模型自动归类，不打扰用户**（无 UX 提醒）
+2. **场景 A（长按 fallback）**：iOS 长按但 `duration_seconds < 120` → post-recording-coordinator **fallback 调本 prompt** 拿子类 → 当短录音处理。**模型自动归类，不打扰用户**（无 UX 提醒）
 
-**唯一林啸要做的事**：`post-recording-coordinator` 加场景 A 路由分支（长按 < 30s → 调 recording-mode-router）。其他全复用现有通道。
+**唯一林啸要做的事**：`post-recording-coordinator` 加场景 A 路由分支（长按 < 120s → 调 recording-mode-router）。其他全复用现有通道。
 
 **Few-shot prompt 全文** ⚠️ 拆给明明撰写：见 MON-38。我已在 prompt 文件里写完 framework + 3 个示范 few-shot，明明补 4+ 真实语料即可。
 

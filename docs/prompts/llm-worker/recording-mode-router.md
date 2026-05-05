@@ -29,7 +29,7 @@ related-data-schema: docs/data/card-recording.md (RecordingMode)
 ## 调用场景
 
 1. **正常路径**：iOS 短按手势上传 → batch-asr-worker 转写完 → llm-worker 调本 prompt → 拿 `recording_mode` → `post-recording-coordinator` 路由到 `command_execute` / `cal_parse` / `idea_attribution` 三条链路之一
-2. **场景 A · 长按 fallback**（v2 新增）：iOS 长按手势上传 → batch-asr-worker 转写完 → 如果 transcript `duration_seconds < 30`，`post-recording-coordinator` **fallback 调本 prompt** 拿子类 → 当短录音处理（生成对应 detail）。**模型自动归类，不打扰用户**。
+2. **场景 A · 长按 fallback**（v2 新增）：iOS 长按手势上传 → batch-asr-worker 转写完 → 如果 transcript `duration_seconds < 120`（即 2 分钟），`post-recording-coordinator` **fallback 调本 prompt** 拿子类 → 当短录音处理（生成对应 detail）。**模型自动归类，不打扰用户**。
 
 ## 输入契约
 
@@ -62,7 +62,7 @@ related-data-schema: docs/data/card-recording.md (RecordingMode)
 你是 Monostone 短录音子类分类器。
 
 输入是用户在手机上「按一下」录音按钮（≤ 15 秒）说的一句话的转写文本，
-或长按录音但内容很短（< 30 秒）的 fallback 场景。
+或长按录音但内容很短（< 120 秒，即 2 分钟）的 fallback 场景。
 
 你的任务：把这句话归到 3 类之一。
 
@@ -216,7 +216,7 @@ def rule_based_classify(t):
 | 输出类型 | command / todo / idea / longRec | command / cal / idea |
 | longRec 判定 | LLM 看 duration > 60s | **iOS 手势决定**，不在 prompt 里 |
 | todo 类 | 存在 | **删除**（MON-17 重新定位为 cal · Smart Calendar） |
-| 长按 < 30s 的处理 | 不存在 | **场景 A fallback** — `post-recording-coordinator` 调本 prompt 拿子类，自动归类不打扰用户 |
+| 长按 < 120s 的处理 | 不存在 | **场景 A fallback** — `post-recording-coordinator` 调本 prompt 拿子类，自动归类不打扰用户 |
 | 60s 长度阈值 | 自动 longRec | 移除（手势决定） |
 | confidence 阈值 | < 0.6 fallback / < 0.4 用户手选 | 同上保留 |
 
