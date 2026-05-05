@@ -48,7 +48,26 @@ category: error
 | `plugin.no_oauth_provider` | 该插件不需要授权 · 直接使用 |
 | `plugin.execute_failed` | {plugin_name} 调用失败 · 可在主页让我重试 |
 
+## 录音错误细分（M1 · MON-15 LOCKED）
+
+| key | 文案 | 触发 |
+|---|---|---|
+| `recording.asr_failed_detail` | 转写失败 · 原音频已保留，可重试 | ASR fail，详情页空白 + [重试转写][下载原音频] |
+| `recording.understanding_failed_partial` | AI 未能整理结构化纪要 · 显示完整转写 | LLM 整理失败但 transcript OK，详情页顶部 banner |
+| `recording.upload_paused_ring` | 已存戒指 · 联网后自动上传 | 上传中断（飞行模式 / 杀进程），戒指 4h 缓存兜底 |
+| `recording.upload_resumed` | 正在补传…  | 网络恢复，自动续传中 |
+| `idea.no_attribution_low_confidence` | 未归属 · 点击选项目 | confidence < 0.4，meta 显示"归属 · 未归属 ›" |
+
+## 重试策略（MON-15 LOCKED）
+
+| 错误类型 | 自动重试 | 用户介入 |
+|---|---|---|
+| 网络错误 (HTTP timeout / ECONNRESET) | 3 次 exponential backoff (1s / 3s / 10s) | 失败后 surface "重试" 按钮 |
+| LLM / ASR 错误 (服务端报错) | ❌ 不自动 (可能是内容问题) | 直接 surface "重试" 按钮 |
+| 权限错误 (401 / 403) | ❌ | 跳到对应授权页 |
+| 戒指 BLE 中断 | iOS 自动重连 | 5s 后失败 toast |
+
 ## TODO（明明）
 
-- [ ] 短录音分类置信度 < 0.4 时的"请手动选类型"文案
+- [x] ~~短录音分类置信度 < 0.4 时的"请手动选类型"文案~~ → MON-18 v2 已 cover (recording-mode-router confidence < 0.4 → idea fallback)
 - [ ] OAuth 中断后回到 App 的引导

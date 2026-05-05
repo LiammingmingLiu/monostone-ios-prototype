@@ -121,6 +121,17 @@ category: toast
 | `permission.granted` | 已授权 |
 | `permission.denied` | 已拒绝 · 设置中开启 |
 
+## 空态 / 错误态 / 戒指缓存（M1 · MON-15）
+
+| key | 文案 | 触发 / 视觉 |
+|---|---|---|
+| `network.offline_banner` | 网络断了 · 新录音会暂存戒指（4 小时容量） | home 顶部暖黄 banner，持续显示直到恢复 |
+| `recording.cached_on_ring` | 已存戒指 · 联网后自动上传 | 卡片 meta + 右上 [戒指] badge |
+| `recording.cached_uploading` | 正在补传…  | 网络恢复后 cached 卡片状态切换 |
+| `recording.transcribe_failed` | 转写失败 · 原音频已保留 | ASR 失败，详情页提示 + [重试转写][下载原音频] 双按钮 |
+| `recording.partial_summary` | AI 未能整理结构化纪要 · 显示完整转写 | LLM 整理失败但 transcript OK |
+| `idea.no_attribution` | 未归属 · 点击选项目 | confidence < 0.4，meta 显示"归属 · 未归属 ›" |
+
 ## Plugins (M4 · MON-28)
 
 > 关键原则：toggle 是即时操作，不用感叹号 / 不用"成功"。toast 仅在用户主动 toggle 时弹（自动状态变化不弹）。
@@ -136,6 +147,10 @@ category: toast
 | `plugin.oauth_failed` | 授权失败 · 在 {provider} 检查权限 | OAuth 回调失败 |
 | `plugin.installing` | 正在连接 {plugin_name}… | 首次安装 OAuth 跳浏览器前 |
 | `plugin.installed` | {plugin_name} 已就绪 | 首次安装 + scope 配置完成 |
+| `plugin.market_oauth_jump_title` | 正在跳转 {provider}… | Marketplace OAuth overlay 顶部文案 |
+| `plugin.market_oauth_jump_sub` | 在 {provider} 中授权后会自动回到 App | OAuth overlay 副文案 |
+| `plugin.coming_soon_tap` | 即将上架 · 关注更新 | 用户点了 disabled "即将上架" CTA |
+| `plugin.third_party_locked` | v1.0 开放第三方接入 | 用户点了 disabled "第三方" CTA |
 
 ## TODO（明明）
 

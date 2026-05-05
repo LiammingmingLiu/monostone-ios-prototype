@@ -458,6 +458,64 @@ iOS
 ### 4.10.e prototype mock
 ux05 home 页 navbar 下方有 `.la-preview` mock 展示 5 状态 cycle 视觉（点击切换）。这是纯演示，iOS 端用 ActivityKit 真实实现。
 
+## 4.11 空态 / 错误态 / 重试 (MON-15 LOCKED 2026-05-05)
+
+### 4.11.a 8 个边界 case 决策
+
+| # | 场景 | 决策 |
+|---|---|---|
+| A | 第一次打开 home（无卡片）| 一行 dim 文字 `还没有录音 · 长按戒指开始`（不引入 illustration）|
+| B | 网络断 | 全局 banner（home 顶部，暖黄持续显示直到恢复）|
+| C | ASR 失败 | 卡片 meta `失败 · 点击重试`；详情页 `[重试转写][下载原音频]` 双按钮 |
+| D | LLM 整理失败但转写成功（部分降级）| status 仍 `done`，详情页顶部 banner `AI 未能整理结构化纪要 · 显示完整转写` |
+| E | **上传中断（飞行模式 / 杀进程）** | **iOS 自动续传 + 卡片显示"已存戒指 · 联网后自动上传"** + 右上角 `[戒指]` badge（戒指 4h 缓存兜底，用户可见）|
+| F | 灵感无法归属（confidence < 0.4）| 暂挂"未归属"伪 project，meta `归属 · 未归属 ›`，用户主动改 |
+| G | 自动重试策略 | 网络错误 3 次 exponential backoff (1/3/10s)；LLM/ASR 错误不自动重试 |
+| H | 错误信息详细程度 | 简短人话主显示，技术细节进 `···` menu "查看错误详情" |
+
+### 4.11.b 戒指本地缓存 (E 场景关键)
+
+**产品定位**: 戒指有 4 小时录音存储空间。上传中断时录音不丢失，**用户可见**地知道"数据安全在戒指上"，避免怀疑数据丢失。
+
+| 视觉元素 | 实现 |
+|---|---|
+| 卡片右上角 `[戒指]` badge | 暖黄色 (`#a07a2a` on `rgba(212,168,104,0.15)`) |
+| 卡片 meta | `已存戒指 · 联网后自动上传` |
+| 卡片边框 | 暖黄 (`rgba(212,168,104,0.30)`) — 区别于 done / failed |
+| 网络恢复 | meta 切换 `正在补传…` → 上传完成转 done |
+
+### 4.11.c 网络断 banner (B 场景)
+
+```
+┌────────────────────────────────────────┐
+│ ● 网络断了 · 新录音会暂存戒指（4 小时容量）│
+└────────────────────────────────────────┘
+```
+- 位置: home navbar 下方，cards 之上
+- 颜色: `#a07a2a` text on `rgba(212,168,104,0.10)` bg
+- 持续显示直到网络恢复（不让用户主动 dismiss，避免后续录音不知情）
+- 网络恢复后 banner 消失（无 toast，避免打扰）
+
+### 4.11.d 后端依赖检查
+
+| 元素 | 后端 |
+|---|---|
+| 网络监测 (Reachability) | ✅ iOS 端到端 |
+| 戒指本地缓存 4h | ✅ 戒指固件已实现（hardware spec, see `project_monostone.md`）|
+| BLE 续传 | ✅ events-protocol 已有 |
+| 自动重试 (网络层) | ✅ iOS URLSession |
+| Live Activity 续传 | ✅ ActivityKit + URLSession background |
+
+⚠️ **2 项可能要后端配合（不是 backend code 改动，是约定 schema）**:
+
+1. **错误码标准化**: 各 service 返回 `{ http_status, error: { code, message_zh, retryable: bool } }`
+   - **v0.5 fallback**: iOS 端 hardcode 错误文案 mapping，按 HTTP status 兜底
+
+2. **understanding 部分降级**: LLM 整理失败时，`understanding-service` 仍返回 `{ full_transcript, full_summary: null, partial: true }`
+   - **v0.5 fallback**: iOS 端 if `understanding.full_summary == null` → 显示降级 UX
+
+这两项都是约定 schema，林啸看 backend 实际响应字段做对齐。
+
 ## 5. 后端变更
 
 ### 5.1 `multimodal-ingestion-service`
