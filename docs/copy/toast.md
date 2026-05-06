@@ -121,12 +121,14 @@ category: toast
 | `permission.granted` | 已授权 |
 | `permission.denied` | 已拒绝 · 设置中开启 |
 
-## 空态 / 错误态 / 戒指缓存（M1 · MON-15）
+## 空态 / 错误态 / 戒指缓存（M1 · MON-15, 5/6 复议简化）
+
+> 网络断不再做全局 banner（污染主屏）。状态信息只在受影响的卡片 meta 上显示。
+> 戒指缓存卡片不再加右上 [戒指] badge —— meta 文案已足够清楚。
 
 | key | 文案 | 触发 / 视觉 |
 |---|---|---|
-| `network.offline_banner` | 网络断了 · 新录音会暂存戒指（4 小时容量） | home 顶部暖黄 banner，持续显示直到恢复 |
-| `recording.cached_on_ring` | 已存戒指 · 联网后自动上传 | 卡片 meta + 右上 [戒指] badge |
+| `recording.cached_on_ring` | 已存戒指 · 联网后自动上传 | 卡片 meta（暖黄边框）|
 | `recording.cached_uploading` | 正在补传…  | 网络恢复后 cached 卡片状态切换 |
 | `recording.transcribe_failed` | 转写失败 · 原音频已保留 | ASR 失败，详情页提示 + [重试转写][下载原音频] 双按钮 |
 | `recording.partial_summary` | AI 未能整理结构化纪要 · 显示完整转写 | LLM 整理失败但 transcript OK |
