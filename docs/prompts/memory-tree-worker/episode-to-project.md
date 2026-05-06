@@ -60,7 +60,7 @@ related-data-schema: docs/data/memory-tree-node.md (layer=project)
 
 ## System Prompt
 
-> 你判定一个 episode 应该归到哪个 project（用户的长期主题）。Scene 不在本 prompt 范围。
+> 你判定一个 episode 应该归到哪个 project（用户的长期主题）。
 >
 > **判定**
 > 看实体重合、时间相邻、主题相似三个维度。给每个候选 project 打 0-1 confidence，输出 top 3。
