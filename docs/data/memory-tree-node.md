@@ -9,49 +9,42 @@ related-prompts:
   - docs/prompts/memory-tree-worker/raw-to-description.md
   - docs/prompts/memory-tree-worker/description-to-episode.md
   - docs/prompts/memory-tree-worker/episode-to-project.md
-  - docs/prompts/memory-tree-worker/episode-to-scene.md
+  - docs/prompts/memory-tree-worker/project-to-scene.md
   - docs/prompts/memory-tree-worker/user-profile-extractor.md
 related-spec: docs/features/M3-memory-prompts.md
 ---
 
 # MemoryNode
 
-> Memory Tree 5 层节点。所有层用同一个表 / 实体，靠 `layer` 字段区分。
+> Memory Tree 6 层节点。所有层用同一个表 / 实体，靠 `layer` 字段区分。
+>
+> ⚠️ **零后端改动原则**：本 schema **完全对齐后端现有字段**，不引入新字段。双视角通过现有 `title`（短）+ `text`（长，含两段结构）实现。
 
 ```swift
 struct MemoryNode: Codable, Identifiable {
-    // ===== 标识 =====
     let id: String                  // memory_node_id
     let userId: String
     let layer: MemoryLayer
 
-    // ===== 双视角字段（核心设计）=====
-    // display_*: 给 iOS UI 渲染的人话字段，短、清爽
-    // search_*:  给 Agent fetch pipeline 的密集检索字段
-    let displayTitle: String?       // ≤ 12 字（episode）/ ≤ 8 字（project/scene）
-    let displaySummary: String?     // ≤ 30 字，一行扫描
-    let searchSummary: String       // ≤ 200 字，信息密集，Agent 检索用
-    let searchKeywords: [String]    // 检索词（实体 + 主题 + 时间锚点）
+    let title: String?              // 短标题，≤ 12 字（display 用）
+    let text: String                // 正文。约定结构：
+                                    //   第一行：人话摘要 ≤ 30 字（用户在 feed 上看到的"一行扫描"）
+                                    //   空行
+                                    //   后续：详细内容（含数字/决策/实体，给 Agent embedding 用）
+                                    // iOS 渲染时按 \n\n 切：第一段=summary，全文=detail
+    let importance: Double          // 0-1，节点的检索价值分数（不是用户感知重要度）
+                                    // 由物化 LLM 标，rubric: 信息密度 0.6 + 情绪信号 0.4
+    let entityIds: [String]         // 关联实体（人、项目、地点、时间）
 
-    // ===== 检索元数据（Agent 视角）=====
-    let salience: Double            // 0-1，原 importance 改名（避免歧义）。
-                                    // 含义：节点的"被检索价值"分数，不是用户感知重要度。
-                                    // 用途：context packaging 阶段决定是否装入 Agent context window
-    let recencyScore: Double        // 0-1，时间衰减
-    let entityIds: [String]         // 关联实体（人、项目、地点）
-
-    // ===== 结构层（连接 Tree 节点）=====
     let parentNodeIds: [String]     // 上一层（多对多）
     let childNodeIds: [String]      // 下一层
     let sourceRecordingIds: [String]
 
-    // ===== 用户编辑层（Q3 选 A 最小改动）=====
-    let userEditedDisplayTitle: String?     // 用户改过的显示标题，覆盖 displayTitle
-    let userEditedDisplaySummary: String?   // 同上。search_* 字段不被用户编辑影响
+    let recencyScore: Double?       // 0-1，时间衰减（后端可能动态算）
 
     let createdAt: String
     let updatedAt: String
-    var schemaVersion: Int = 2      // v2: 双视角字段 + scene 层级调整 + salience 改名
+    var schemaVersion: Int = 1
 }
 
 enum MemoryLayer: String, Codable {
@@ -64,12 +57,36 @@ enum MemoryLayer: String, Codable {
 }
 ```
 
-> **⚠️ Schema v2 变更（2026-05-03）**
-> 1. 新增双视角字段（display_* / search_*）—— 同节点同行，UI 用 display，Agent 用 search
-> 2. `importance` → `salience`（语义精准化，避免与"用户感知重要度"混淆）
-> 3. **scene 从 L3 升到 L4**——scene 是跨 project 的更大语境包络
-> 4. user_profile 从 L4 → L5
-> 5. 新增 userEdited* 字段（用户改 display 不污染 search）
+## 双视角的实现：text 字段两段结构
+
+**关键约定**：物化 prompt 输出的 `text` 字段必须遵守这个结构，iOS 客户端按 `\n\n` 切。
+
+```
+{display_summary 一句 ≤ 30 字人话摘要}
+
+{search_text 详细内容，含所有数字/决策/实体/时间锚点}
+```
+
+**示例**：
+
+```
+续航 38h，离 50h 目标差 12h
+
+当前续航 38 小时，距 50 小时目标差 12 小时。林啸计划把心率上报频率从 1Hz 降到 0.2Hz，预计省 18%，明天测试验证。
+```
+
+**iOS 渲染规则**：
+- Memory feed 一行扫描 → `text.split("\n\n")[0]`（第一段，30 字内）
+- 详情页全文 → `text` 完整内容
+- title → 直接显示
+
+**Agent fetch 规则**：
+- embedding 全文 `text`（不需要单独的 search_summary 字段）
+- 倒排索引按 `entity_ids`
+- importance 决定 context packaging 优先级
+
+**降级策略**（如果 LLM 没遵守结构）：
+- iOS 端 split("\n\n") 只有一段 → 截前 30 字作为 summary
 
 ## API 调用
 
@@ -84,49 +101,44 @@ enum MemoryLayer: String, Codable {
 
 > ⚠️ `/admin/memory`、`/ops/memory`、`/agent/memory`、`/internal/memory` 是后端 / Agent 用，iOS 不直接调。
 
-## 节点物化关系（M3 prompt 决定形态）· v2 双视角
+## 用户编辑
+
+用户在 Memory tab 改 title 或 text → 走 `PATCH /internal/memory/tree/nodes/{node_id}/text` API（后端文档已存在）。
+不区分"AI 版本 vs 用户版本"——用户改了就直接覆盖（最小改动原则）。
+
+## 节点物化链
 
 ```
-                                          ┌── search 字段 ──→ Agent fetch pipeline
-所有 layer 的节点都有双视角字段 ─────────┤
-                                          └── display 字段 ──→ iOS Memory tab UI
-
-物化链：
-
-L0 raw  ──────────────────────────────────────────  #1 raw → description
-              │
-              ▼
-L1 description (单条可检索原子) ────────────────────  #2 description → episode
-              │
-              ▼
-L2 episode    (一段事件，时间窗 ≤ 1 天)  ───────────  #3 episode → project
-              │
-              ▼
-L3 project    (主题项目，"在做什么")    ───────────  #4 project → scene
-              │
-              ▼
-L4 scene      (语境包络，"在哪个上下文里"，可跨多个 project)
-              │
-              ▼
-L5 user_profile (从 episode + project + scene 综合抽取)  #5
+L0 raw  ──────────────────  #1 raw → description
+       │
+       ▼
+L1 description           ──  #2 description → episode
+       │
+       ▼
+L2 episode               ──  #3 episode → project
+       │
+       ▼
+L3 project               ──  #4 project → scene
+       │
+       ▼
+L4 scene
+       │
+       ▼
+L5 user_profile          ──  #5 提取自 episode + project + scene
+```
 
 * episode 同时挂到 project（主题归属）和 scene（语境包络）
-* scene 比 project 更宽：一个 "和林啸的所有对话" scene 可以包含
-  ["Ring v1 硬件", "iOS App MVP"] 等多个 project
-```
+* scene 比 project 更宽：一个 scene 可包含多个 project
+* **生产现状**：scene 实际只有 Work / Life 两个 phase（v0.5 范围）
 
-## 用户视角 vs Agent 视角
+## 历史变更
 
-| 字段 | 给谁看 | 谁写 | 谁可改 |
-|---|---|---|---|
-| displayTitle / displaySummary | 用户 (Memory tab) | LLM 物化时 | 用户可编辑 (写到 userEdited*) |
-| searchSummary / searchKeywords | Agent fetch | LLM 物化时 | 系统自动，用户不改 |
-| salience | Agent context packaging | LLM 物化时 | 系统自动 |
-| entityIds / parentNodeIds | 双方 | 系统结构 | 系统自动 |
-
-每一层物化由一个 prompt 完成，prompt 文件路径在 frontmatter `related-prompts` 列出。
+- v1 (2026-05-02): 初版
+- v2 (2026-05-03): 引入 display_* / search_* 双视角字段（已废弃，未对齐后端）
+- **v1.5 (2026-05-06)**: 回退到对齐后端现有字段，双视角通过 text 字段两段结构实现，零新字段
 
 ## TODO
 
-- [ ] 校对 entity / importance / recencyScore 字段是否实际存在
+- [ ] 跟林啸验证 title / importance / entityIds 字段实际存在
+- [ ] 跟林啸验证 PATCH /internal/memory/tree/nodes/{node_id}/text 接口
 - [ ] 列出 `/memory/tree/search` 的请求体 schema

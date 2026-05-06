@@ -1,9 +1,9 @@
 ---
 name: memory-tree-description-to-episode
-version: 1
+version: 3
 owner: 明明
 status: draft
-last-updated: 2026-05-02
+last-updated: 2026-05-06
 backend-service: memory-tree-worker
 related-issue: MON-5
 related-data-schema: docs/data/memory-tree-node.md (layer=episode)
@@ -17,56 +17,67 @@ related-data-schema: docs/data/memory-tree-node.md (layer=episode)
 ## 输入契约
 ```typescript
 {
-  candidate_descriptions: Array<{ id, title, text, created_at, entities }>,
-  existing_episodes_summary: Array<{ id, title, time_range, entity_overlap }>,
+  candidate_descriptions: Array<{
+    id: string,
+    title: string,           // 短标题
+    text: string,            // 两段结构（按 \n\n 分隔）
+    created_at: string,
+    entities: string[],
+  }>,
+  existing_episodes_summary: Array<{
+    id: string,
+    title: string,
+    time_range: string,
+    entity_overlap: string[]
+  }>,
   user_timezone: string,
 }
 ```
 
-## 输出契约（v2 双视角）
+## 输出契约（v3 对齐后端 — 零新字段）
 ```typescript
 {
   episode_actions: Array<
     | {
         kind: "create",
-        // display 字段（给用户）
-        display_title: string,        // ≤ 12 字 "5/3 周例会"
-        display_summary: string,      // ≤ 30 字 "硬件 + 招聘 + 设计"
-        // search 字段（给 Agent）
-        search_summary: string,       // ≤ 80 字，主题密集
-        search_keywords: string[],    // 实体 + 主题
-        // 结构
+        title: string,            // ≤ 12 字 "5/3 周例会"
+        text: string,             // 两段结构（按 \n\n 分隔）
+                                  //   第一段 ≤ 30 字: 一行摘要"硬件 + 招聘 + 设计"
+                                  //   第二段: 详细 search 内容（含人名/数字/决策）
         description_ids: string[],
         time_range: string,
         entity_ids: string[],
-        salience: number,
+        importance: number,
       }
     | { kind: "extend", episode_id: string, description_ids: string[] }
     | { kind: "skip", description_id: string, reason: string }
   >,
-  schema_version: 2,
+  schema_version: 1,
 }
 ```
 
 ## System Prompt
-> TODO（明明 v2）。draft：
+
+> 你是 Memory 树的事件聚合器。把若干 description 聚合成 episode。
+> 每个 episode 输出 4 个字段：title / text / importance / entity_ids。
 >
-> 你是 Memory 树的事件聚合器。把若干 description 聚合成 episode，每个 episode 有双视角标题：
+> 【title — ≤ 12 字】
+> 时间锚 + 主类型："5/3 周例会"、"5/2 BLE 讨论"
+> 不要塞主题词，那些放 text 第一段
 >
-> 【display_title】≤ 12 字
-> - 时间锚 + 主类型，"5/3 周例会"、"5/2 BLE 讨论"、"4/30 设计 review"
-> - 不要塞主题词，那些放 display_summary 里
+> 【text — 两段结构（必须 \n\n 分隔）】
 >
-> 【display_summary】≤ 30 字
-> - 用户翻 Memory tab 时的"一行摘要"，温和、人感
-> - "硬件 + 招聘 + 设计"、"心率上报频率优化"
+> 第一段 ≤ 30 字：用户翻 Memory feed 时的"一行摘要"
+> 例: "硬件 + 招聘 + 设计"、"心率上报频率优化"
 >
-> 【search_summary】≤ 80 字
-> - 给 Agent 检索用，信息密集，包含所有人名/项目/数字/决策关键词
-> - "续航 38h vs 50h 目标，林啸提议 BLE 心率 1Hz→0.2Hz 省 18%；面试 Sean 推荐的 iOS 候选人..."
+> 空行
 >
-> 【search_keywords】数组形式
-> - 实体名 + 主题词 + 数字关键值（用于倒排索引）
+> 第二段：信息密集详细内容
+> - 包含所有人名/项目/数字/决策关键词（给 Agent embedding）
+> - 例: "续航 38h vs 50h 目标，林啸提议 BLE 心率 1Hz→0.2Hz 省 18%；面试 Sean 推荐的 iOS 候选人..."
+>
+> 【importance — 0-1】
+> 综合 description 的 importance 和 episode 整体决策密度
 >
 > 【拆/合 决策】
 > - 时间窗 ≤ 1 天硬上限，跨天延续 → kind=extend 已有 episode
@@ -87,10 +98,10 @@ related-data-schema: docs/data/memory-tree-node.md (layer=episode)
 ```json
 {
   "candidate_descriptions": [
-    { "id": "d_001", "display_title": "续航讨论", "search_text": "当前 38h，目标 50h。林啸提议 1Hz→0.2Hz 省 18%。", "created_at": "2026-05-03 09:15", "entities": ["林啸", "续航"] },
-    { "id": "d_002", "display_title": "iOS 候选人面试", "search_text": "周三 15:00，林啸参加。", "created_at": "2026-05-03 09:18", "entities": ["Sean", "林啸"] },
-    { "id": "d_003", "display_title": "周末家庭", "search_text": "周六深圳湾，全天不在线。", "created_at": "2026-05-03 09:22", "entities": ["深圳湾"] },
-    { "id": "d_004", "display_title": "设计稿 review", "search_text": "下午 4 点 Sean 拉一次。", "created_at": "2026-05-03 09:25", "entities": ["Sean"] }
+    { "id": "d_001", "title": "续航讨论", "text": "续航 38h，离 50h 目标差 12h\n\n当前 38h，目标 50h。林啸提议 1Hz→0.2Hz 省 18%。", "created_at": "2026-05-03 09:15", "entities": ["林啸", "续航"] },
+    { "id": "d_002", "title": "iOS 候选人面试", "text": "周三下午 3 点，林啸一起\n\n周三 15:00，林啸参加。", "created_at": "2026-05-03 09:18", "entities": ["Sean", "林啸"] },
+    { "id": "d_003", "title": "周末家庭", "text": "周六深圳湾，全天不在线\n\n周六深圳湾，全天不在线。", "created_at": "2026-05-03 09:22", "entities": ["深圳湾"] },
+    { "id": "d_004", "title": "设计稿 review", "text": "下午 4 点 Sean 拉一次\n\n下午 4 点 Sean 拉一次设计稿 review。", "created_at": "2026-05-03 09:25", "entities": ["Sean"] }
   ],
   "existing_episodes_summary": []
 }
@@ -102,14 +113,12 @@ related-data-schema: docs/data/memory-tree-node.md (layer=episode)
   "episode_actions": [
     {
       "kind": "create",
-      "display_title": "5/3 周例会",
-      "display_summary": "硬件 + 招聘 + 设计",
-      "search_summary": "续航 38h vs 50h 目标，林啸提议 BLE 心率 1Hz→0.2Hz 省 18%；Sean 推荐 iOS 候选人周三 15:00 面试；下午 4 点设计稿 review",
-      "search_keywords": ["续航", "BLE", "1Hz→0.2Hz", "林啸", "Sean", "iOS 候选人", "周三 15:00", "设计稿"],
+      "title": "5/3 周例会",
+      "text": "硬件 + 招聘 + 设计\n\n续航 38h vs 50h 目标，林啸提议 BLE 心率 1Hz→0.2Hz 省 18%；Sean 推荐 iOS 候选人周三 15:00 面试；下午 4 点设计稿 review",
       "description_ids": ["d_001", "d_002", "d_004"],
       "time_range": "2026-05-03 09:15~09:25",
       "entity_ids": ["林啸", "Sean"],
-      "salience": 0.82
+      "importance": 0.82
     },
     {
       "kind": "skip",
@@ -117,11 +126,11 @@ related-data-schema: docs/data/memory-tree-node.md (layer=episode)
       "reason": "主题为个人家庭安排，与会议工作主线无关。留待 Life scene 单独处理。"
     }
   ],
-  "schema_version": 2
+  "schema_version": 1
 }
 ```
 
-**为什么这样**：3 条工作主题（d_001, d_002, d_004）同时间窗 + 实体重合（林啸/Sean）→ create 一个 episode。d_003 是个人主题切换 → skip 而不是合进来（避免污染工作 episode 的语义纯度）。
+**为什么这样**：3 条工作主题（d_001, d_002, d_004）同时间窗 + 实体重合 → create 一个 episode。d_003 是个人主题切换 → skip。
 
 ---
 
@@ -131,10 +140,10 @@ related-data-schema: docs/data/memory-tree-node.md (layer=episode)
 ```json
 {
   "candidate_descriptions": [
-    { "id": "d_010", "display_title": "续航实测", "search_text": "0.2Hz 实测省 21%，超预期 3 个百分点。", "created_at": "2026-05-04 10:00", "entities": ["林啸", "续航", "BLE"] }
+    { "id": "d_010", "title": "续航实测", "text": "实测省 21% 超预期\n\n0.2Hz 实测省 21%，超预期 3 个百分点。", "created_at": "2026-05-04 10:00", "entities": ["林啸", "续航", "BLE"] }
   ],
   "existing_episodes_summary": [
-    { "id": "ep_5_3_dev", "display_title": "5/3 续航优化讨论", "time_range": "2026-05-03 09:00~10:00", "entity_overlap": ["林啸", "BLE", "续航"] }
+    { "id": "ep_5_3_dev", "title": "5/3 续航优化讨论", "time_range": "2026-05-03 09:00~10:00", "entity_overlap": ["林啸", "BLE", "续航"] }
   ]
 }
 ```
@@ -149,11 +158,11 @@ related-data-schema: docs/data/memory-tree-node.md (layer=episode)
       "description_ids": ["d_010"]
     }
   ],
-  "schema_version": 2
+  "schema_version": 1
 }
 ```
 
-**为什么 extend 不 create**：实体 100% 重合（林啸/BLE/续航），且是前一天讨论的**直接结果验证**——主题连续。即便跨天，也归属同一 episode。
+**为什么 extend**：实体 100% 重合 + 是前一天讨论的直接结果验证 → 主题连续。
 
 ---
 
@@ -163,8 +172,8 @@ related-data-schema: docs/data/memory-tree-node.md (layer=episode)
 ```json
 {
   "candidate_descriptions": [
-    { "id": "d_021", "display_title": "心情快照灵感", "search_text": "戒指主动按一下记录此刻感觉。", "created_at": "2026-05-03 11:20", "entities": ["心情快照", "戒指交互"] },
-    { "id": "d_022", "display_title": "晨跑决心", "search_text": "从今天起每天 6:30 跑 3km。", "created_at": "2026-05-03 06:30", "entities": ["晨跑", "健康"] }
+    { "id": "d_021", "title": "心情快照灵感", "text": "用戒指按一下记录此刻感觉\n\n戒指主动按一下记录此刻感觉。", "created_at": "2026-05-03 11:20", "entities": ["心情快照", "戒指交互"] },
+    { "id": "d_022", "title": "晨跑决心", "text": "每天 6:30 跑 3km\n\n从今天起每天 6:30 跑 3km。", "created_at": "2026-05-03 06:30", "entities": ["晨跑", "健康"] }
   ],
   "existing_episodes_summary": []
 }
@@ -176,45 +185,41 @@ related-data-schema: docs/data/memory-tree-node.md (layer=episode)
   "episode_actions": [
     {
       "kind": "create",
-      "display_title": "5/3 心情快照灵感",
-      "display_summary": "用戒指按一下记录此刻感觉",
-      "search_summary": "产品想法：Ring 增加心情快照按键，用户主动按一下记录此刻情绪。比每日健康汇总更有温度。",
-      "search_keywords": ["心情快照", "戒指交互", "产品想法", "v2"],
+      "title": "5/3 心情快照灵感",
+      "text": "用戒指按一下记录此刻感觉\n\n产品想法：Ring 增加心情快照按键，用户主动按一下记录此刻情绪。比每日健康汇总更有温度。",
       "description_ids": ["d_021"],
       "time_range": "2026-05-03 11:20",
       "entity_ids": ["心情快照", "戒指交互"],
-      "salience": 0.75
+      "importance": 0.75
     },
     {
       "kind": "create",
-      "display_title": "5/3 开始晨跑",
-      "display_summary": "每天早 6:30 跑 3km",
-      "search_summary": "明明决定从 2026-05-03 起每天早 6:30 跑 3km 作为长期健康习惯。",
-      "search_keywords": ["晨跑", "健康习惯", "6:30", "3km", "5/3 起步"],
+      "title": "5/3 开始晨跑",
+      "text": "每天早 6:30 跑 3km\n\n明明决定从 2026-05-03 起每天早 6:30 跑 3km 作为长期健康习惯。",
       "description_ids": ["d_022"],
       "time_range": "2026-05-03 06:30",
       "entity_ids": ["晨跑", "健康"],
-      "salience": 0.7
+      "importance": 0.7
     }
   ],
-  "schema_version": 2
+  "schema_version": 1
 }
 ```
 
-**为什么不合并**：虽都在 5/3 同一天，但实体完全不重合（心情快照 vs 晨跑）+ 主题完全不同（产品想法 vs 个人习惯）。**时间相邻 ≠ 应该合并**，关键是主题/实体一致性。
+**为什么不合并**：实体完全不重合 + 主题完全不同。时间相邻 ≠ 应该合并。
 
 ---
 
-### Example 4：第二天补充上下文 → extend 不 create
+### Example 4：第二天补充 → extend
 
 **Input**:
 ```json
 {
   "candidate_descriptions": [
-    { "id": "d_030", "display_title": "晨跑第 2 天", "search_text": "今天又跑了 3km，6:30 出门，状态比昨天好。", "created_at": "2026-05-04 06:30", "entities": ["晨跑"] }
+    { "id": "d_030", "title": "晨跑第 2 天", "text": "今天又跑了 3km\n\n今天又跑了 3km，6:30 出门，状态比昨天好。", "created_at": "2026-05-04 06:30", "entities": ["晨跑"] }
   ],
   "existing_episodes_summary": [
-    { "id": "ep_running_start", "display_title": "5/3 开始晨跑", "time_range": "2026-05-03 06:30", "entity_overlap": ["晨跑"] }
+    { "id": "ep_running_start", "title": "5/3 开始晨跑", "time_range": "2026-05-03 06:30", "entity_overlap": ["晨跑"] }
   ]
 }
 ```
@@ -229,24 +234,22 @@ related-data-schema: docs/data/memory-tree-node.md (layer=episode)
       "description_ids": ["d_030"]
     }
   ],
-  "schema_version": 2
+  "schema_version": 1
 }
 ```
 
-**为什么 extend**：实体重合 + 是同一习惯的连续打卡。⚠️ **但是**：这里有个长期挑战 — 如果第 30 天还在打卡，episode 里就有 30 条 description，会变臃肿。**v0.5 范围内允许 episode 长期 extend**；v0.6 需要决策"什么时候封口一个 episode 开新的"（待定的 issue）。
-
 ---
 
-### Example 5：候选 episode 都不像 → skip + 暗示 create new
+### Example 5：候选 episode 都不像 → create 新 episode
 
 **Input**:
 ```json
 {
   "candidate_descriptions": [
-    { "id": "d_040", "display_title": "Anthropic 切换决策", "search_text": "我决定从 OpenAI 改用 Anthropic。Claude prompt following 更好。", "created_at": "2026-05-03 14:00", "entities": ["Anthropic", "OpenAI", "LLM"] }
+    { "id": "d_040", "title": "Anthropic 切换决策", "text": "从 OpenAI 改用 Anthropic\n\n我决定从 OpenAI 改用 Anthropic。Claude prompt following 更好。", "created_at": "2026-05-03 14:00", "entities": ["Anthropic", "OpenAI", "LLM"] }
   ],
   "existing_episodes_summary": [
-    { "id": "ep_5_3_dev", "display_title": "5/3 续航优化", "time_range": "2026-05-03 09:00~10:00", "entity_overlap": [] }
+    { "id": "ep_5_3_dev", "title": "5/3 续航优化", "time_range": "2026-05-03 09:00~10:00", "entity_overlap": [] }
   ]
 }
 ```
@@ -257,29 +260,28 @@ related-data-schema: docs/data/memory-tree-node.md (layer=episode)
   "episode_actions": [
     {
       "kind": "create",
-      "display_title": "5/3 LLM 切到 Anthropic",
-      "display_summary": "从 OpenAI 改用 Anthropic",
-      "search_summary": "明明决定 5/3 起项目内 LLM 全部从 OpenAI 切换到 Anthropic。理由：Claude 的 prompt following 比 GPT 表现更好。",
-      "search_keywords": ["Anthropic", "OpenAI", "LLM 切换", "Claude", "prompt following", "技术决策"],
+      "title": "5/3 LLM 切到 Anthropic",
+      "text": "从 OpenAI 改用 Anthropic\n\n明明决定 5/3 起项目内 LLM 全部从 OpenAI 切换到 Anthropic。理由：Claude 的 prompt following 比 GPT 表现更好。",
       "description_ids": ["d_040"],
       "time_range": "2026-05-03 14:00",
       "entity_ids": ["Anthropic", "OpenAI", "LLM"],
-      "salience": 0.88
+      "importance": 0.88
     }
   ],
-  "schema_version": 2
+  "schema_version": 1
 }
 ```
 
-**为什么 create**：候选 episode (`ep_5_3_dev`) 实体重合 = 0（续航讨论里没出现 LLM）→ 不能 extend。salience 0.88：明确决策（"我决定"）+ 跨多个未来 project 的影响 + 命名实体。
+**为什么 create**：候选 episode 实体重合 = 0 → 不能 extend。importance 0.88：明确决策 + 跨多 project 影响。
 
 ## 边界
-- 单条 description 不归到任何 episode → kind=skip
-- 候选 episode 都不匹配 → kind=create
+- 候选 description 都 < 0.3 importance → 全部 skip
+- 一天内超过 5 个独立 episode → 提示用户"今天信息密度异常高"
 
 ## 版本历史
 - v1 (2026-05-02): 初版骨架
-- v2 (2026-05-03): 双视角字段（display_title/summary + search_summary/keywords）
+- v2 (2026-05-03): display_/search_ 双视角 — **已废弃**
+- **v3 (2026-05-06): 对齐后端 — title + text 两段结构**
 
 ## Eval
 见 `eval/description-to-episode-fixtures.md`
