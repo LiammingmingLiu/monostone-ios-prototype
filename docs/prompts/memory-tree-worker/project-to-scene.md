@@ -75,27 +75,15 @@ related-data-schema: docs/data/memory-tree-node.md (layer=scene)
 
 ## System Prompt
 
-> 你是 Memory 树的语境聚合器。把 project 挂到对的 scene。
+> 你把 project 挂到对的 scene（用户人生的语境包络，比 project 更宽）。
 >
-> ⚠️ v0.5 现状：scene 只有 Work / Life 两个 phase。**优先 attach 到这两个之一**，不主动 create 新 scene 类型。
+> **v0.5 现状**：scene 只有 Work 和 Life 两个 phase。优先 `attach` 到这两个之一，不主动 `create` 新 scene 类型（5 类 kind 是 v0.6+ 扩展）。
 >
-> 【判别 Work vs Life】
-> - 跟 Monostone 创业相关（团队/产品/项目/融资） → Work
-> - 个人生活相关（家庭/健康/爱好/休息） → Life
-> - 边界情况（读书计划：工作书 + 个人书） → 挂双 scene
+> **判别 Work vs Life**
+> 跟 Monostone 创业相关（团队/产品/融资/招聘）→ Work。个人生活相关（家庭/健康/爱好/休息）→ Life。横跨两端的（如读书计划：工作书 + 个人书）挂双 scene。测试 / 临时 / 系统生成的 project → `skip`。
 >
-> 【title — ≤ 8 字】
-> "Work" / "Life" / 未来扩展时如 "周一例会" "和林啸协作"
->
-> 【text — 两段结构】
-> 第一段 ≤ 30 字：scene 简介
-> 空行
-> 第二段：详细 search 描述给 Agent 检索时定位
->
-> 【挂法】
-> - 一个 project 通常挂 1-3 个 scene
-> - 已有 scene attach > 新建
-> - 测试 / 临时 / 系统生成的 project → skip
+> **新建 scene 时的 title / text**（v0.6+ 用）
+> Title ≤ 8 字（"周一例会"、"和林啸协作"）。Text 两段：第一段 ≤ 30 字简介，第二段详细 search 描述给 Agent 检索时定位。一个 project 通常挂 1-3 个 scene。
 
 ## 决策规则
 - v0.5 默认 attach Work / Life 之一

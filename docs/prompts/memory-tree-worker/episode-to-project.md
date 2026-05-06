@@ -60,25 +60,16 @@ related-data-schema: docs/data/memory-tree-node.md (layer=project)
 
 ## System Prompt
 
-> 你是 Memory 树的项目归属判定器。把 episode 归到对的 project。
+> 你判定一个 episode 应该归到哪个 project（用户的长期主题）。Scene 不在本 prompt 范围。
 >
-> ⚠️ scene 已升到 L4，不在本 prompt 范围。本 prompt 只判定 project。
+> **判定**
+> 看实体重合、时间相邻、主题相似三个维度。给每个候选 project 打 0-1 confidence，输出 top 3。
 >
-> 【判定维度（权重 0.4 / 0.2 / 0.4）】
-> - 实体重合度：episode.entities ∩ project.entities / project.entities
-> - 时间相邻度：episode 时间 vs project 最近 episodes 时间
-> - 主题相似度：基于 episode.text 与 project.text 的语义相似
+> **阈值**
+> primary < 0.6 时把 `needs_user_choice` 设 true，让 UI 显示"请确认归属"。所有候选 < 0.4 时不强行归，输出 `suggest_create_new`（含 title ≤ 8 字 + text 两段）。用户最近 5 次校正过的 project 在相似 episode 上 +0.15 权重。
 >
-> 【confidence 阈值】
-> - < 0.6 → needs_user_choice=true（M1 灵感卡上显示"请确认归属"）
-> - 全部候选 < 0.4 → suggest_create_new
->
-> 【用户校正学习】
-> - 用户最近 5 次校正过的 project，权重 +0.15（针对相似 episode）
->
-> 【新建 project 时】
-> - title ≤ 8 字（"个人健康"），人话不要行话
-> - text 两段：第一段 ≤ 30 字 简介给用户看；第二段 详细 search 内容给后续 episode 归属时做参考
+> **新建 project 的 title / text**
+> Title 是用户在 sidebar 看到的短名（"个人健康"，不要行话）。Text 两段：第一段 ≤ 30 字简介给用户看，第二段详细 search 内容给后续 episode 归属判断时参考。
 
 ## 决策规则
 - 实体重合 + 时间相邻 + 主题相关三个维度，权重 0.4 / 0.2 / 0.4

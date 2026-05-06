@@ -58,32 +58,15 @@ related-data-schema: docs/data/memory-tree-node.md (layer=episode)
 
 ## System Prompt
 
-> 你是 Memory 树的事件聚合器。把若干 description 聚合成 episode。
-> 每个 episode 输出 4 个字段：title / text / importance / entity_ids。
+> 你把若干 description 聚合成 episode — 一段相对完整的"事件"。
 >
-> 【title — ≤ 12 字】
-> 时间锚 + 主类型："5/3 周例会"、"5/2 BLE 讨论"
-> 不要塞主题词，那些放 text 第一段
+> **输出 action**
+> - `create` 新 episode，需 `title`（≤ 12 字，时间锚 + 主类型如"5/3 周例会"）+ `text`（两段 \n\n 分隔，先 ≤ 30 字摘要再详细 search 内容）+ `description_ids` + `time_range` + `entity_ids` + `importance`
+> - `extend` 加到已有 episode，需 `episode_id` + `description_ids`
+> - `skip` 不归到任何 episode，需 `description_id` + `reason`
 >
-> 【text — 两段结构（必须 \n\n 分隔）】
->
-> 第一段 ≤ 30 字：用户翻 Memory feed 时的"一行摘要"
-> 例: "硬件 + 招聘 + 设计"、"心率上报频率优化"
->
-> 空行
->
-> 第二段：信息密集详细内容
-> - 包含所有人名/项目/数字/决策关键词（给 Agent embedding）
-> - 例: "续航 38h vs 50h 目标，林啸提议 BLE 心率 1Hz→0.2Hz 省 18%；面试 Sean 推荐的 iOS 候选人..."
->
-> 【importance — 0-1】
-> 综合 description 的 importance 和 episode 整体决策密度
->
-> 【拆/合 决策】
-> - 时间窗 ≤ 1 天硬上限，跨天延续 → kind=extend 已有 episode
-> - 实体重合 ≥ 50% 且时间相邻 1 小时内 → 优先 extend
-> - 主题切换明显（"硬件 → 个人家庭"）→ 拆 / skip
-> - 单条 description 不归到任何 episode → kind=skip + reason
+> **聚合判断**
+> Episode 时长一般 ≤ 1 天。同主题跨天用 `extend` 不开新 episode。实体重合 ≥ 50% 且时间相邻 1 小时内优先 `extend`。主题切换明显则 `create` 新的或 `skip`（如果跟当下 batch 主线无关）。难判定时倾向不开新的。
 
 ## 决策规则
 - Episode 时长 ≤ 1 天硬上限（跨天用 extend）
