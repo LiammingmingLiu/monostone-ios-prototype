@@ -98,6 +98,55 @@ category: toast
 | `command.failed` | 失败 · 点击重试 | task.status = failed |
 | `command.context_overflow` | … 还有 {N} 项 › | 上下文 > 4 项时的省略行 |
 
+## Live Activity / 锁屏 / 桌面小组件 / Push（M2 · MON-19）
+
+> Live Activity / 灵动岛 / 锁屏文案 ≤14 字硬约束（pill 显示空间）。
+> needs_input 中断走 **C3 双通道**：push 一次 + LA 文案换暖黄 + 锁屏切暖黄。
+> failed 走 **D3 双层**：head 一行简短 reason + 产出区完整 markdown 说明。
+
+### 灵动岛 compact (pill, ≤14 字)
+
+| key | 文案 | 状态点 |
+|---|---|---|
+| `la.compact.pending` | 排队中 · {title} | 橙 pulse |
+| `la.compact.executing` | 执行中 · {title} | 橙 pulse + timer |
+| `la.compact.needs_input` | 需要确认 · {title} | 暖黄 `#d4a868` 静止 |
+| `la.compact.done` | 已完成 · {title} | 橙静止（5s 后收起） |
+| `la.compact.failed` | 失败 · {title} | 红 `#d4574a` 静止 |
+
+### 灵动岛 expanded · 状态行
+
+| key | 文案 |
+|---|---|
+| `la.expanded.executing` | 执行中 · 还剩 {ETA} |
+| `la.expanded.executing_no_eta` | 执行中 |
+| `la.expanded.needs_input` | 需要你确认（暖黄 + `[拒绝] [允许]` 按钮） |
+| `la.expanded.done` | 已完成 |
+| `la.expanded.failed` | {failure_summary} ≤14 字 |
+
+### Push notification (needs_input 触发，C3 一次到位)
+
+| key | 文案 | 备注 |
+|---|---|---|
+| `push.needs_input` | 需要你确认 · {task title} | ≤30 字，不连环 |
+
+### 锁屏 widget 状态文案
+
+| key | 文案 | 颜色 |
+|---|---|---|
+| `lock.executing` | 执行中 · 还剩 {ETA} | 灰白 |
+| `lock.needs_input` | 需要你确认 · 点击查看 | 暖黄 `#f0c982` |
+| `lock.failed` | {failure_summary} | 红 `#ff8b8b` |
+
+### 桌面小组件 (Home Widget)
+
+| key | 文案 | 触发 |
+|---|---|---|
+| `widget.title.idle` | 今天 | 默认 |
+| `widget.title.recording` | 录音中 | ringtone session 录音中 |
+| `widget.status.recording` | Mono Working · {timer} | 录音时左上角 |
+| `widget.more_events` | {N} 件事 › | 当天日程总数链接 |
+
 ## 日程 / Smart Calendar（M2 · MON-17）
 
 > v0.5 不存在 todo / 待办类型；语音里"提醒我 X 时 Y"全部归"日程"。日程不只是日历事件，是 Smart Calendar（带 Smart Brief）。

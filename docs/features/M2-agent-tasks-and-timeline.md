@@ -449,8 +449,107 @@ var showSteps: Bool {
 | `cal-1` | 朋友生日（无冲突，社交场景） | Smart Brief 完整形态 — 关于人的 context + 准备建议（送礼） |
 | `cal-2` | 上海见敦敏（**有冲突**，工作场景） | 红色冲突顶段 + 工作 brief（带 deck + 偏好提醒） |
 
-### 4.3 短录音处理中卡片
-- 状态机: `pending` → `executing` → `done` / `failed` / `needs_input`
+### 4.3 Command 进度展示 · Live Activity / 锁屏 / 桌面小组件（MON-19）
+
+**状态机**: `pending` → `executing` → `done` / `failed` / `needs_input`
+
+**3 个外置展示面**（在 ux05 prototype 中以 mock 面板形式放在手机左右两侧）：
+
+#### 4.3.1 Live Activity / 灵动岛（左侧面板）
+
+| 形态 | 出现场景 | 内容 |
+|---|---|---|
+| **compact (pill)** | 默认收起态，灵动岛右侧 | `M` logo + 状态文本 (≤14 字) + timer (executing 时) + 状态点（橙色 pulse / 暖黄静止 / 红色） |
+| **expanded** | 用户长按灵动岛 | logo + 标题 (task title 截断 ≤16 字) + 状态行 + 进度条（executing）/ 拒绝/允许 按钮（needs_input） |
+
+**5 状态文案（≤14 字硬约束）**：
+
+| status | compact 文本 | trail dot | expanded 状态行 |
+|---|---|---|---|
+| `pending` | 排队中 · {title} | 橙 pulse | 排队中 · 即将开始 |
+| `executing` | 执行中 · {title} | 橙 pulse | 执行中 · 还剩 {ETA} |
+| `needs_input` | 需要确认 · {title} | 暖黄静止 `#d4a868` | 需要你确认（黄色） + `[拒绝] [允许]` 按钮 |
+| `done` | 已完成 · {title} | 橙静止 | 已完成（5s 后自动收起） |
+| `failed` | 失败 · {title} | 红静止 `#d4574a` | {failure_summary} ≤14 字 |
+
+> {title} 自动截断到剩余空间能容纳的字数（一般 ≤8 字 / pill 显示能力）
+
+#### 4.3.2 锁屏 widget
+
+iOS 锁屏顶部 banner widget，wallpaper 半透明遮罩。
+
+| 状态 | 视觉 |
+|---|---|
+| `executing` | 灰白文字 + pulse 点 + ETA |
+| `needs_input` | **暖黄文字** `#f0c982` + 静止点 + "需要你确认 · 点击查看" |
+| `failed` | **红色文字** `#ff8b8b` + 静止点 + 简短 reason |
+
+点击 → deep link 进 detail 页**顶部**（F1 决策：用户从原话 / 上下文读到产出再决定）
+
+#### 4.3.3 桌面小组件 (Home Widget) · 4×2 暗色
+
+**基于明明设计稿**（2026-05-06）。WidgetKit 实现，**点击交互生效**：
+
+```
+┌─────────────────────────────────────┐
+│ 5 月 6 日 · 周三       日程         │
+│ 今天                   2 件事       │
+├─────────────────────────────────────┤
+│ ┌──────────────┐  ┌──────────────┐ │
+│ │给敦敏邮件     │  │15:00–16:00   │ │
+│ │已完成·1h前   │  │Memory 评审    │ │
+│ ├──────────────┤  │会议室 A       │ │
+│ │Sandbar↗     │  ├──────────────┤ │
+│ │执行中·3min  │  │19:30          │ │
+│ └──────────────┘  │和 Marshall    │ │
+│                   │外滩茂悦       │ │
+│                   └──────────────┘ │
+│ ········· 5 件事 › │
+└─────────────────────────────────────┘
+```
+
+**可点元素**：
+- 左列 task 卡 → 进对应 cmd / cal detail
+- 右列日程行 → 进 cal detail
+- "5 件事 ›" → 跳日历 tab 看全部
+- 录音中状态时左上角显示 `Mono Working · 0:24` + `Recording` 大字 + 红 pulse dot
+
+**配色**（暗色 widget 故意和 app 主体暖白形成对比，iOS home screen 上更突出）：
+- bg `#0d0d0d`
+- 行卡片 bg `rgba(255,255,255,0.05)`
+- 日程时间色 `#f0c982` 暖黄
+- 录音 dot `#ff5040`
+
+#### 4.3.4 needs_input 中断 → 恢复链路（C3 决策）
+
+用户**没在 app 里**时进入 needs_input 怎么提醒：
+
+1. **Push notification** 一次：`需要你确认 · {task title}`（≤30 字硬限）
+2. **同时** Live Activity 文案换成 `需要确认 · {title}` + 暖黄点
+3. **同时** 锁屏 widget 切到 needs_input 视觉（暖黄文字）
+4. 用户点任何一处 → deep link 进 detail 顶部 → 看上下文 / 产出 → 拒绝 / 允许
+5. 不连环 push（一次到位，不打扰）
+
+#### 4.3.5 failed 的"为什么 + 怎么办"（D3 决策）
+
+两层展示：
+- **head 一行简短 reason**（≤14 字）：`邮件服务断开 · 检查网络` / `需要重新登录 · 点击` 等。来自 task.failure_summary
+- **产出区完整说明**（markdown）：来自 task.failure_detail_markdown，可以解释具体哪步失败 + 建议措施
+- **底部按钮**：`[拒绝]` `[重试 (primary)]`（同 MON-16 锁定）
+
+#### 4.3.d 后端依赖
+
+| 项 | 状态 | 备注 |
+|---|---|---|
+| task status 5 态字段 | ✅ 现有 `agent-orchestrator-service` | — |
+| `needs_input` 来自 confirmation pending | ✅ 现有 | — |
+| **task 带 `failure_summary` (≤14 字) + `failure_detail_markdown` 字段** | ⚠️ 林啸确认现状是否已输出 | 林啸 |
+| iOS ActivityKit (Live Activity) 集成 | ⚠️ iOS 端工作 | 林啸 (iOS) |
+| iOS WidgetKit (桌面小组件) 集成 | ⚠️ iOS 端工作 | 林啸 (iOS) |
+| Push notification (needs_input 触发) | ⚠️ iOS 端 + APNs | 林啸 (iOS) |
+
+### 4.4 inline chat（command 卡内）
+- 关系: 是 `/agent/tasks/{id}/turn` 的简化入口；不和 AgentView 主线程合并
 
 ### 4.4 inline chat（command 卡内）
 - 关系: 是 `/agent/tasks/{id}/turn` 的简化入口；不和 AgentView 主线程合并
