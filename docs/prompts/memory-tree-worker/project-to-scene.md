@@ -1,6 +1,6 @@
 ---
 name: memory-tree-project-to-scene
-version: 3
+version: 4
 owner: 明明
 status: draft
 last-updated: 2026-05-06
@@ -12,14 +12,19 @@ related-data-schema: docs/data/memory-tree-node.md (layer=scene)
 # memory-tree-worker · project → scene
 
 ## 用途
-**Scene 是 L4，比 L3 project 更宽的语境包络**。把若干 project 聚合到 scene。
+**Scene 是 L4，比 L3 project 更宽的语境包络**。把 project 挂到对的 scene。
 
 - **Project = "在做什么"**（Monostone Ring v1、iOS App MVP、GTM）
-- **Scene = "在哪个上下文里做"**（Work / Life）
+- **Scene = "在哪个上下文里做"**（Work、Life，或用户自定义的更多）
 
-⚠️ **生产现状**：当前后端实际跑的 scene 只有 **Work** 和 **Life** 两个 phase。
-本 prompt 实际行为 = attach 到 Work / Life 之一。
-5 类 kind（time / location / topic / person / phase）是未来扩展（v0.6+），v0.5 范围内默认走 phase。
+## 关键产品决策
+
+**Scene 列表由用户自己管理**：
+- 默认 2 个：`Work`（工作 / 主业）和 `Life`（个人生活）
+- 用户在「我」tab 可自由增减（增 Side Hustle、删 Life、重命名等）—— **没有数量上限**
+- AI **不主动 create 新 scene** —— 用户控制人生大块的命名权
+
+→ 本 prompt 只做**归属判断**：在 existing_scenes 列表里挑一个或多个 attach，或 skip。
 
 ## 输入契约
 ```typescript
@@ -33,62 +38,44 @@ related-data-schema: docs/data/memory-tree-node.md (layer=scene)
   },
   existing_scenes: Array<{
     id: string,
-    title: string,                 // "Work" / "Life" / 等
-    text: string,                  // 两段结构（第一段=简介, 第二段=详细给 Agent 检索用）
-    kind: "time" | "location" | "topic" | "person" | "phase",
+    title: string,                 // "Work" / "Life" / 用户自定义
+    text: string,                  // 两段结构（第一段=简介, 第二段=详细判别描述）
     contained_project_ids: string[],
   }>,
   user_timezone: string,
 }
 ```
 
-## 输出契约（v3 对齐后端 — 零新字段）
+## 输出契约
 ```typescript
 {
   scene_actions: Array<
     | { kind: "attach", scene_id: string, reason: string }
-    | {
-        kind: "create",
-        scene_kind: "time" | "location" | "topic" | "person" | "phase",
-        title: string,             // ≤ 8 字 "周一例会" "和林啸协作"
-        text: string,              // 两段结构（第一段=简介给用户，第二段=详细给 Agent）
-        recurrence_pattern?: string,
-        location?: string,
-        topic?: string,
-        person_id?: string,
-        reason: string,
-      }
     | { kind: "skip", reason: string }
   >,
   schema_version: 1,
 }
 ```
 
-## Scene 维度（5 种 kind）
-- **phase** — 人生 / 业务阶段（Work / Life）⭐ v0.5 默认走这个
-- **time** — 周期性时间（"周一例会"）— v0.6+
-- **location** — 地理空间（"深圳湾办公室"）— v0.6+
-- **topic** — 主题语境（"健康习惯探索"）— v0.6+
-- **person** — 围绕特定人（"和林啸协作"）— v0.6+
-
-> 一个 project 可同时挂多个 scene（横切）。
+> 一个 project 可同时 attach 到多个 scene（横切，跨 Work + Life 等）。
 
 ## System Prompt
 
 > 你把 project 挂到对的 scene（用户人生的语境包络，比 project 更宽）。
 >
-> **v0.5 现状**：scene 只有 Work 和 Life 两个 phase。优先 `attach` 到这两个之一，不主动 `create` 新 scene 类型（5 类 kind 是 v0.6+ 扩展）。
+> **输出**
+> - `attach` 到一个或多个已有 scene
+> - `skip` 没有合适候选（测试性 / 临时 project）
 >
-> **判别 Work vs Life**
-> 跟 Monostone 创业相关（团队/产品/融资/招聘）→ Work。个人生活相关（家庭/健康/爱好/休息）→ Life。横跨两端的（如读书计划：工作书 + 个人书）挂双 scene。测试 / 临时 / 系统生成的 project → `skip`。
+> **不要 create**。Scene 列表由用户在「我」tab 自己管理，AI 只判定归属。
 >
-> **新建 scene 时的 title / text**（v0.6+ 用）
-> Title ≤ 8 字（"周一例会"、"和林啸协作"）。Text 两段：第一段 ≤ 30 字简介，第二段详细 search 描述给 Agent 检索时定位。一个 project 通常挂 1-3 个 scene。
+> **判别**
+> 读每个 existing scene 的 title 和 text 描述，结合 project 的实体和主题判断。默认两类：跟创业 / 工作产出相关挂 Work，跟家庭 / 健康 / 爱好相关挂 Life。横跨两端（如读书计划同时含工作书和个人书）attach 多个。用户自定义的其他 scene（如 Side Hustle）按其 text 描述判断。测试 / 临时 / 系统生成的 project → skip。
 
 ## 决策规则
-- v0.5 默认 attach Work / Life 之一
-- 灰色地带（横跨工作和生活） → 挂双 scene
-- 测试性质 project → skip
+- AI 只 attach / skip，不 create
+- 横跨多个 scene → 多个 attach（数组多项）
+- 没有合适候选 → skip + reason
 
 ## Few-shot
 
@@ -104,8 +91,8 @@ related-data-schema: docs/data/memory-tree-node.md (layer=scene)
     "entity_ids": ["林啸", "续航", "BLE"]
   },
   "existing_scenes": [
-    { "id": "sc_phase_work", "title": "Work", "text": "工作语境\n\n明明的工作上下文：Monostone 创业相关所有项目", "kind": "phase", "contained_project_ids": ["proj_growth", "proj_app"] },
-    { "id": "sc_phase_life", "title": "Life", "text": "生活语境\n\n明明的个人生活：家庭、健康、爱好", "kind": "phase", "contained_project_ids": [] }
+    { "id": "sc_work", "title": "Work", "text": "工作语境\n\n明明的工作上下文：Monostone 创业、团队、产品、融资", "contained_project_ids": ["proj_growth", "proj_app"] },
+    { "id": "sc_life", "title": "Life", "text": "生活语境\n\n明明的个人生活：家庭、健康、爱好", "contained_project_ids": [] }
   ]
 }
 ```
@@ -114,11 +101,7 @@ related-data-schema: docs/data/memory-tree-node.md (layer=scene)
 ```json
 {
   "scene_actions": [
-    {
-      "kind": "attach",
-      "scene_id": "sc_phase_work",
-      "reason": "Ring v1 是 Monostone 创业核心产品，明确属于 Work phase scene"
-    }
+    { "kind": "attach", "scene_id": "sc_work", "reason": "Ring v1 是 Monostone 创业核心产品，明确属于工作语境" }
   ],
   "schema_version": 1
 }
@@ -134,12 +117,12 @@ related-data-schema: docs/data/memory-tree-node.md (layer=scene)
   "project": {
     "id": "proj_health",
     "title": "个人健康",
-    "text": "晨跑/运动/饮食习惯\n\n晨跑/运动/饮食/睡眠等长期健康习惯跟踪",
+    "text": "晨跑/运动/饮食\n\n晨跑/运动/饮食习惯跟踪",
     "entity_ids": ["晨跑", "健康", "运动"]
   },
   "existing_scenes": [
-    { "id": "sc_phase_work", "title": "Work", "text": "工作\n\n工作", "kind": "phase", "contained_project_ids": ["proj_ring_v1", "proj_app"] },
-    { "id": "sc_phase_life", "title": "Life", "text": "生活\n\n生活", "kind": "phase", "contained_project_ids": [] }
+    { "id": "sc_work", "title": "Work", "text": "工作\n\n工作", "contained_project_ids": ["proj_ring_v1"] },
+    { "id": "sc_life", "title": "Life", "text": "生活\n\n生活", "contained_project_ids": [] }
   ]
 }
 ```
@@ -148,11 +131,7 @@ related-data-schema: docs/data/memory-tree-node.md (layer=scene)
 ```json
 {
   "scene_actions": [
-    {
-      "kind": "attach",
-      "scene_id": "sc_phase_life",
-      "reason": "个人健康习惯属于个人生活范畴，挂到 Life phase scene"
-    }
+    { "kind": "attach", "scene_id": "sc_life", "reason": "个人健康习惯属于生活语境" }
   ],
   "schema_version": 1
 }
@@ -160,7 +139,7 @@ related-data-schema: docs/data/memory-tree-node.md (layer=scene)
 
 ---
 
-### Example 3：跨工作/生活的灰色地带 → 都挂
+### Example 3：横跨两端 → 挂双 scene
 
 **Input**:
 ```json
@@ -172,8 +151,8 @@ related-data-schema: docs/data/memory-tree-node.md (layer=scene)
     "entity_ids": ["读书", "学习"]
   },
   "existing_scenes": [
-    { "id": "sc_phase_work", "title": "Work", "text": "工作\n\n工作", "kind": "phase", "contained_project_ids": [] },
-    { "id": "sc_phase_life", "title": "Life", "text": "生活\n\n生活", "kind": "phase", "contained_project_ids": [] }
+    { "id": "sc_work", "title": "Work", "text": "工作\n\n工作", "contained_project_ids": [] },
+    { "id": "sc_life", "title": "Life", "text": "生活\n\n生活", "contained_project_ids": [] }
   ]
 }
 ```
@@ -182,16 +161,8 @@ related-data-schema: docs/data/memory-tree-node.md (layer=scene)
 ```json
 {
   "scene_actions": [
-    {
-      "kind": "attach",
-      "scene_id": "sc_phase_work",
-      "reason": "工作相关读书（产品/管理书）属于 Work"
-    },
-    {
-      "kind": "attach",
-      "scene_id": "sc_phase_life",
-      "reason": "个人读书（哲学/小说）属于 Life。读书计划本身横跨两端"
-    }
+    { "kind": "attach", "scene_id": "sc_work", "reason": "工作相关读书（产品/管理书）属于 Work" },
+    { "kind": "attach", "scene_id": "sc_life", "reason": "个人读书（哲学/小说）属于 Life" }
   ],
   "schema_version": 1
 }
@@ -199,20 +170,21 @@ related-data-schema: docs/data/memory-tree-node.md (layer=scene)
 
 ---
 
-### Example 4：保守路径，不主动建 topic scene
+### Example 4：用户自定义 Side scene → attach Side
 
 **Input**:
 ```json
 {
   "project": {
-    "id": "proj_v2_planning",
-    "title": "Ring v2 规划",
-    "text": "下一代形态探索\n\nRing 下一代形态探索：可能形态、关键约束、技术方向",
-    "entity_ids": ["v2", "形态", "硬件演进"]
+    "id": "proj_blog",
+    "title": "技术博客",
+    "text": "周末写 1 篇\n\n每周末写一篇技术博客，内容是 Monostone 工程笔记或行业观察",
+    "entity_ids": ["博客", "写作"]
   },
   "existing_scenes": [
-    { "id": "sc_phase_work", "title": "Work", "text": "工作\n\n工作", "kind": "phase", "contained_project_ids": ["proj_ring_v1", "proj_app"] },
-    { "id": "sc_phase_life", "title": "Life", "text": "生活\n\n生活", "kind": "phase", "contained_project_ids": [] }
+    { "id": "sc_work", "title": "Work", "text": "工作\n\n创业", "contained_project_ids": ["proj_ring_v1"] },
+    { "id": "sc_life", "title": "Life", "text": "生活\n\n个人", "contained_project_ids": [] },
+    { "id": "sc_side", "title": "Side", "text": "副业 / 兴趣项目\n\n个人副业、兴趣驱动的产出，如博客、开源、独立项目", "contained_project_ids": [] }
   ]
 }
 ```
@@ -221,24 +193,18 @@ related-data-schema: docs/data/memory-tree-node.md (layer=scene)
 ```json
 {
   "scene_actions": [
-    {
-      "kind": "attach",
-      "scene_id": "sc_phase_work",
-      "reason": "Ring v2 规划是工作核心项目，属于 Work phase。v0.5 不主动新建 topic scene。"
-    }
+    { "kind": "attach", "scene_id": "sc_side", "reason": "技术博客是兴趣驱动的个人产出，属于 Side（用户自定义）" },
+    { "kind": "attach", "scene_id": "sc_work", "reason": "内容涉及 Monostone 工程笔记，与 Work 也有交叉" }
   ],
   "schema_version": 1
 }
 ```
 
-> ⚠️ **v0.6+ 路径**：当用户的 v2 相关 episode 积累超过 30 个 + 涉及主题超出 Work 普通范畴时，可以触发 create topic scene。届时本 prompt 输出会变成：
-> ```json
-> { "kind": "create", "scene_kind": "topic", "title": "硬件演进", "text": "v1→v2→v3 硬件路线\n\nRing 硬件代际演进策略...", "topic": "硬件演进", "reason": "..." }
-> ```
+**为什么挂双 scene**：用户自定义的 Side scene 描述里说"个人副业 / 兴趣"，博客主要属于这类；但内容涉及主业，所以也 attach Work。AI 在用户管理的 scene 列表里灵活归属。
 
 ---
 
-### Example 5：边缘 project → skip
+### Example 5：测试 / 临时 project → skip
 
 **Input**:
 ```json
@@ -250,8 +216,8 @@ related-data-schema: docs/data/memory-tree-node.md (layer=scene)
     "entity_ids": ["测试", "import"]
   },
   "existing_scenes": [
-    { "id": "sc_phase_work", "title": "Work", "text": "工作\n\n工作", "kind": "phase", "contained_project_ids": [] },
-    { "id": "sc_phase_life", "title": "Life", "text": "生活\n\n生活", "kind": "phase", "contained_project_ids": [] }
+    { "id": "sc_work", "title": "Work", "text": "工作\n\n工作", "contained_project_ids": [] },
+    { "id": "sc_life", "title": "Life", "text": "生活\n\n生活", "contained_project_ids": [] }
   ]
 }
 ```
@@ -260,24 +226,21 @@ related-data-schema: docs/data/memory-tree-node.md (layer=scene)
 ```json
 {
   "scene_actions": [
-    {
-      "kind": "skip",
-      "reason": "测试性质 project，既非 Work 也非 Life，不挂 scene 避免污染语境"
-    }
+    { "kind": "skip", "reason": "测试性质 project，不属于任何用户语境，不挂 scene 避免污染" }
   ],
   "schema_version": 1
 }
 ```
 
 ## 边界
-- project 不属于任何已有语境 → 默认 attach Work（除非明显是 Life）
-- 用户已有 50+ scene → 优先 attach 已有
-- 测试 / 系统生成 project → skip
+- 用户没建任何 scene → 只能 skip（理论极少，默认 onboarding 时已建 Work + Life）
+- 用户建了 10+ scene → AI 仍按描述判别，可能 attach 多个
 
 ## 版本历史
 - v1 (2026-05-02): episode → scene
-- v2 (2026-05-03): scene 升 L4 + 5 类 kind + display/search 双视角 — **已废弃**（双视角部分）
-- **v3 (2026-05-06): 对齐后端 — title + text 两段结构 + scene 实际只用 phase (Work/Life)**
+- v2 (2026-05-03): scene 升 L4 + 5 类 kind + display/search 双视角 — **已废弃**
+- v3 (2026-05-06): 对齐后端 — title + text 两段结构 + scene 实际只用 phase (Work/Life) — **已废弃**
+- **v4 (2026-05-06): 简化 — 删除 5 类 kind 概念 + AI 只 attach 不 create + 用户自定义无上限**
 
 ## Eval
 见 `eval/project-to-scene-fixtures.md`
