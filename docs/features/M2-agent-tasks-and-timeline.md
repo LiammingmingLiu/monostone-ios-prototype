@@ -508,11 +508,19 @@ iOS 锁屏顶部 banner widget，wallpaper 半透明遮罩。
 └─────────────────────────────────────┘
 ```
 
-**可点元素**：
-- 左列 task 卡 → 进对应 cmd / cal detail
-- 右列日程行 → 进 cal detail
-- "5 件事 ›" → 跳日历 tab 看全部
-- 录音中状态时左上角显示 `Mono Working · 0:24` + `Recording` 大字 + 红 pulse dot
+**可点元素**（交互边界清晰版，2026-05-06 与明明拍板）：
+
+| 操作 | 去哪 | 谁负责 |
+|---|---|---|
+| 左列 task 卡（cmd / cal） | Monostone app 内 detail（看 Smart Brief / 草稿） | Monostone 差异化 |
+| 右列单个日程行 | Monostone cal detail (Smart Brief) | Monostone 差异化 |
+| **"5 件事 ›" 看完整日历** | **`calshow://` 跳 Apple Calendar** | 系统原生 |
+| 录音中状态左上角 `Mono Working · {timer}` + `Recording` 大字 + 红 pulse dot | — | — |
+
+**核心边界原则**：
+- Monostone 只做 "**单条的深度**"（Smart Brief、command 草稿、context 这些差异化内容）
+- "**列表展示 / 全部日程**" 交给系统 Calendar — Apple Calendar 通过 EventKit 已经聚合了 iCloud + Google + Outlook 等所有连接源，一个 `calshow://` deep link 解决所有情况，0 新 nav / sheet / tab
+- 这个边界让 v0.5 不需要日历 tab，也不需要"今日日程 sheet"
 
 **配色**（暗色 widget 故意和 app 主体暖白形成对比，iOS home screen 上更突出）：
 - bg `#0d0d0d`
