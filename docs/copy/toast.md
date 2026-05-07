@@ -147,19 +147,33 @@ category: toast
 | `widget.status.recording` | Mono Working · {timer} | 录音时左上角 |
 | `widget.more_events` | {N} 件事 › | 当天日程总数链接 |
 
-## 日程 / Smart Calendar（M2 · MON-17）
+## 日程 / Smart Calendar（M2 · MON-17 / MON-20）
 
-> v0.5 不存在 todo / 待办类型；语音里"提醒我 X 时 Y"全部归"日程"。日程不只是日历事件，是 Smart Calendar（带 Smart Brief）。
+> v0.5 类型 schema (recording-mode-router v3): `command | cal | todo | idea`。
+> - **cal** 日程 = 有具体时间 → Apple 日历 (EKEvent) + Smart Brief
+> - **todo** 待办 = 无具体时间 → Apple 提醒事项 (EKReminder) + Smart Brief
 > 全 App 禁止 emoji（明明强调），冲突视觉用红色 + 排版承载，不用 ⚠️。
+
+### cal · 日程
 
 | key | 文案 | 触发 |
 |---|---|---|
-| `cal.added` | 已加入日历 · 撤销 | EventKit 写入成功（5s toast 含撤销） |
+| `cal.added` | 已加入日历 · 撤销 | EKEvent 写入成功（5s toast 含撤销） |
 | `cal.undone` | 已撤销 | 5s 内点撤销 |
 | `cal.parse_failed` | 时间没识别出来 · 在主页跟我说一句 | cal_parse.parse_failed = true |
 | `cal.removed` | 已从日历移除 | navbar `···` → 从日历移除 |
 | `cal.brief_loading` | 正在为你想想… | §C Smart Brief async loading |
 | `cal.opened_in_apple` | 打开 Apple 日历 | §D 点 `打开` 按钮 |
+
+### todo · 待办（MON-20）
+
+| key | 文案 | 触发 |
+|---|---|---|
+| `todo.added` | 已加入提醒事项 · 撤销 | EKReminder 写入成功（5s toast 含撤销） |
+| `todo.undone` | 已撤销 | 5s 内点撤销 |
+| `todo.removed` | 已从提醒事项移除 | navbar `···` → 移除 |
+| `todo.brief_loading` | 正在为你想想… | §C Smart Brief async loading |
+| `todo.opened_in_apple` | 打开 Apple 提醒事项 | §D 点 `打开` 按钮 |
 
 ## 通用
 

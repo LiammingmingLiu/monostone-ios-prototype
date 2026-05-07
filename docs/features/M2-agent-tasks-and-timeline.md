@@ -84,13 +84,26 @@ agent-orchestrator-service
 6. plugin-runtime → email-sender → 发送
 7. iOS 显示 done + toast
 
-### 3.2 短录音 → todo（日历）
+### 3.2 短录音 → cal（有具体时间，写 Apple 日历）
 1. FAB 快点录音 "提醒我周五下午三点和林啸开会"
-2. 后端分类 = todo + 解析时间地点
-3. 后端写 `/timeline/events` (kind=todo, scheduled_at=2026-05-08T15:00)
+2. 后端分类 = cal（recording_mode v3）+ cal_parse 解析时间地点
+3. 后端写 `/timeline/events` (kind=cal, scheduled_at=2026-05-08T15:00)
+4. iOS 收到 timeline event → 插入 cal 卡片
+5. iOS 询问 EventKit 权限 → 写 Apple 日历 (EKEvent)
+6. Smart Brief 异步生成；冲突由 brief 内嵌红色段表达
+
+### 3.3 短录音 → todo（无具体时间，写 Apple 提醒事项）
+1. FAB 快点录音 "把那本书还给舟舟"
+2. 后端分类 = todo（recording_mode v3）+ 解析任务标题
+3. 后端写 `/timeline/events` (kind=todo)
 4. iOS 收到 timeline event → 插入 todo 卡片
-5. iOS 询问 EventKit 权限 → 写 Apple 日历
-6. 冲突检测：如果有重叠事件，弹冲突 UI
+5. iOS 询问 EventKit 权限 → 写 Apple 提醒事项 (EKReminder)
+6. Smart Brief 异步生成（Agent 自由判断提醒形式 + 提供 context，不写固定时间）
+
+> **cal vs todo 边界**：唯一差异是"有没有具体时间"。
+> 用户视角：cal 卡显示时间字段；todo 卡时间字段写"无具体时间"，提醒由 Agent 智能决定。
+> iOS 写入：cal → EKEvent；todo → EKReminder。
+> 视觉框架：完全相同（4 段：head / 卡本体 / Smart Brief / 已写入），仅 §B / §D 内容不同。
 
 ## 4. 页面级 spec
 
@@ -556,10 +569,60 @@ iOS 锁屏顶部 banner widget，wallpaper 半透明遮罩。
 | iOS WidgetKit (桌面小组件) 集成 | ⚠️ iOS 端工作 | 林啸 (iOS) |
 | Push notification (needs_input 触发) | ⚠️ iOS 端 + APNs | 林啸 (iOS) |
 
-### 4.4 inline chat（command 卡内）
-- 关系: 是 `/agent/tasks/{id}/turn` 的简化入口；不和 AgentView 主线程合并
+### 4.4 TodoDetailView · Apple 提醒事项 (MON-20)
 
-### 4.4 inline chat（command 卡内）
+> **核心**：todo 是 cal 的姊妹形态。视觉/结构和 §4.2 CalendarDetailView 完全一致（4 段），唯一差异：
+> - **§B 卡本体**：时间字段写"无具体时间"（暖灰），多一行"提醒"显示 Agent 决定的提醒形式
+> - **§D 已写入**：写"已加入 Apple 提醒事项"（不是"已加入 Apple 日历"）；icon 用"REM" 字样
+> - **写入 target**：iOS EventKit 调 `EKReminder` 而非 `EKEvent`
+
+#### 4.4.1 §B 字段（todo 简化版）
+
+| 字段 | 内容 |
+|---|---|
+| 时间 | 固定显示 `无具体时间`（颜色 `--text-dim`） |
+| 提醒 | Agent 智能决定的描述（如 `明天上班路上`、`本周内 · 价格波动较大时`） — **不固定规则**，由 Agent 根据 context 给出自然语言提醒 |
+| 地点 / 参与人 | 通常 todo 没有，无值不显示 |
+
+#### 4.4.2 §C Smart Brief（todo 也有 brief，和 cal 同等待遇）
+
+明明拍板：todo 不是"光秃秃的提醒"，模型也带 context 帮用户做这件事。
+- 例：todo "把那本《设计中的设计》还给舟舟" → brief 提示舟舟最近在做设计 + 你们常约在哪
+- 例：todo "订下个月去东京的机票" → brief 提示要去见谁 + 历史订票偏好 + ANA 里程余额
+
+Smart Brief prompt 和 cal 共用（详见 MON-37），输入参数加 `card_kind: "cal" | "todo"` 区分语气。
+
+#### 4.4.3 §D 已写入标识（提醒事项版）
+
+```
+[REM icon] 已加入 Apple 提醒事项
+           默认列表 · iCloud      [打开]
+```
+
+点 `打开` → deep link `x-apple-reminderkit://` 跳系统提醒事项 app
+
+#### 4.4.4 提醒形式 — Agent 智能决定（明明拍板，不固定规则）
+
+不用"提前 30 分钟 / 1 小时" 这种简单规则。Agent 根据 context 写自然语言：
+- "把书还给舟舟" → `明天上班路上`（因为知道用户工作日通勤会经过她公司附近）
+- "订机票" → `本周内 · 价格波动较大时`（基于历史购票模式）
+- "做 POC" → `这周三晚上`（基于用户日历空闲槽 + 工作偏好）
+
+iOS EventKit 写入时，Agent 把自然语言转成具体时间触发器（EKAlarm），用户在 Apple 提醒事项 app 看到具体时间。
+
+#### 4.4.d 后端依赖
+
+| 项 | 状态 | 备注 |
+|---|---|---|
+| `recording-mode-router` v3 输出 4 类（含 todo） | ⚠️ prompt 改 | 林啸（schema 加 todo） |
+| `understanding-prompt` 输出 `todo_parse: {title, agent_reminder_natural_lang, agent_alarm_trigger}` | ⚠️ 新加字段 | 林啸（prompt 改） |
+| iOS EventKit 写 `EKReminder` + `EKAlarm` | ✅ 现有 | — |
+| iOS deep link `x-apple-reminderkit://` 打开提醒事项 | ✅ 现有 | — |
+| 卡片删除同步删 EKReminder | ✅ 现有 5s undo 链路 | — |
+| Smart Brief prompt 接受 `card_kind: "cal" \| "todo"` 参数 | ⚠️ MON-37 prompt 加分支 | 明明（写 prompt） |
+| 错误文案 `todo.permission_denied` / `todo.write_failed` | ⚠️ docs/copy/error.md 加 | 我
+
+### 4.5 inline chat（command 卡内）
 - 关系: 是 `/agent/tasks/{id}/turn` 的简化入口；不和 AgentView 主线程合并
 
 ## 5. 后端变更

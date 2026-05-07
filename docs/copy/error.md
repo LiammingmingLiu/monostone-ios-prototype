@@ -23,12 +23,17 @@ category: error
 | `command.execution_failed` | 执行失败 · {reason}，可重试 |
 | `agent.confirmation_timeout` | 确认超时 · 任务已暂停 |
 
-## Todo / EventKit（M2）
+## EventKit · 日历 / 提醒事项（M2 · MON-17 / MON-20）
+
+> v0.5 schema：cal → Apple 日历 (EKEvent)；todo → Apple 提醒事项 (EKReminder)。
+> 权限被拒时 detail §D 提示 + 跳系统设置（G1 + onboarding G3 拍板）。
 
 | key | 文案 |
 |---|---|
-| `todo.calendar_permission_denied` | 需要日历权限 · 设置中开启 |
-| `todo.calendar_write_failed` | 写入日历失败 · 重试或手动添加 |
+| `cal.permission_denied` | 需要日历权限 · 设置中开启 |
+| `cal.write_failed` | 写入日历失败 · 重试或手动添加 |
+| `todo.permission_denied` | 需要提醒事项权限 · 设置中开启 |
+| `todo.write_failed` | 写入提醒事项失败 · 重试或手动添加 |
 
 ## Memory
 

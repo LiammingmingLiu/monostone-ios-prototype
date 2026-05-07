@@ -1,11 +1,11 @@
 ---
 name: llm-worker-recording-mode-router
-version: 2
+version: 3
 owner: 明明
 status: framework-ready · few-shot-pending
-last-updated: 2026-05-04
+last-updated: 2026-05-07
 backend-service: llm-worker
-related-issue: MON-6, MON-18, MON-38
+related-issue: MON-6, MON-18, MON-20, MON-38
 related-data-schema: docs/data/card-recording.md (RecordingMode)
 ---
 
@@ -15,16 +15,17 @@ related-data-schema: docs/data/card-recording.md (RecordingMode)
 
 **长 vs 短录音不在这里分类** —— 由 iOS 手势直接决定（按住 = 长 / 按一下 = 短），是物理硬约束。
 
-这个 prompt 只做一件事：**已经被手势确定为"短录音"的 transcript，分到 3 个子类之一**：
+这个 prompt 只做一件事：**已经被手势确定为"短录音"的 transcript，分到 4 个子类之一**：
 - `command` — 让 Agent 替自己做事（"帮我写邮件"、"提醒林啸…"）
-- `cal` — 日程 / 时间点要发生的事（"提醒我明天三点开会"、"周五约敦敏吃饭"）
-- `idea` — 想法 / 反思 / 不属于前两类
+- `cal` — 日程 / 有具体时间点要发生的事（"提醒我明天三点开会"、"周五约敦敏吃饭"）→ 写 Apple Calendar
+- `todo` — 待办 / 自己要做但**没有具体时间**（"把书还给舟舟"、"订下月机票"）→ 写 Apple 提醒事项
+- `idea` — 想法 / 反思 / 不属于前三类
 
-> **类型重命名说明（2026-05-04）**：
-> - 旧 schema: `command | todo | idea | longRec`（v1）
-> - 新 schema: `command | cal | idea`（v2）
-> - `todo` → `cal`（MON-17 把"待办"概念删掉，归到 Smart Calendar）
-> - `longRec` 移除（手势决定，不是 LLM 输出）
+> **类型 schema 演进**：
+> - v1：`command | todo | idea | longRec`
+> - v2（2026-05-04）：`command | cal | idea` — 删 todo 归 cal；删 longRec（手势决定）
+> - **v3（2026-05-07，MON-20）**：`command | cal | todo | idea` — todo 重新引入，但限定意义：**无具体时间** → Apple 提醒事项 (EKReminder)；**有具体时间** → Apple 日历 (EKEvent) 走 cal
+> - cal 和 todo 在 iOS 卡片视觉一致（4 段：head / 卡本体 / Smart Brief / 已写入），**唯一差异是写入目标 + 时间字段是否为 null**
 
 ## 调用场景
 
@@ -48,11 +49,11 @@ related-data-schema: docs/data/card-recording.md (RecordingMode)
 
 ```typescript
 {
-  recording_mode: "command" | "cal" | "idea",
+  recording_mode: "command" | "cal" | "todo" | "idea",
   confidence: number,             // 0-1
   reason: string,                 // ≤ 30 字解释
   fallback_used: boolean,         // 是否走规则匹配 (confidence < 0.6)
-  schema_version: 2,
+  schema_version: 3,
 }
 ```
 
@@ -74,13 +75,20 @@ related-data-schema: docs/data/card-recording.md (RecordingMode)
    例："帮我写封 follow-up 邮件给敦敏"
    例："让 Agent 在 Slack 里通知一下 Marshall"
 
-2. cal — 日程 / 一个时间点要发生的事。
+2. cal — 日程 / **有具体时间点**要发生的事。
    关键词倾向："提醒我..."、"约..."、"明天/周X/X 月 X 日..."、"X 点..."、"会议"、"碰面"
    特征：包含明确的时间点 / 时间段；动作的承担者是用户本人 + 日历
    例："提醒我周五下午三点和林啸开 1on1"
    例："下周二是舟舟生日"
 
-3. idea — 想法 / 反思 / 灵感 / 备忘。
+3. todo — 待办 / 自己要做但**没有具体时间**。
+   关键词倾向："把 X 还给..."、"订..."、"买..."、"看一下..."、"做个 POC..."（不含时间词或时间词模糊如"有空时"、"这周"、"找时间"）
+   特征：用户本人要做的小事；没有具体时间点；可以延后；不是给 Agent 的指令
+   例："把那本书还给舟舟"
+   例："订下个月去东京的机票"
+   例："找时间看一下林啸的 RFC"
+
+4. idea — 想法 / 反思 / 灵感 / 备忘。
    特征：不属于上面两类；用户在自言自语、记一个想法、做一个判断
    例："Memory 的 L2 到 L3 promotion 可以加 confidence decay"
    例："其实我们的核心用户应该再聚焦一点"
@@ -89,8 +97,10 @@ related-data-schema: docs/data/card-recording.md (RecordingMode)
 
 边界优先级（多类候选时）：
 - 同时含时间词和"帮我..." → 优先 command（Agent 来 schedule 这件事）
-- 含时间词但无承担者 → cal
-- 无时间词 + 无指令词 → idea
+- 含**具体时间**词（"周五 3 点" / "明天上午"）+ 自己做 → cal
+- 含**模糊时间**词（"这周" / "有空时" / "找时间"）+ 自己做 → todo
+- 无时间词 + 自己做 → todo
+- 无时间词 + 无指令词 + 偏抽象/反思 → idea
 - transcript 为空 → idea, confidence=0
 
 confidence 校准：
@@ -132,14 +142,22 @@ def classify(transcript, duration_seconds, capture_mode):
 def rule_based_classify(t):
     """简单规则兜底，避免 LLM hallucinate"""
     cmd_kw = ["帮我", "让 agent", "让 ai", "发邮件", "回复", "转发", "通知"]
-    cal_kw = ["提醒我", "约", "碰面", "见面", "会议", "1on1",
-              "明天", "后天", "周", "下周", "号", "点", "上午", "下午", "晚上"]
+    cal_specific_time_kw = ["明天", "后天", "周一", "周二", "周三", "周四", "周五", "周六", "周日",
+                            "下周", "号", "点", "上午", "下午", "晚上", "今晚"]
+    cal_event_kw = ["约", "碰面", "见面", "会议", "1on1", "提醒我..."]
+    todo_kw = ["把", "订", "买", "看一下", "做个", "做一下", "找时间", "有空"]
 
     t_lower = t.lower()
     if any(k in t_lower for k in cmd_kw):
         return {"recording_mode": "command", "confidence": 0.7, "reason": "命中指令关键词"}
-    if any(k in t for k in cal_kw):
-        return {"recording_mode": "cal", "confidence": 0.7, "reason": "命中时间/日程关键词"}
+    has_specific_time = any(k in t for k in cal_specific_time_kw)
+    has_cal_event = any(k in t for k in cal_event_kw)
+    if has_specific_time and has_cal_event:
+        return {"recording_mode": "cal", "confidence": 0.75, "reason": "具体时间+日程词"}
+    if any(k in t for k in todo_kw):
+        return {"recording_mode": "todo", "confidence": 0.7, "reason": "命中待办关键词，无具体时间"}
+    if has_cal_event:
+        return {"recording_mode": "cal", "confidence": 0.6, "reason": "日程词但时间不明，仍归 cal"}
     return None  # idea fallback by LLM
 ```
 
@@ -209,21 +227,20 @@ def rule_based_classify(t):
 - duration < 2s → `recording_mode="idea", confidence=0.3, fallback_used=true`（极短误触）
 - 长按 fallback (`capture_mode="long_fallback"`) → 走同一个 prompt，但不暴露给用户"模型猜的"，detail 直接当对应子类形态显示
 
-## v2 变更点（vs v1）
+## v3 变更点（vs v2）
 
-| 项 | v1 | v2 |
+| 项 | v2 | v3 |
 |---|---|---|
-| 输出类型 | command / todo / idea / longRec | command / cal / idea |
-| longRec 判定 | LLM 看 duration > 60s | **iOS 手势决定**，不在 prompt 里 |
-| todo 类 | 存在 | **删除**（MON-17 重新定位为 cal · Smart Calendar） |
-| 长按 < 120s 的处理 | 不存在 | **场景 A fallback** — `post-recording-coordinator` 调本 prompt 拿子类，自动归类不打扰用户 |
-| 60s 长度阈值 | 自动 longRec | 移除（手势决定） |
-| confidence 阈值 | < 0.6 fallback / < 0.4 用户手选 | 同上保留 |
+| 输出类型 | command / cal / idea | command / cal / **todo** / idea |
+| todo 类 | 删除（归 cal） | **重新引入**，限定意义：无具体时间 → Apple 提醒事项 |
+| cal 类 | 涵盖所有"提醒我"语义 | 限定**有具体时间** → Apple 日历 |
+| 时间词分级 | 不区分 | 区分"具体时间"vs"模糊时间" |
 
 ## 版本历史
 
 - v1 (2026-05-02): 4 类分类骨架（含 longRec / todo）
 - v2 (2026-05-04): MON-18 重新框架。手势主导长短，prompt 缩窄到短录音子类 3 选 1（cmd/cal/idea），新增长按 fallback 场景
+- v3 (2026-05-07): MON-20 重新引入 todo 类（无具体时间 → Apple 提醒事项），cal 严格限定有具体时间 → Apple 日历。schema 4 类
 
 ## Eval
 
