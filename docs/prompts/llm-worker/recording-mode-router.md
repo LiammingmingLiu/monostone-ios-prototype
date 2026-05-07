@@ -163,13 +163,16 @@ def rule_based_classify(t):
 
 ## Few-shot
 
-> **明明补 ≥ 4 个真实语料 few-shot**，覆盖：
-> - 多意图（cmd + 时间）→ 优先 command 的例子
-> - 含糊（短句没明确意图）→ idea 的例子
-> - 中英混合 / 工作场景术语
-> - 长按 fallback 场景（capture_mode = "long_fallback"）
+> **MON-38 完成（2026-05-07）**：8 条 few-shot 已覆盖：
+> - 多意图（cmd + 时间）→ command priority（Example 1, 6）
+> - 明确 cal（Example 2）
+> - 含糊（短句没明确意图）→ idea（Example 3, 8）
+> - todo 无时间 / 模糊时间（Example 4, 5）
+> - 中英混合 / 工作场景术语（Example 6）
+> - 长按 fallback 场景 capture_mode="long_fallback"（Example 7）
+> - 边界 / 不完整内容 → low confidence（Example 8）
 
-### 示范 few-shot（我写 3 个，明明补完）
+### Few-shot 完整集（8 条 · MON-38 明明 review）
 
 ```jsonc
 // Example 1: 明确 command + 含时间，优先 command
@@ -184,7 +187,7 @@ def rule_based_classify(t):
     "confidence": 0.95,
     "reason": "「帮我」+ 明确动作（发邮件），时间是任务约束不是日程",
     "fallback_used": false,
-    "schema_version": 2
+    "schema_version": 3
   }
 }
 
@@ -200,7 +203,7 @@ def rule_based_classify(t):
     "confidence": 0.92,
     "reason": "「提醒我」+ 具体时间 + 会议",
     "fallback_used": false,
-    "schema_version": 2
+    "schema_version": 3
   }
 }
 
@@ -216,7 +219,87 @@ def rule_based_classify(t):
     "confidence": 0.85,
     "reason": "无指令无时间，纯反思",
     "fallback_used": false,
-    "schema_version": 2
+    "schema_version": 3
+  }
+}
+
+// Example 4: todo 无具体时间 (MON-20 v3 新增)
+{
+  "input": {
+    "transcript": "把那本《设计中的设计》还给舟舟。",
+    "duration_seconds": 4,
+    "capture_mode": "short"
+  },
+  "output": {
+    "recording_mode": "todo",
+    "confidence": 0.9,
+    "reason": "「把 X 还给」+ 无时间词，自己要做的小事",
+    "fallback_used": false,
+    "schema_version": 3
+  }
+}
+
+// Example 5: todo 模糊时间 → 仍归 todo (不是 cal)
+{
+  "input": {
+    "transcript": "找时间订一下下个月去东京的机票。",
+    "duration_seconds": 5,
+    "capture_mode": "short"
+  },
+  "output": {
+    "recording_mode": "todo",
+    "confidence": 0.85,
+    "reason": "「找时间」+「订」，时间词模糊，归 todo",
+    "fallback_used": false,
+    "schema_version": 3
+  }
+}
+
+// Example 6: 中英混合 + 工作场景术语 → command
+{
+  "input": {
+    "transcript": "那个 latency 问题让林啸看一下 connection pool 的配置。",
+    "duration_seconds": 5,
+    "capture_mode": "short"
+  },
+  "output": {
+    "recording_mode": "command",
+    "confidence": 0.88,
+    "reason": "「让林啸 X」= 让 Agent 提醒/委托他人，归 command",
+    "fallback_used": false,
+    "schema_version": 3
+  }
+}
+
+// Example 7: 长按 fallback (capture_mode = long_fallback)
+{
+  "input": {
+    "transcript": "提醒我下周有空的时候订一下东京的机票，看看 ANA 周末有没有便宜的。",
+    "duration_seconds": 45,
+    "capture_mode": "long_fallback"
+  },
+  "output": {
+    "recording_mode": "todo",
+    "confidence": 0.82,
+    "reason": "长按但 < 120s，fallback 走短分类；「下周有空」模糊时间 → todo",
+    "fallback_used": false,
+    "schema_version": 3
+  }
+}
+
+// Example 8: 边界 / 不完整 → idea + low confidence (走 needs_input)
+{
+  "input": {
+    "transcript": "把那个东西。",
+    "duration_seconds": 2,
+    "capture_mode": "short"
+  },
+  "output": {
+    "recording_mode": "idea",
+    "confidence": 0.3,
+    "reason": "transcript 不完整，意图不清",
+    "fallback_used": true,
+    "schema_version": 3
   }
 }
 ```

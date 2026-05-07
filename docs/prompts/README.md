@@ -31,13 +31,16 @@ prompts/
 │   ├── episode-to-scene.md                ← MON-5
 │   └── user-profile-extractor.md          ← MON-5
 │
-└── agent-orchestrator/                    ← 对齐 services/agent/agent-orchestrator-service
-    ├── query-router.md                    ← MON-8 / AGENT_QUERY_ROUTER_*
-    ├── retrieval-policy.md                ← MON-8 / ENABLE_AGENT_INTELLIGENT_RETRIEVAL_POLICY_V25
-    ├── context-packaging.md               ← MON-8 / AGENT_CONTEXT_PACKAGING_*
-    ├── timeline-reasoning.md              ← MON-8 / AGENT_TIMELINE_REASONING_*
-    ├── pattern-reasoning.md               ← MON-8 / AGENT_PATTERN_REASONING_*
-    └── dialogue-writeback.md              ← MON-7 / ENABLE_MEMORY_TREE_AGENT_DIALOGUE_WRITEBACK
+├── agent-orchestrator/                    ← 对齐 services/agent/agent-orchestrator-service
+│   ├── query-router.md                    ← MON-8 / AGENT_QUERY_ROUTER_*
+│   ├── retrieval-policy.md                ← MON-8 / ENABLE_AGENT_INTELLIGENT_RETRIEVAL_POLICY_V25
+│   ├── context-packaging.md               ← MON-8 / AGENT_CONTEXT_PACKAGING_*
+│   ├── timeline-reasoning.md              ← MON-8 / AGENT_TIMELINE_REASONING_*
+│   ├── pattern-reasoning.md               ← MON-8 / AGENT_PATTERN_REASONING_*
+│   └── dialogue-writeback.md              ← MON-7 / ENABLE_MEMORY_TREE_AGENT_DIALOGUE_WRITEBACK
+│
+└── plugin-runtime/                        ← 对齐 services/plugin/plugin-runtime-service plugin pods
+    └── calendar-smart-brief-generator.md  ← MON-17 / MON-20 / MON-37 (cal + todo Smart Brief)
 ```
 
 ## 单个 prompt 文件的标准模板
