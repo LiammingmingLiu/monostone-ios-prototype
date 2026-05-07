@@ -129,6 +129,7 @@ category: toast
 | key | 文案 | 备注 |
 |---|---|---|
 | `push.needs_input` | 需要你确认 · {task title} | ≤30 字，不连环 |
+| `push.cal_upcoming` | {title} · {30/60} 分钟后 | cal 即将开始（MON-21：明明 2026-05-07 拍板 home feed 不上浮，提醒只走 push + widget）|
 
 ### 锁屏 widget 状态文案
 

@@ -75,6 +75,45 @@ agent-orchestrator-service
 
 ## 3. iOS 用户旅程
 
+### 3.0 HomeView · 4 类卡片形态总表（MON-34）
+
+> 收口：v0.5 极简 HomeView (MON-32 锁定) — 卡片只显示 type chip + title + meta-min 一行。下表是 4 类（+ 长录音）卡片的视觉差异 + 5 状态映射。
+
+**4 类型颜色规范（已是现状，不动）**：
+
+| type | color var | 色值 | 用在哪 |
+|---|---|---|---|
+| `command` (cmd) | `--t-cmd` | `#A295D0` 紫 | type chip + filter-chip |
+| `cal` 日程 | `--t-todo` | `#7FC090` 绿（复用） | type chip + filter-chip |
+| `todo` 待办 | — | `#b49b7c` 暖灰 | type chip（MON-20 新加） |
+| `idea` 灵感 | `--t-idea` | `#d4a868` 暖黄 | type chip + filter-chip |
+| 长录音 (rec) | `--text-dim` | 灰 | 默认无独立 chip 色 |
+
+**meta-min 5 状态文案（已锁定 MON-32）+ 卡片右上角小圆点**：
+
+| status | meta-min 文案 | 颜色 | 右上 dot |
+|---|---|---|---|
+| done（默认）| `{2 小时前}` / `{昨天 22:14}` | `--text-dimmer` | 无 |
+| pending | `排队中` | `--text-dim` | 无 |
+| executing / processing | `处理中 · 还剩 {X} 分钟` 或降级 `处理中` | `--text-dim` | 橙 pulse（仅录音处理链路） |
+| needs_input | `需要确认 · {time}` | `#d4a868` 暖黄 | 暖黄静止（`.dot-warn`） |
+| failed | `失败 · 点击重试 · {time}` | `--red` | 红静止（`.dot-err`） |
+
+**特殊状态（cal/todo 写入失败 — MON-21 §E3）**：
+- `cal` EventKit 写入失败 → meta `未加入日历 · 需权限` (`--red`)
+- `todo` EKReminder 写入失败 → meta `未加入提醒事项 · 需权限` (`--red`)
+- 默认成功不标，仅失败显示警告（避免冗余）
+
+**即将开始的 cal（MON-21 / MON-34 拍板）**：
+- **不在 HomeView 上浮 / 染色**（明明 2026-05-07 拍板：home feed 不引入新视觉）
+- "即将开始" 提醒只走外置通道：**push notification + 桌面小组件**
+- 1h 内即将开始 → push 一次 + widget SCHEDULED 区域显示
+
+**改类型入口**（误分类纠正，MON-18 锁定 + MON-21 收口）：
+- 仅在详情页 navbar `···` overflow menu 里
+- HomeView 卡片**不引入长按 / 滑动手势**（极简）
+- 改完 toast `已改为 {type} · Agent 会学习`
+
 ### 3.1 短录音 → command（邮件）
 1. FAB 快点录音 "帮我写封 follow-up 邮件给敦敏"
 2. 后端分类 = command, 创建 `/agent/tasks`
@@ -622,7 +661,76 @@ iOS EventKit 写入时，Agent 把自然语言转成具体时间触发器（EKAl
 | Smart Brief prompt 接受 `card_kind: "cal" \| "todo"` 参数 | ⚠️ MON-37 prompt 加分支 | 明明（写 prompt） |
 | 错误文案 `todo.permission_denied` / `todo.write_failed` | ⚠️ docs/copy/error.md 加 | 我
 
-### 4.5 inline chat（command 卡内）
+### 4.5 详情页统一规范（MON-21）
+
+> 收口：散落在 MON-16/17/18/19/20 的 detail 页规则收成一处。所有 4 种 detail (cmd/cal/todo/idea/rec) 共享。
+
+#### 4.5.1 navbar `···` overflow menu（**所有 detail 页一致**）
+
+固定 3 项，顺序固定：
+1. **改类型** → 弹 reclass picker（4 选 1：指令/日程/待办/灵感）
+2. **分享** → 弹 share sheet（**仅 rec 长录音显示**，其他 type 隐藏此项）
+3. **删除**（红色文字）→ 同步删 EventKit + 5s undo toast
+
+> v0.5 不引入"复制原话"、"导出"等其他菜单项，保持极简。
+
+#### 4.5.2 详情页手势规范（4 detail 一致）
+
+- ✅ **垂直滚动**（默认）
+- ✅ **左滑返回**（iOS 系统标准）
+- ✅ **navbar 分享按钮**（仅 rec）
+- ❌ **不支持长按**（任何位置）
+- ❌ **不支持卡内左滑/右滑**
+- ❌ **不支持 pinch / zoom / pull-to-refresh**
+
+详情页内的所有动作走 navbar `···` 或 detail-actions 底部按钮，**不引入 hidden 手势**。
+
+#### 4.5.3 撤销窗口 + 视觉（5s 跨所有 detail 一致）
+
+- **5s 倒计时**（已锁定 MON-17 §4.2.8 / MON-20）
+- **视觉**：toast 显示 `已 X · 撤销`（纯文字，**不加进度条 / 圆环**），5s 后自动消失
+- **触发场景**：
+  - cal/todo 写入 EventKit 后
+  - 删除 task / cal / todo 后（同步删 EKEvent / EKReminder）
+  - command 草稿被允许后（用户可在 5s 内反悔）
+- **撤销点击后**：toast 切到 `已撤销`，回滚状态
+
+#### 4.5.4 失败重试规范（MON-19 D3 + MON-21）
+
+**自动重试策略（A2 拍板）**：
+- agent-orchestrator-service / EventKit 写入失败 → **后端自动重试 1 次**（应对网络瞬断）
+- 仍失败 → 进入 `failed` 状态，弹给用户
+
+**用户重试入口**（已锁定 MON-16）：
+- detail 底部 actions：`[拒绝] [重试 (primary)]`
+- 重试 = 用 task 原 plan + 当前最新 context 重跑
+
+**failed 信息展示（MON-19 D3 双层）**：
+- head status 一行简短 `failure_summary`（≤14 字）
+- 产出区完整 `failure_detail_markdown`
+
+#### 4.5.5 Toast 文案归属表
+
+所有 detail 页 toast 文案统一在 `docs/copy/toast.md`：
+- 通用 toast → `## 通用` 章节
+- cmd 相关 → `## Command（M2）`
+- cal 相关 → `## 日程 / Smart Calendar` § cal
+- todo 相关 → `## 日程 / Smart Calendar` § todo
+- 长录音 → `## RecordingDetailView 分享 / ## 录音 / 上传`
+- 灵感 → `## IdeaDetailView`
+- LA / 锁屏 / widget / push → `## Live Activity / 锁屏 / 桌面小组件 / Push`
+
+每条 toast 文案 ≤14 字（`network.offline` 例外，≤20 字），`·` 分隔，无句号无感叹号。
+
+#### 4.5.d 后端依赖
+
+| 项 | 状态 |
+|---|---|
+| agent-orchestrator-service auto-retry 1 次 | ⚠️ 林啸（加 retry policy，轻改） |
+| 5s undo / EventKit 删除链路 | ✅ 现有 |
+| timeline-service 不需要"即将开始上浮"逻辑 | ✅ 不动（明明 2026-05-07 拍板 skip 上浮） |
+
+### 4.6 inline chat（command 卡内）
 - 关系: 是 `/agent/tasks/{id}/turn` 的简化入口；不和 AgentView 主线程合并
 
 ### 4.6 AgentView · 主对话屏（MON-41 v0.5）
