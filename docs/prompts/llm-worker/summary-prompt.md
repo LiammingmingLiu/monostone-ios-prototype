@@ -1,75 +1,42 @@
 ---
 name: llm-worker-summary
-version: 1
+version: 2
 owner: 明明
-status: draft
-last-updated: 2026-05-02
+status: deprecated · 复用 App 现有实现
+last-updated: 2026-05-07
 backend-service: llm-worker
-backend-trigger: LLM_EVENTS_QUEUE_URL
 related-issue: MON-6
 related-data-schema: docs/data/card-recording.md (RecordingSummary)
 ---
 
 # llm-worker · Summary Prompt
 
-## 用途
-batch-asr-worker 完成转写后，llm-worker 用这个 prompt 把 transcript 压成 summary（title + one_line_summary + 长 mode 的 structured_summary）。
+## ⚠️ 状态：废弃（v2 ─ 2026-05-07）
 
-## 输入契约
-```typescript
-{
-  recording_id: string,
-  recording_mode: "command" | "todo" | "idea" | "longRec",  // 来自 recording-mode-router
-  transcript: string,                  // ASR 原文
-  duration_seconds: number,
-  recorded_at: string,                 // ISO8601
-  user_locale: string,
-  user_timezone: string,
-}
-```
+**完整总结的 LLM prompt 已在 iOS App 内部实现并部署**（明明 setup，输出 markdown 格式），不在本 spec 维护。
 
-## 输出契约
-```typescript
-{
-  title: string,                       // ≤ 20 字
-  one_line_summary: string,            // ≤ 60 字
-  structured_summary: {                // 仅 longRec 有
-    sections: Array<{
-      heading: string,
-      bullets: string[]
-    }>
-  } | null,
-  schema_version: 1,
-}
-```
+→ 本文件保留作历史归档，**林啸 vibecoding 时不要再写这个 prompt**。
 
-## System Prompt
+## 现状
 
-> TODO（明明）写正式 prompt。draft：
->
-> 你是 Monostone 的录音摘要器。用户对着戒指说话，你把转写文本压成一个能让用户 1 秒看懂的标题和概览。
-> 长录音（longRec）额外生成 6 段结构化摘要：参与人 / 议题 / 决策 / 行动 / 风险 / 下一步。
-> 严格按输出 JSON schema 返回，不要 markdown，不要解释。
+- App 内部已有的 prompt 已跑通，用户对效果满意
+- 输出格式：markdown
+- 触发：长录音点开详情页时（或后台预生成 + 缓存）
+- 缓存策略：`card.full_summary_cached` 命中即返回，否则调 LLM 生成
 
-## Few-shot
+详见：[`docs/sharing-spec.md` §4](../../sharing-spec.md) 关于 full_summary prompt 的早期 spec（**注意：实际 App 实现可能跟 spec §4 略有差异，以 App 实现为准**）。
 
-> TODO（明明）填 3-5 条覆盖：
-> - 长录音正常会议
-> - 灵感独白
-> - 含数字 / 人名 / 公司名
-> - 中英混合
-> - 含糊 / 重复表达
+## 替代方案
 
-## 决策规则
-- title 不能包含人名隐私敏感信息（除非用户已显式同意，由 user-profile 决定）
-- 检测到完全无法理解的 transcript → 用第一句话作 title
-
-## 边界
-- 空 transcript → title="（无内容）", structured_summary=null
-- transcript < 10 字 → 不生成 structured_summary
+| 之前的字段 | 现在怎么得到 |
+|---|---|
+| `title` | 由 understanding-prompt 输出（参与人 / 议题 / 第一句话） |
+| `one_line_summary` | 同上 |
+| `structured_summary` | **删除**。完整总结由 App 内部 prompt 直接输出 markdown |
 
 ## 版本历史
-- v1 (2026-05-02): 初版骨架
+- v1 (2026-05-02): 初版骨架（含 system prompt + structured_summary）
+- **v2 (2026-05-07): 废弃 — App 内部 prompt 已部署，本文件不维护**
 
 ## Eval
-见 `eval/llm-worker-summary-fixtures.md`（MON-23）
+N/A — 本文件不再演进
