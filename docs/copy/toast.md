@@ -197,7 +197,19 @@ category: toast
 | `recording.partial_summary` | AI 未能整理结构化纪要 · 显示完整转写 | LLM 整理失败但 transcript OK |
 | `idea.no_attribution` | 未归属 · 点击选项目 | confidence < 0.4，meta 显示"归属 · 未归属 ›" |
 
-## Plugins (M4 · MON-28)
+## AgentView · 主对话屏 (M2 · MON-41)
+
+> 双模输入 + memory 引用 + 主动 push msg 的 toast 反馈。
+
+| key | 文案 | 触发 |
+|---|---|---|
+| `chat.mic_recording` | 录音中… 松开发送 | 长按 mic 200ms 后 |
+| `chat.mic_sent` | 已发送 · Agent 正在响应… | 抬起 mic |
+| `chat.search_open` | 搜历史对话 · 输入关键词 | 点 navbar 🔍（v0.5 mock） |
+| `chat.refs_jump` | 跳到 {ref_title} | 点引用节点（v0.5 mock，未来真跳详情） |
+| `chat.attach_open` | 打开 {attachment_title} | 点 chat 内 attachment 卡 |
+| `chat.proactive.brief` | （Agent 主动消息，无 toast，直接渲染） | 早 8 点 push |
+| `chat.proactive.reminder` | （Agent 主动消息，无 toast） | 监测到行为模式 push |
 
 > 关键原则：toggle 是即时操作，不用感叹号 / 不用"成功"。toast 仅在用户主动 toggle 时弹（自动状态变化不弹）。
 

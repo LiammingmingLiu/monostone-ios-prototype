@@ -625,6 +625,132 @@ iOS EventKit 写入时，Agent 把自然语言转成具体时间触发器（EKAl
 ### 4.5 inline chat（command 卡内）
 - 关系: 是 `/agent/tasks/{id}/turn` 的简化入口；不和 AgentView 主线程合并
 
+### 4.6 AgentView · 主对话屏（MON-41 v0.5）
+
+> Sidebar 一等入口「Agent」跳转的主屏。HTML 锚点 `#s9` in `monostone-ux05/index.html`。
+> v0.5 范围：把现有 chat mock 的产品定位正式化 + 视觉对齐其他屏（暖米白 + Claude 橙）+ 加 4 件原型未做的事（搜索入口 / 主动 push msg / memory 引用折叠 / 双模输入）。
+
+#### 4.6.0 产品定位（核心 framing）
+
+**Agent chat = 卡片做不到的 5 件事的唯一去处**：
+
+| # | 场景 | 例子 |
+|---|---|---|
+| 1 | 跨 capture 综合问答 | "我这周关于戒指续航的所有讨论说了什么" |
+| 2 | 脱离 capture 的纯问答 | "我下午有空吗"、"Series A 估值上限我说过吗" |
+| 3 | **Agent 主动提示** | "你最近 3 次说要联系敦敏都没做"（每日活的核心驱动） |
+| 4 | 跨 project 协调 | "把今早结论同步到 Series A 并更新策略" |
+| 5 | 推理 trace 展示 | "你为什么这么建议" |
+
+其他能在卡片里做的事不强塞 chat。
+
+#### 4.6.1 屏幕结构
+
+```
+┌─ navbar (暖米白 backdrop-blur) ──────────────┐
+│ [● avatar]  Agent                 [🔍]      │
+│             已加载今天会议 + 这周 memory      │
+├──────────────────────────────────────────────┤
+│ chat-scroll                                  │
+│  · proactive 主动 push (橙竖条 + 标签)       │
+│  · date 分隔                                 │
+│  · system msg                                │
+│  · user 气泡 (橙底白字, 右对齐)              │
+│  · agent 气泡 (白底深褐, 左对齐)             │
+│    └─ thinking steps (虚线框, dim)           │
+│    └─ "参考 N 条记忆 ›" 折叠条               │
+│       (展开列出 5 个引用节点 + kind tag)     │
+│  · agent attachment (邮件草稿卡)             │
+│  · agent action pills (查看/改/发)           │
+│  · agent typing (3 dots)                     │
+├──────────────────────────────────────────────┤
+│ chat-input (双模, 默认 voice-mode)           │
+│  voice-mode:  [⌨]      [● mic 大圆]          │
+│               按住说话 · 松开发送             │
+│  keyboard-mode: [● voice] [输入框] [↑ send]  │
+└──────────────────────────────────────────────┘
+```
+
+#### 4.6.2 关键决策
+
+| § | 决策 | 落地 |
+|---|---|---|
+| §A 主屏定位 | A 纯 chat | 沿用现状 |
+| §B 输入主导 | B 语音主导，大 mic 居中 | `.chat-input.voice-mode` 默认 |
+| §C Context 感知 | B navbar 简化 + chat 内"参考 N 条记忆"折叠 | `.chat-refs` + `.chat-refs-list` |
+| §D 初始状态 | B 上次未完成延续 / 退化 C 系统打招呼 | system msg 沿用 |
+| §E 长 chat | 按天分段 + 顶部 search；不做 pin / quote | `.chat-date` + 🔍 入口 |
+| §F Plugin 展示 | 1 步 inline pills；多步跳详情 | 沿用 attach + actions |
+| §G 跟首页关系 | chat → 单向跳详情；反向不同步 | memory_refs item 点击跳目标 screen |
+| §H 多 conversation | A 单 conversation 永久延续 | 不放"新建 chat"按钮 |
+
+#### 4.6.3 主动 push msg 视觉规范（§C）
+
+跟 Agent 普通回答区分：
+- 不用气泡形状（避免和"用户问→Agent 答"流混淆）
+- 淡橙背景 `var(--accent-soft)` + 左侧 2.5px 橙竖条
+- 头部一个小 pill tag："今早简报" / "提醒" / "模式发现" / "待办催促"
+- 触发时机由后端决定（cron / event-driven），前端只渲染收到的 msg
+
+mock 例子见 `data/mock.js` AGENT_CONVERSATION 第一条。
+
+#### 4.6.4 memory 引用展示（§C wow moment）
+
+每条 agent text 回答可带 `memory_refs[]` 字段：
+
+```js
+memory_refs: [
+  { id: 'rec-2026-04-09-am', kind: '录音', title: '...', target: 's4' },
+  { id: 'desc-positioning',   kind: 'desc', title: '...', target: 's8' },
+  ...
+]
+```
+
+- 渲染："参考 N 条记忆 ›" 折叠条（虚线框，dim 灰）
+- 点击展开列出引用节点（kind tag + 标题）
+- 节点点击跳到对应 detail（v0.5 mock toast，未来 deep link 到 RecordingDetailView / IdeaDetailView / Memory tab）
+
+跟 MON-39 wow moment §2 强相关。
+
+#### 4.6.5 双模输入交互（§B）
+
+**voice-mode（默认）**：
+- 大圆 mic 居中（56×56，accent 橙底白字 + 阴影）
+- 左侧小圆按钮 ⌨ 切到键盘
+- mic 上方提示 "按住说话 · 松开发送"
+- 按下 mic：200ms 后 toast"录音中…松开发送"
+- 抬起 mic：toast"已发送 · Agent 正在响应…"
+
+**keyboard-mode**：
+- input box 展开 + send 按钮亮起
+- 左侧小圆按钮 ● 切回语音
+- mic 隐藏
+
+切换函数：`setAgentInputMode('voice' | 'keyboard')`
+
+#### 4.6.d 后端依赖检查表 ✅ 零改动
+
+| 字段 / 行为 | 接口 | 状态 |
+|---|---|---|
+| chat 历史读 / 写 | `agent-orchestrator-service` 现有 conversation API | ✅ 用现有 |
+| memory_refs 字段 | Agent 回答 response 加 `evidence_node_ids[]` | ⚠️ 林啸 verify 是否已返；若无，前端 mock 兜底 |
+| proactive push msg | 后端 cron / event → SNS push → 前端展示 | ⚠️ 后端要加 cron-worker（不阻塞 v0.5 前端 mock） |
+| 搜历史对话 | 走 memory tree search（chat 入 memory raw 节点） | ⚠️ 林啸 verify chat 是否入 memory；若无，v0.5 mock toast |
+| 单 conversation | 1 个永久 conversation_id | ✅ 用现有 |
+
+> 接口契约不动，后端实现可以脱胎换骨重写（架构可变 / 门面不变原则）。
+
+#### 4.6.6 v0.5 砍掉的事
+
+| 砍 | 原因 | 留给 |
+|---|---|---|
+| 卡片内 inline chat | 工作量大，需要 RecordingDetailView/IdeaDetailView 全改 | v0.6 |
+| chat 历史 search 真实跳转 | 需要 backend chat search 接口 | v1.0 |
+| memory 引用真实跳转到 detail | 需要 deep link 路由 | v1.0 |
+| 多 conversation / 新建 chat | 跟产品定位不符（Agent 是 long-lived companion） | 永远不做 |
+| pin / quote 引用回看 | ChatGPT 风功能；Monostone 走 memory 检索路径 | 永远不做 |
+| 真实 push msg 推送链路 | 后端 cron-worker + SNS topic | M5 主动陪伴 |
+
 ## 5. 后端变更
 
 ### 5.1 `llm-worker` 的 recording-mode-router prompt（MON-18 v2 重新框架）
