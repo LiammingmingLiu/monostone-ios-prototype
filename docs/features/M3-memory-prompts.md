@@ -27,6 +27,52 @@ linear-issues: [MON-5, MON-6, MON-7, MON-8, MON-23, MON-24]
 - iOS UI 变更（prompt 改不影响 UI 字段，schema 不动）
 - 全新 memory 功能（只是 prompt 质量，不动数据模型）
 
+## 1.1 数据流时序：从录音到 memory 物化（M1 ↔ M3 衔接）
+
+> **写这段的原因**：M1 spec 只写到"录音 done"，M3 只写"prompt 清单"，中间"录音 done → memory 物化怎么触发"的链路一直散落在 backend report 里。林啸 / iOS 端读 spec 时不应该需要去翻 backend 代码才能拼出全图。
+
+```
+[长录音 / 短录音]                                          (M1 spec)
+   │  iOS POST /multimodal/inputs (audio 上传 S3)
+   ▼
+[multimodal-ingestion-service]                            (M1 spec)
+   │  发 BATCH_ASR_QUEUE_URL
+   ▼
+[batch-asr-worker]                                        (M1 spec)
+   │  转写完成 → 发 LLM_EVENTS_QUEUE_URL
+   ▼
+[llm-worker]                                              (M3 prompt §3 llm-worker/)
+   │  跑 understanding-prompt + summary-prompt + recording-mode-router
+   │  写 understanding artifact → 发 UNDERSTANDING_READY_SNS_TOPIC_ARN
+   ▼
+[post-recording-coordinator]                              (M2 spec §5.2 — 短录音分流)
+   │
+   ├─→ 短录音: 按 mode 分流到 timeline-service / agent-orchestrator    (M2 spec)
+   │
+   └─→ 同时（不分长短）: 发 MEMORY_TREE_EVENTS_QUEUE_URL              ← 这里是 M1 ↔ M3 衔接点
+       │
+       ▼
+   [memory-tree-worker]                                   (M3 prompt §3 memory-tree-worker/)
+       跑 5 个节点物化 prompt:
+       raw → description → episode → project / scene → user_profile
+       │
+       ▼
+   [memory-api]                                           (M3 prompt §3 — fetch 侧)
+       memory tree 入库, agent-orchestrator 后续可 fetch
+```
+
+### 1.1.1 关键澄清
+
+| 问题 | 答案 |
+|---|---|
+| **memory 物化什么时候触发？** | `post-recording-coordinator` 在 understanding artifact 落地后**同时**发：(1) timeline event（M2 链路）+ (2) MEMORY_TREE_EVENTS_QUEUE_URL（M3 链路）。两条链路并行，不阻塞 |
+| **iOS 卡片何时变 done？** | iOS 收到 `understanding-service` 200 → 卡片切 done 状态。**不等 memory 物化完**——memory 是后台异步事，用户感知不到 |
+| **memory 物化失败会影响 UI 吗？** | 不影响。memory tree 是"后台累积"，失败重试在 worker 层处理；iOS 端没有 "memory 物化失败" 的 toast / 错误态 |
+| **agent fetch memory 时新录音可能还没物化怎么办？** | retrieval-policy 跳过未物化节点（见 MON-8 prompt）。延迟最长一个 batch 周期，对用户回答影响 < 1% case |
+| **链路谁配？** | 整条链路在 backend 已经存在（`MEMORY_TREE_EVENTS_QUEUE_URL` env 已配）。林啸只需 verify `post-recording-coordinator` 是否真的"同时"发两条 event；如果它现在只发 timeline event，需要补上 memory queue 一条 |
+
+> ⚠️ **林啸 verify** 的事：`post-recording-coordinator` 发 MEMORY_TREE_EVENTS_QUEUE_URL 这条链是否已经在跑？ux0.5 spec 假设它已经在跑。如果没在跑，这是 v0.5 上线前的 backend 阻塞项。
+
 ## 2. Backend 模块对齐
 
 ### memory-tree-worker（节点物化）

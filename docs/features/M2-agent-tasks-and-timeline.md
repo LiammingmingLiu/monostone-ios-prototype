@@ -877,12 +877,31 @@ memory_refs: [
 
 **Few-shot prompt 全文** ⚠️ 拆给明明撰写：见 MON-38。我已在 prompt 文件里写完 framework + 3 个示范 few-shot，明明补 4+ 真实语料即可。
 
-### 5.2 `post-recording-coordinator` 路由逻辑
-- TODO: command → 创建 agent task; todo → 写 timeline event
+### 5.2 `post-recording-coordinator` 路由逻辑（短录音分类后的分流）
+
+**前提**：`llm-worker` 已用 `recording-mode-router` 决定了 `recording_mode ∈ {command, cal, todo, idea}` (v3 schema)。
+
+**post-recording-coordinator 按 mode 分流**（每条短录音单一职责，分流后**永远写 timeline event**，让 HomeView feed 一定能看到卡片）：
+
+| recording_mode | 步骤 1：写 timeline event | 步骤 2：是否再创建 agent task |
+|---|---|---|
+| `command` | `POST /timeline/events` (kind=command, status=executing) | ✅ `POST /agent/tasks` (type=command_execute, link=event_id) |
+| `cal` | `POST /timeline/events` (kind=cal, scheduled_at=...) | ❌ 不走 agent。iOS 端在收到 event 后调 EventKit 写 EKEvent |
+| `todo` | `POST /timeline/events` (kind=todo) | ❌ 不走 agent。iOS 端在收到 event 后调 EventKit 写 EKReminder |
+| `idea` | `POST /timeline/events` (kind=idea) | ❌ 不走 agent（idea 是被动 capture，不主动执行） |
+
+**核心原则**：
+1. **timeline-service 是唯一 source of truth for HomeView feed** —— 4 类卡片都先写 timeline event，再决定要不要叫 agent
+2. **agent task 只为 `command` 创建**——其他 3 类不走 agent-orchestrator，避免无意义任务实例
+3. **iOS 不主动调 timeline-service POST**——后端 push event 到 iOS（WebSocket 或轮询），iOS 是消费方
+4. **`event.id` ↔ `agent_task.id` 通过 `agent_task.linked_event_id` 关联**，让前端在 task status 更新时能定位卡片
+
+> ⚠️ 林啸 verify：现有 backend 是否已经在 post-recording-coordinator 里实现这个分流？如果没有，需要他在这层加上面表格的逻辑（接口契约不动，只是 worker 内部加分支）。
 
 ### 5.3 `agent-orchestrator-service`
-- 新增 task type: `command_execute`
-- TODO: confirmation 流复用现有 `/agent/tasks/{id}/confirmations/*`
+- 新增 task type: `command_execute`（cal/todo/idea 不创建 task）
+- confirmation 流复用现有 `POST /agent/tasks/{task_id}/confirmations/{confirmation_id}` ✅ 不改 API
+- task 状态机：`pending → executing → (needs_input?)→ done | failed`，跟 plugin 调用阻塞同步
 
 ## 6. API 契约
 

@@ -116,13 +116,15 @@ category: toast
 
 ### 灵动岛 expanded · 状态行
 
-| key | 文案 |
-|---|---|
-| `la.expanded.executing` | 执行中 · 还剩 {ETA} |
-| `la.expanded.executing_no_eta` | 执行中 |
-| `la.expanded.needs_input` | 需要你确认（暖黄 + `[拒绝] [允许]` 按钮） |
-| `la.expanded.done` | 已完成 |
-| `la.expanded.failed` | {failure_summary} ≤14 字 |
+> **v0.5 ETA 全局 fallback**（跟 M1 MON-32 一致）：后端无 `estimated_remaining_seconds` 字段，所有"还剩 X"占位文案在 v0.5 都降级为 "执行中" / "处理中"。下表保留 ETA 字段是给 v1.0 后端补字段后启用，**iOS v0.5 实现时直接用 `_no_eta` fallback**。
+
+| key | 文案 | v0.5 实际渲染 |
+|---|---|---|
+| `la.expanded.executing` | 执行中 · 还剩 {ETA} | **fallback → "执行中"** |
+| `la.expanded.executing_no_eta` | 执行中 | ✅ v0.5 用这个 |
+| `la.expanded.needs_input` | 需要你确认（暖黄 + `[拒绝] [允许]` 按钮） | ✅ |
+| `la.expanded.done` | 已完成 | ✅ |
+| `la.expanded.failed` | {failure_summary} ≤14 字 | ✅ |
 
 ### Push notification (needs_input 触发，C3 一次到位)
 
@@ -133,11 +135,14 @@ category: toast
 
 ### 锁屏 widget 状态文案
 
-| key | 文案 | 颜色 |
-|---|---|---|
-| `lock.executing` | 执行中 · 还剩 {ETA} | 灰白 |
-| `lock.needs_input` | 需要你确认 · 点击查看 | 暖黄 `#f0c982` |
-| `lock.failed` | {failure_summary} | 红 `#ff8b8b` |
+> ETA 同上：v0.5 全局 fallback，iOS 实现时不渲染"还剩 X"。
+
+| key | 文案 | 颜色 | v0.5 实际渲染 |
+|---|---|---|---|
+| `lock.executing` | 执行中 · 还剩 {ETA} | 灰白 | **fallback → "执行中"** |
+| `lock.executing_no_eta` | 执行中 | 灰白 | ✅ v0.5 用这个 |
+| `lock.needs_input` | 需要你确认 · 点击查看 | 暖黄 `#f0c982` | ✅ |
+| `lock.failed` | {failure_summary} | 红 `#ff8b8b` | ✅ |
 
 ### 桌面小组件 (Home Widget)
 
